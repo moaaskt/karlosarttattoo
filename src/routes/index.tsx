@@ -1,16 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Instagram, Mail, ArrowDown } from "lucide-react";
+import { Instagram, Mail, ArrowDown, Play } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { BookingModal, type BookingServiceType } from "@/components/booking-modal";
-import tattoo01 from "@/assets/tattoo-detail-01.jpg";
+import { portfolioItems } from "@/data/portfolio";
 import tattoo02 from "@/assets/tattoo-detail-02.jpg";
-import tattoo03 from "@/assets/tattoo-detail-03.jpg";
-import tattoo04 from "@/assets/tattoo-detail-04.jpg";
-import tattoo05 from "@/assets/tattoo-detail-05.jpg";
-import tattoo06 from "@/assets/tattoo-detail-06.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,17 +21,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-const allWork = [
-  { src: tattoo01, alt: "Tatuagem geométrica de linhas finas no antebraço" },
-  { src: tattoo02, alt: "Retrato editorial com tatuagem abstrata nas costas" },
-  { src: tattoo03, alt: "Processo de criação de uma tatuagem autoral" },
-  { src: tattoo04, alt: "Detalhe de tatuagem ornamental em preto" },
-  { src: tattoo05, alt: "Retrato editorial com tatuagens no pescoço" },
-  { src: tattoo06, alt: "Tatuagem botânica de traço fino no braço" },
-];
-// Always render complete rows (multiples of 3) so the grid never ends ragged.
-const work = allWork.slice(0, Math.floor(allWork.length / 3) * 3);
 
 function Mark() {
   return (
@@ -149,6 +134,7 @@ function Index() {
   const root = useRef<HTMLElement>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingService, setBookingService] = useState<BookingServiceType>("studio");
+  const [visibleCount, setVisibleCount] = useState(6);
 
   useSmoothScroll();
   useEditorialAnimations(root);
@@ -157,6 +143,16 @@ function Index() {
     setBookingService(service);
     setBookingOpen(true);
   };
+
+  const handleLoadMore = () => {
+    if (visibleCount < portfolioItems.length) {
+      setVisibleCount((prev) => Math.min(prev + 3, portfolioItems.length));
+    } else {
+      window.open("https://www.instagram.com/karlitostattooo/", "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const displayedItems = portfolioItems.slice(0, visibleCount);
 
   return (
     <main ref={root} className="overflow-hidden bg-background text-foreground">
@@ -260,18 +256,89 @@ function Index() {
         </div>
       </section>
 
-      <section id="portfolio" className="py-24 md:py-36">
-        <div className="mb-16 px-6 text-center md:px-12"><p className="section-index">02 / Trabalhos selecionados</p><h2 data-anim="section-title" className="text-xl font-semibold uppercase tracking-[0.34em] md:text-3xl">| Portfólio |</h2></div>
-        <div className="grid grid-cols-2 gap-0.5 bg-background md:grid-cols-3">
-          {work.map((image, index) => (
-            <figure key={image.src} data-anim="tile" className="group relative aspect-[4/5] overflow-hidden bg-muted">
-              <img src={image.src} alt={image.alt} loading="lazy" width={800} height={1000} className="h-[112%] w-full -translate-y-[6%] object-cover grayscale transition-[filter,transform] duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0" />
-              <div className="pointer-events-none absolute inset-0 bg-background/25 opacity-0 ring-1 ring-inset ring-primary transition-opacity duration-300 group-hover:opacity-100" />
-              <figcaption className="absolute bottom-0 left-0 bg-background px-3 py-2 text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors duration-300 group-hover:text-primary">0{index + 1} / Karlos.Art</figcaption>
-            </figure>
+      <section id="portfolio" className="py-24 md:py-36 bg-background">
+        <div className="mb-16 px-6 text-center md:px-12">
+          <p className="section-index">02 / Trabalhos selecionados</p>
+          <h2 data-anim="section-title" className="text-xl font-semibold uppercase tracking-[0.34em] text-white md:text-3xl">
+            | Portfólio |
+          </h2>
+        </div>
+        
+        {/* Continuous TiagoDot-style portfolio grid */}
+        <div className="grid grid-cols-2 gap-[2px] bg-border md:grid-cols-3 max-w-7xl mx-auto px-1 sm:px-4">
+          {displayedItems.map((item, index) => (
+            <a
+              key={item.id + index}
+              href={item.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-anim="tile"
+              className="group relative aspect-[4/5] overflow-hidden bg-[#121214] block"
+              aria-label={`${item.caption} — Ver no Instagram`}
+            >
+              <img
+                src={item.imageUrl}
+                alt={item.caption}
+                loading="lazy"
+                width={800}
+                height={1000}
+                className="h-full w-full object-cover grayscale transition-transform duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0"
+              />
+
+              {/* Video Indicator Badge */}
+              {item.type === "video" && (
+                <div
+                  className="absolute top-3 right-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 backdrop-blur-xs border border-white/20 text-white/90 shadow-sm"
+                  aria-label="Vídeo do Instagram"
+                >
+                  <Play className="h-3 w-3 fill-white/80 translate-x-[1px]" strokeWidth={1.5} />
+                </div>
+              )}
+
+              {/* Subtle hover overlay & reveal */}
+              <div className="pointer-events-none absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-between p-4 sm:p-5">
+                <div className="text-right">
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-[#9be5ff]">
+                    0{index + 1} / Karlos.Art
+                  </span>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center gap-2 text-center my-auto">
+                  <div className="h-9 w-9 rounded-full border border-[#9be5ff]/50 bg-black/70 flex items-center justify-center text-[#9be5ff] transition-transform duration-300 group-hover:scale-110">
+                    <Instagram className="h-4 w-4" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-[#9be5ff]">
+                    Ver no Instagram
+                  </span>
+                  <p className="text-[11px] text-neutral-300 line-clamp-1 max-w-[200px] hidden sm:block">
+                    {item.caption}
+                  </p>
+                </div>
+
+                <div className="text-left">
+                  <span className="text-[9px] uppercase tracking-[0.16em] text-neutral-400">
+                    @karlitostattooo
+                  </span>
+                </div>
+              </div>
+            </a>
           ))}
         </div>
-        <div className="mt-16 text-center"><Button variant="link" className="rounded-none px-0 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground no-underline transition-colors duration-250 hover:text-primary hover:no-underline">CARREGAR MAIS <span aria-hidden="true">＋</span></Button></div>
+
+        <div className="mt-16 text-center">
+          <Button
+            type="button"
+            onClick={handleLoadMore}
+            variant="link"
+            className="rounded-none px-0 text-[11px] font-medium uppercase tracking-[0.18em] text-[#F5F5F7] no-underline transition-colors duration-250 hover:text-[#9be5ff] hover:no-underline cursor-pointer"
+          >
+            {visibleCount < portfolioItems.length ? (
+              <>CARREGAR MAIS <span aria-hidden="true">＋</span></>
+            ) : (
+              <>VER FEED COMPLETO NO INSTAGRAM <span aria-hidden="true">↗</span></>
+            )}
+          </Button>
+        </div>
       </section>
 
       <footer className="flex flex-col gap-5 border-t border-border px-6 py-10 text-[9px] uppercase tracking-[0.22em] text-muted-foreground md:flex-row md:items-center md:justify-between md:px-12"><span>© 2026 KARLOS ART TATTOO. ALL RIGHTS RESERVED.</span><span>Arte permanente / Feita à mão</span></footer>
