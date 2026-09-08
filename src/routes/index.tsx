@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
-import heroVideo from "@/assets/tattoo-hero.mp4";
 import tattoo01 from "@/assets/tattoo-detail-01.jpg";
 import tattoo02 from "@/assets/tattoo-detail-02.jpg";
 import tattoo03 from "@/assets/tattoo-detail-03.jpg";
@@ -155,7 +154,7 @@ function Index() {
 
       <section id="inicio" className="relative flex min-h-[100svh] items-center justify-center px-5 py-28">
         <video autoPlay muted loop playsInline poster={tattoo02} className="absolute inset-0 h-full w-full object-cover object-center grayscale" aria-hidden="true">
-          <source src={heroVideo} type="video/mp4" />
+          <source src="/hero-bg.mp4" type="video/mp4" />
         </video>
         <div className="hero-overlay absolute inset-0" />
         <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.38em] text-muted-foreground md:block">São Paulo — Brasil</p>
