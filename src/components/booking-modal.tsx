@@ -65,13 +65,13 @@ export function BookingModal({
       <DialogContent className="max-w-md border-border bg-[#121214] text-foreground p-6 sm:p-8 rounded-none border-[1.5px] border-primary/40 shadow-2xl">
         <DialogHeader className="space-y-2 text-left">
           <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9be5ff]">
-            Agendamento Exclusivo
+            KARLOS ART TATTOO · Ateliê Autoral
           </p>
           <DialogTitle className="text-xl font-bold uppercase tracking-[0.2em] text-white">
             Solicitar Horário
           </DialogTitle>
           <DialogDescription className="text-xs text-[#A1A1AA] tracking-wide">
-            Preencha os dados abaixo para receber nossa proposta autoral e disponibilidade.
+            Preencha os dados abaixo para receber nossa proposta autoral e disponibilidade com Karlos.
           </DialogDescription>
         </DialogHeader>
 
@@ -84,7 +84,7 @@ export function BookingModal({
               Solicitação Enviada!
             </h4>
             <p className="text-xs text-[#A1A1AA] leading-relaxed">
-              Entraremos em contato via WhatsApp/E-mail dentro de 24 horas com a confirmação da sua data.
+              A equipe da KARLOS ART TATTOO entrará em contato via WhatsApp/E-mail dentro de 24 horas.
             </p>
             <Button
               variant="editorial"

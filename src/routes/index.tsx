@@ -15,10 +15,10 @@ import tattoo06 from "@/assets/tattoo-detail-06.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nox Tattoo — Arte Autoral" },
+      { title: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
       { name: "description", content: "Tatuagem autoral, atendimentos exclusivos e workshops em São Paulo e Rio de Janeiro." },
-      { property: "og:title", content: "Nox Tattoo — Arte Autoral" },
-      { property: "og:description", content: "Tatuagem autoral, atendimentos exclusivos e workshops." },
+      { property: "og:title", content: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
+      { property: "og:description", content: "Tatuagem autoral, atendimentos exclusivos e workshops em São Paulo e Rio de Janeiro." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -39,12 +39,14 @@ const work = allWork.slice(0, Math.floor(allWork.length / 3) * 3);
 
 function Mark() {
   return (
-    <a href="#inicio" aria-label="Nox Tattoo — início" className="group flex items-center gap-3">
+    <a href="#inicio" aria-label="KARLOS ART TATTOO — início" className="group flex items-center gap-3">
       <svg viewBox="0 0 40 40" className="h-9 w-9 text-primary" aria-hidden="true">
         <path d="M4 4h32v32H4zM4 4l32 32M36 4L4 36M20 4v32" fill="none" stroke="currentColor" strokeWidth="1" />
         <path d="M12 20h16" stroke="currentColor" strokeWidth="2" />
       </svg>
-      <span className="hidden text-xs font-semibold uppercase tracking-[0.3em] text-foreground sm:block">Nox Tattoo</span>
+      <span className="hidden text-[13px] font-medium uppercase tracking-[0.25em] text-[#F5F5F7] sm:block">
+        KARLOS ART TATTOO
+      </span>
     </a>
   );
 }
@@ -183,7 +185,7 @@ function Index() {
         <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.38em] text-muted-foreground md:block z-10">São Paulo — Brasil</p>
         <div className="relative z-10 flex w-full max-w-md flex-col gap-3">
           <p data-anim="hero-item" className="mb-4 text-center text-[10px] font-medium uppercase tracking-[0.45em] text-[#9be5ff] opacity-90">Tatuagem autoral · 2026</p>
-          <h1 className="sr-only">Nox Tattoo — tatuagem autoral</h1>
+          <h1 className="sr-only">KARLOS ART TATTOO — tatuagem autoral</h1>
           <Button
             data-anim="hero-item"
             type="button"
@@ -265,14 +267,14 @@ function Index() {
             <figure key={image.src} data-anim="tile" className="group relative aspect-[4/5] overflow-hidden bg-muted">
               <img src={image.src} alt={image.alt} loading="lazy" width={800} height={1000} className="h-[112%] w-full -translate-y-[6%] object-cover grayscale transition-[filter,transform] duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0" />
               <div className="pointer-events-none absolute inset-0 bg-background/25 opacity-0 ring-1 ring-inset ring-primary transition-opacity duration-300 group-hover:opacity-100" />
-              <figcaption className="absolute bottom-0 left-0 bg-background px-3 py-2 text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors duration-300 group-hover:text-primary">0{index + 1} / Nox</figcaption>
+              <figcaption className="absolute bottom-0 left-0 bg-background px-3 py-2 text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors duration-300 group-hover:text-primary">0{index + 1} / Karlos.Art</figcaption>
             </figure>
           ))}
         </div>
         <div className="mt-16 text-center"><Button variant="link" className="rounded-none px-0 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground no-underline transition-colors duration-250 hover:text-primary hover:no-underline">CARREGAR MAIS <span aria-hidden="true">＋</span></Button></div>
       </section>
 
-      <footer className="flex flex-col gap-5 border-t border-border px-6 py-10 text-[9px] uppercase tracking-[0.22em] text-muted-foreground md:flex-row md:items-center md:justify-between md:px-12"><span>© 2026 Nox Tattoo</span><span>Arte permanente / Feita à mão</span></footer>
+      <footer className="flex flex-col gap-5 border-t border-border px-6 py-10 text-[9px] uppercase tracking-[0.22em] text-muted-foreground md:flex-row md:items-center md:justify-between md:px-12"><span>© 2026 KARLOS ART TATTOO. ALL RIGHTS RESERVED.</span><span>Arte permanente / Feita à mão</span></footer>
 
       <BookingModal
         open={bookingOpen}
