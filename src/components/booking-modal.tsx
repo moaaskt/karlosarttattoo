@@ -138,24 +138,24 @@ export function BookingModal({
 
             <div className="space-y-1.5">
               <Label htmlFor="booking-service" className="text-[11px] uppercase tracking-wider text-[#A1A1AA]">
-                Tipo de Atendimento
+                Local de Atendimento
               </Label>
               <Select value={service} onValueChange={(v) => setService(v as BookingServiceType)}>
                 <SelectTrigger
                   id="booking-service"
                   className="h-10 rounded-none border-border bg-black/40 text-sm text-white focus:ring-0 focus:border-primary"
                 >
-                  <SelectValue placeholder="Selecione o serviço" />
+                  <SelectValue placeholder="Selecione o local" />
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-border bg-[#18181b] text-white">
                   <SelectItem value="studio" className="cursor-pointer focus:bg-[#27272a] focus:text-white">
-                    Agendamento Estúdio (São Paulo / Rio)
+                    Estúdio Privado (Palhoça)
                   </SelectItem>
                   <SelectItem value="home" className="cursor-pointer focus:bg-[#27272a] focus:text-white">
-                    Atendimento a Domicílio VIP
+                    Atendimento a Domicílio (Florianópolis / São José / Região)
                   </SelectItem>
                   <SelectItem value="flash" className="cursor-pointer focus:bg-[#27272a] focus:text-white">
-                    Flash Days &amp; Workshops
+                    Outra Cidade / Eventos
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -172,6 +172,10 @@ export function BookingModal({
                 className="rounded-none border-border bg-black/40 text-sm text-white placeholder:text-zinc-600 focus-visible:border-primary focus-visible:ring-0 resize-none"
               />
             </div>
+
+            <p className="text-center text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA] pt-1">
+              Atendimento presencial e a domicílio em toda a Grande Florianópolis.
+            </p>
 
             <div className="pt-2">
               <Button

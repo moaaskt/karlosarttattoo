@@ -16,9 +16,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
-      { name: "description", content: "Tatuagem autoral, atendimentos exclusivos e workshops em São Paulo e Rio de Janeiro." },
+      { name: "description", content: "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina." },
       { property: "og:title", content: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
-      { property: "og:description", content: "Tatuagem autoral, atendimentos exclusivos e workshops em São Paulo e Rio de Janeiro." },
+      { property: "og:description", content: "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -182,7 +182,7 @@ function Index() {
         </video>
         <div className="absolute inset-0 bg-black/40 pointer-events-none z-[1]" />
         <div className="hero-overlay absolute inset-0 pointer-events-none z-[2]" />
-        <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.38em] text-muted-foreground md:block z-10">São Paulo — Brasil</p>
+        <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.3em] text-neutral-600 md:block z-10">SANTA CATARINA — BRASIL</p>
         <div className="relative z-10 flex w-full max-w-md flex-col gap-3">
           <p data-anim="hero-item" className="mb-4 text-center text-[10px] font-medium uppercase tracking-[0.45em] text-[#9be5ff] opacity-90">Tatuagem autoral · 2026</p>
           <h1 className="sr-only">KARLOS ART TATTOO — tatuagem autoral</h1>
@@ -217,33 +217,33 @@ function Index() {
         <a href="#locais" aria-label="Ver locais" className="absolute bottom-7 left-1/2 -translate-x-1/2 text-[#9be5ff] z-10"><ArrowDown className="h-5 w-5 animate-bounce" strokeWidth={1} /></a>
       </section>
 
-      <section id="locais" className="border-y border-border px-6 py-24 md:px-12 md:py-36 bg-background">
+      <section id="locais" className="border-y border-border px-6 py-24 md:px-12 md:py-36 bg-black">
         <div className="mx-auto max-w-6xl">
           <p className="section-index">01 / Locais</p>
           <h2 data-anim="section-title" className="mb-20 text-center text-xl font-semibold uppercase tracking-[0.34em] text-white md:text-3xl">Onde me encontrar</h2>
           <div className="grid gap-px bg-border md:grid-cols-3">
-            <article data-anim="location" className="bg-background px-5 py-9 md:px-8">
+            <article data-anim="location" className="bg-black px-5 py-9 md:px-8">
               <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
-                <span className="text-[#9be5ff] text-base leading-none">◊</span> São Paulo
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> PALHOÇA (BASE / ESTÚDIO)
               </h3>
               <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
-                — Atelier República<br />— Atendimento com hora marcada
+                — ATELIÊ PRIVADO<br />— ATENDIMENTO COM HORA MARCADA<br />— SESSÕES EXCLUSIVAS
               </p>
             </article>
-            <article data-anim="location" className="bg-background px-5 py-9 md:px-8">
+            <article data-anim="location" className="bg-black px-5 py-9 md:px-8">
               <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
-                <span className="text-[#9be5ff] text-base leading-none">◊</span> Rio de Janeiro
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> FLORIANÓPOLIS &amp; SÃO JOSÉ
               </h3>
               <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
-                — Estúdio Botafogo<br />— Datas selecionadas
+                — ATENDIMENTO A DOMICÍLIO (VIP)<br />— GUEST SPOTS &amp; ESTÚDIOS PARCEIROS<br />— CONSULTE DISPONIBILIDADE
               </p>
             </article>
-            <article data-anim="location" className="bg-background px-5 py-9 md:px-8">
+            <article data-anim="location" className="bg-black px-5 py-9 md:px-8">
               <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
-                <span className="text-[#9be5ff] text-base leading-none">◊</span> Outras Cidades
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> GRANDE FLORIANÓPOLIS
               </h3>
               <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
-                — Agenda itinerante<br />— Consulte disponibilidade
+                — ATENDIMENTO ITINERANTE<br />— EVENTOS &amp; FLASH DAYS REGIONAIS<br />— SANTA CATARINA
               </p>
             </article>
           </div>
