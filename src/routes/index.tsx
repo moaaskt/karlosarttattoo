@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Instagram, Mail, ArrowDown } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
+import { BookingModal, type BookingServiceType } from "@/components/booking-modal";
 import tattoo01 from "@/assets/tattoo-detail-01.jpg";
 import tattoo02 from "@/assets/tattoo-detail-02.jpg";
 import tattoo03 from "@/assets/tattoo-detail-03.jpg";
@@ -75,15 +76,20 @@ function useEditorialAnimations(root: React.RefObject<HTMLElement | null>) {
           stagger: 0.1,
         });
 
-        // Hero caption + buttons
-        gsap.from("[data-anim='hero-item']", {
-          y: 28,
-          opacity: 0,
-          duration: 0.9,
-          delay: 0.25,
-          ease: "power3.out",
-          stagger: 0.15,
-        });
+        // Hero caption + buttons - subtle entrance once, rock-solid opacity
+        gsap.fromTo(
+          "[data-anim='hero-item']",
+          { y: 20, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            delay: 0.1,
+            ease: "power2.out",
+            stagger: 0.1,
+            clearProps: "all",
+          },
+        );
 
         // Section titles: fade + tracking expansion
         gsap.utils.toArray<HTMLElement>("[data-anim='section-title']").forEach((title) => {
@@ -139,8 +145,16 @@ function useEditorialAnimations(root: React.RefObject<HTMLElement | null>) {
 
 function Index() {
   const root = useRef<HTMLElement>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingService, setBookingService] = useState<BookingServiceType>("studio");
+
   useSmoothScroll();
   useEditorialAnimations(root);
+
+  const openBooking = (service: BookingServiceType) => {
+    setBookingService(service);
+    setBookingOpen(true);
+  };
 
   return (
     <main ref={root} className="overflow-hidden bg-background text-foreground">
@@ -153,31 +167,94 @@ function Index() {
       </header>
 
       <section id="inicio" className="relative flex min-h-[100svh] items-center justify-center px-5 py-28">
-        <video autoPlay muted loop playsInline poster={tattoo02} className="absolute inset-0 h-full w-full object-cover object-center grayscale" aria-hidden="true">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster={tattoo02}
+          className="w-full h-full object-cover object-[center_20%] absolute inset-0 z-0 grayscale"
+          aria-hidden="true"
+        >
           <source src="/hero-bg.mp4" type="video/mp4" />
         </video>
-        <div className="hero-overlay absolute inset-0" />
-        <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.38em] text-muted-foreground md:block">São Paulo — Brasil</p>
+        <div className="absolute inset-0 bg-black/40 pointer-events-none z-[1]" />
+        <div className="hero-overlay absolute inset-0 pointer-events-none z-[2]" />
+        <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.38em] text-muted-foreground md:block z-10">São Paulo — Brasil</p>
         <div className="relative z-10 flex w-full max-w-md flex-col gap-3">
-          <p data-anim="hero-item" className="mb-4 text-center text-[10px] font-medium uppercase tracking-[0.45em] text-primary opacity-85">Tatuagem autoral · 2026</p>
+          <p data-anim="hero-item" className="mb-4 text-center text-[10px] font-medium uppercase tracking-[0.45em] text-[#9be5ff] opacity-90">Tatuagem autoral · 2026</p>
           <h1 className="sr-only">Nox Tattoo — tatuagem autoral</h1>
-          <Button data-anim="hero-item" asChild variant="editorial" className="h-14 w-full px-6 text-[13px] font-medium uppercase tracking-[0.18em]"><a href="mailto:contato@noxtattoo.com?subject=Agendamento%20Estúdio">AGENDAMENTO ESTÚDIO</a></Button>
-          <Button data-anim="hero-item" asChild variant="editorial" className="h-14 w-full px-6 text-[13px] font-medium uppercase tracking-[0.18em]"><a href="mailto:contato@noxtattoo.com?subject=Atendimento%20a%20Domicílio">ATENDIMENTO A DOMICÍLIO</a></Button>
-          <Button data-anim="hero-item" asChild variant="editorial" className="h-14 w-full px-6 text-[13px] font-medium uppercase tracking-[0.18em]"><a href="#portfolio">FLASH DAYS &amp; WORKSHOPS</a></Button>
+          <Button
+            data-anim="hero-item"
+            type="button"
+            variant="editorial"
+            onClick={() => openBooking("studio")}
+            className="h-14 w-full px-6 text-[13px] font-medium uppercase tracking-[0.18em] !opacity-100"
+          >
+            AGENDAMENTO ESTÚDIO
+          </Button>
+          <Button
+            data-anim="hero-item"
+            type="button"
+            variant="editorial"
+            onClick={() => openBooking("home")}
+            className="h-14 w-full px-6 text-[13px] font-medium uppercase tracking-[0.18em] !opacity-100"
+          >
+            ATENDIMENTO A DOMICÍLIO
+          </Button>
+          <Button
+            data-anim="hero-item"
+            type="button"
+            variant="editorial"
+            onClick={() => openBooking("flash")}
+            className="h-14 w-full px-6 text-[13px] font-medium uppercase tracking-[0.18em] !opacity-100"
+          >
+            FLASH DAYS &amp; WORKSHOPS
+          </Button>
         </div>
-        <a href="#locais" aria-label="Ver locais" className="absolute bottom-7 left-1/2 -translate-x-1/2 text-primary"><ArrowDown className="h-5 w-5 animate-bounce" strokeWidth={1} /></a>
+        <a href="#locais" aria-label="Ver locais" className="absolute bottom-7 left-1/2 -translate-x-1/2 text-[#9be5ff] z-10"><ArrowDown className="h-5 w-5 animate-bounce" strokeWidth={1} /></a>
       </section>
 
-      <section id="locais" className="border-y border-border px-6 py-24 md:px-12 md:py-36">
+      <section id="locais" className="border-y border-border px-6 py-24 md:px-12 md:py-36 bg-background">
         <div className="mx-auto max-w-6xl">
           <p className="section-index">01 / Locais</p>
-          <h2 data-anim="section-title" className="mb-20 text-center text-xl font-semibold uppercase tracking-[0.34em] md:text-3xl">Onde me encontrar</h2>
+          <h2 data-anim="section-title" className="mb-20 text-center text-xl font-semibold uppercase tracking-[0.34em] text-white md:text-3xl">Onde me encontrar</h2>
           <div className="grid gap-px bg-border md:grid-cols-3">
-            <article data-anim="location" className="bg-background px-5 py-9 md:px-8"><h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">◊ São Paulo</h3><p className="mt-5 text-xs uppercase leading-7 tracking-[0.16em] text-muted-foreground">— Atelier República<br />— Atendimento com hora marcada</p></article>
-            <article data-anim="location" className="bg-background px-5 py-9 md:px-8"><h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">◊ Rio de Janeiro</h3><p className="mt-5 text-xs uppercase leading-7 tracking-[0.16em] text-muted-foreground">— Estúdio Botafogo<br />— Datas selecionadas</p></article>
-            <article data-anim="location" className="bg-background px-5 py-9 md:px-8"><h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">◊ Outras Cidades</h3><p className="mt-5 text-xs uppercase leading-7 tracking-[0.16em] text-muted-foreground">— Agenda itinerante<br />— Consulte disponibilidade</p></article>
+            <article data-anim="location" className="bg-background px-5 py-9 md:px-8">
+              <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> São Paulo
+              </h3>
+              <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
+                — Atelier República<br />— Atendimento com hora marcada
+              </p>
+            </article>
+            <article data-anim="location" className="bg-background px-5 py-9 md:px-8">
+              <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> Rio de Janeiro
+              </h3>
+              <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
+                — Estúdio Botafogo<br />— Datas selecionadas
+              </p>
+            </article>
+            <article data-anim="location" className="bg-background px-5 py-9 md:px-8">
+              <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> Outras Cidades
+              </h3>
+              <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
+                — Agenda itinerante<br />— Consulte disponibilidade
+              </p>
+            </article>
           </div>
-          <div className="mt-16 text-center"><Button asChild variant="editorialGhost" className="h-12 px-9 text-[11px] font-medium uppercase tracking-[0.18em]"><a href="mailto:contato@noxtattoo.com?subject=Solicitação%20de%20Orçamento">SOLICITAR ORÇAMENTO</a></Button></div>
+          <div className="mt-16 text-center">
+            <Button
+              type="button"
+              onClick={() => openBooking("studio")}
+              variant="editorialGhost"
+              className="h-12 px-9 text-[11px] font-medium uppercase tracking-[0.18em]"
+            >
+              SOLICITAR ORÇAMENTO
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -196,6 +273,12 @@ function Index() {
       </section>
 
       <footer className="flex flex-col gap-5 border-t border-border px-6 py-10 text-[9px] uppercase tracking-[0.22em] text-muted-foreground md:flex-row md:items-center md:justify-between md:px-12"><span>© 2026 Nox Tattoo</span><span>Arte permanente / Feita à mão</span></footer>
+
+      <BookingModal
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        defaultService={bookingService}
+      />
     </main>
   );
 }
