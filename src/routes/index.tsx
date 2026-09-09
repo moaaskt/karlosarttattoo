@@ -288,10 +288,17 @@ function Index() {
               {/* Instagram Media Indicator Badges */}
               {item.type === "video" ? (
                 <div
-                  className="absolute top-3 right-3 z-10 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-black/40 backdrop-blur-xs text-white/90 drop-shadow-md"
+                  className="absolute top-3 right-3 z-10 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center text-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                   aria-label="Vídeo do Instagram"
                 >
-                  <Play className="h-3 w-3 fill-white translate-x-[1px]" strokeWidth={1.5} />
+                  {/* Instagram-style Video Play Icon */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-md"
+                  >
+                    <path d="M5.5 3.5A1.5 1.5 0 0 0 3 4.8v14.4a1.5 1.5 0 0 0 2.5 1.3l13.5-7.2a1.5 1.5 0 0 0 0-2.6L5.5 3.5z" />
+                  </svg>
                 </div>
               ) : (
                 <div

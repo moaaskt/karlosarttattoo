@@ -47,7 +47,7 @@ export const portfolioItems: PortfolioItem[] = [
     imageUrl: "/portfolio/foto5.jpg",
     instagramUrl: "https://www.instagram.com/p/DbUG_1AggLW/",
     caption: "Tatuagem autoral — Karlos Art Tattoo",
-    type: "image",
+    type: "video",
   },
   {
     id: "6",
