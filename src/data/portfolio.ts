@@ -24,7 +24,7 @@ export const portfolioItems: PortfolioItem[] = [
   {
     id: "2",
     imageUrl: "/portfolio/foto2.jpg",
-    instagramUrl: "https://www.instagram.com/p/Db0csN6gfg9/",
+    instagramUrl: "https://www.instagram.com/p/DcJUGlFFqtz/?img_index=1",
     caption: "Tatuagem autoral — Karlos Art Tattoo",
     type: "image",
   },
@@ -51,9 +51,9 @@ export const portfolioItems: PortfolioItem[] = [
   },
   {
     id: "6",
-    imageUrl: tattoo06,
-    instagramUrl: "https://www.instagram.com/karlitostattooo/",
-    caption: "Tatuagem botânica de traço fino no braço",
+    imageUrl: "/portfolio/foto6.jpg",
+    instagramUrl: "https://www.instagram.com/p/DZjPRuCNqyP/",
+    caption: "Tatuagem autoral — Karlos Art Tattoo",
     type: "image",
   },
   {
