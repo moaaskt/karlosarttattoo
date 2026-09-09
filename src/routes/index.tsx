@@ -273,7 +273,9 @@ function Index() {
               target="_blank"
               rel="noopener noreferrer"
               data-anim="tile"
-              className="group relative aspect-[4/5] overflow-hidden bg-[#121214] block"
+              className={`group relative aspect-[4/5] overflow-hidden bg-[#121214] ${
+                item.mobileOnly ? "block md:hidden" : "block"
+              }`}
               aria-label={`${item.caption} — Ver no Instagram`}
             >
               <img

@@ -11,6 +11,7 @@ export interface PortfolioItem {
   instagramUrl: string; // Link direto do post original
   caption: string;
   type: "image" | "video";
+  mobileOnly?: boolean;
 }
 
 export const portfolioItems: PortfolioItem[] = [
@@ -76,5 +77,13 @@ export const portfolioItems: PortfolioItem[] = [
     instagramUrl: "https://www.instagram.com/p/DbHJhgoAHqq/",
     caption: "Tatuagem autoral — Karlos Art Tattoo",
     type: "image",
+  },
+  {
+    id: "10",
+    imageUrl: "/portfolio/foto10.jpg",
+    instagramUrl: "https://www.instagram.com/p/DZh6e0ugfYK/",
+    caption: "Tatuagem autoral — Karlos Art Tattoo",
+    type: "image",
+    mobileOnly: true,
   },
 ];
