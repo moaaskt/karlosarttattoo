@@ -285,13 +285,34 @@ function Index() {
                 className="h-full w-full object-cover grayscale contrast-125 brightness-95 transition-all duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0 group-hover:contrast-100 group-hover:brightness-100"
               />
 
-              {/* Video Indicator Badge */}
-              {item.type === "video" && (
+              {/* Instagram Media Indicator Badges */}
+              {item.type === "video" ? (
                 <div
-                  className="absolute top-3 right-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 backdrop-blur-xs border border-white/20 text-white/90 shadow-sm"
+                  className="absolute top-3 right-3 z-10 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-black/40 backdrop-blur-xs text-white/90 drop-shadow-md"
                   aria-label="Vídeo do Instagram"
                 >
-                  <Play className="h-3 w-3 fill-white/80 translate-x-[1px]" strokeWidth={1.5} />
+                  <Play className="h-3 w-3 fill-white translate-x-[1px]" strokeWidth={1.5} />
+                </div>
+              ) : (
+                <div
+                  className="absolute top-3 right-3 z-10 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center text-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                  aria-label="Carrossel do Instagram"
+                >
+                  {/* Instagram-style Carousel / Multiple items Icon (overlapping cards) */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-md"
+                  >
+                    {/* Back card */}
+                    <path d="M7 4h10a2 2 0 0 1 2 2v10" stroke="currentColor" fill="none" opacity="0.8" />
+                    {/* Front card */}
+                    <rect x="3" y="7" width="13" height="13" rx="2" stroke="currentColor" fill="none" />
+                  </svg>
                 </div>
               )}
 
