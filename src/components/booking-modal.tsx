@@ -29,13 +29,27 @@ interface BookingModalProps {
   defaultService?: BookingServiceType;
 }
 
+const locationLabels: Record<BookingServiceType, string> = {
+  studio: "Estúdio Privado (Palhoça)",
+  home: "Atendimento a Domicílio (Florianópolis / São José / Região)",
+  flash: "Outra Cidade / Eventos",
+};
+
 export function BookingModal({
   open,
   onOpenChange,
   defaultService = "studio",
 }: BookingModalProps) {
+  const [name, setName] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [service, setService] = React.useState<BookingServiceType>(defaultService);
+  const [message, setMessage] = React.useState("");
+
+  const [loading, setLoading] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
   const firstInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -47,6 +61,7 @@ export function BookingModal({
   React.useEffect(() => {
     if (open) {
       setSubmitted(false);
+      setError(null);
       // Ensure focus on first input immediately after open
       const timer = setTimeout(() => {
         firstInputRef.current?.focus();
@@ -55,14 +70,64 @@ export function BookingModal({
     }
   }, [open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setName("");
+    setPhone("");
+    setEmail("");
+    setMessage("");
+    setError(null);
+    setSubmitted(false);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onOpenChange(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+
+    const payload = {
+      name,
+      phone,
+      email,
+      location: locationLabels[service] || service,
+      message,
+      _subject: "Novo Orçamento Autoral — Karlos Art Tattoo",
+    };
+
+    try {
+      const response = await fetch("https://formspree.io/f/xqpkwdzp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        const data = await response.json().catch(() => null);
+        if (data && data.errors && data.errors.length > 0) {
+          setError(data.errors.map((err: { message: string }) => err.message).join(", "));
+        } else {
+          setError("Ocorreu um erro ao enviar. Tente novamente ou entre em contato pelo Instagram.");
+        }
+      }
+    } catch {
+      setError("Ocorreu um erro ao enviar. Tente novamente ou entre em contato pelo Instagram.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md border-border bg-[#121214] text-foreground p-6 sm:p-8 rounded-none border-[1.5px] border-primary/40 shadow-2xl">
+      <DialogContent className="max-w-md bg-[#070707] text-foreground p-6 sm:p-8 rounded-none border-[1.5px] border-[#9be5ff] shadow-2xl">
         <DialogHeader className="space-y-2 text-left">
           <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9be5ff]">
             KARLOS ART TATTOO · Ateliê Autoral
@@ -77,21 +142,22 @@ export function BookingModal({
 
         {submitted ? (
           <div className="py-8 text-center space-y-4">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[#9be5ff] text-[#9be5ff] text-xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-none border border-[#9be5ff] text-[#9be5ff] text-xl">
               ✓
             </div>
-            <h4 className="text-base font-medium tracking-widest text-white uppercase">
-              Solicitação Enviada!
+            <h4 className="text-lg font-bold tracking-[0.25em] text-[#9be5ff] uppercase">
+              SOLICITAÇÃO ENVIADA
             </h4>
-            <p className="text-xs text-[#A1A1AA] leading-relaxed">
-              A equipe da KARLOS ART TATTOO entrará em contato via WhatsApp/E-mail dentro de 24 horas.
+            <p className="text-xs text-[#A1A1AA] leading-relaxed max-w-sm mx-auto">
+              Obrigado! Recebemos sua ideia. O Karlos analisará a proposta e entrará em contato via WhatsApp/E-mail para alinhar disponibilidade e orçamento.
             </p>
             <Button
+              type="button"
               variant="editorial"
-              className="mt-4 w-full h-11 text-xs uppercase tracking-[0.18em]"
-              onClick={() => onOpenChange(false)}
+              className="mt-4 w-full h-11 text-xs uppercase tracking-[0.2em] font-semibold bg-[#9be5ff] text-black hover:bg-white transition-all rounded-none"
+              onClick={handleClose}
             >
-              Fechar
+              FECHAR
             </Button>
           </div>
         ) : (
@@ -104,8 +170,11 @@ export function BookingModal({
                 ref={firstInputRef}
                 id="booking-name"
                 required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome"
-                className="h-10 rounded-none border-border bg-black/40 text-sm text-white placeholder:text-zinc-600 focus-visible:border-primary focus-visible:ring-0"
+                disabled={loading}
+                className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0"
               />
             </div>
 
@@ -118,8 +187,11 @@ export function BookingModal({
                   id="booking-phone"
                   required
                   type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   placeholder="(11) 99999-9999"
-                  className="h-10 rounded-none border-border bg-black/40 text-sm text-white placeholder:text-zinc-600 focus-visible:border-primary focus-visible:ring-0"
+                  disabled={loading}
+                  className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0"
                 />
               </div>
               <div className="space-y-1.5">
@@ -130,8 +202,11 @@ export function BookingModal({
                   id="booking-email"
                   required
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="voce@email.com"
-                  className="h-10 rounded-none border-border bg-black/40 text-sm text-white placeholder:text-zinc-600 focus-visible:border-primary focus-visible:ring-0"
+                  disabled={loading}
+                  className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0"
                 />
               </div>
             </div>
@@ -140,21 +215,25 @@ export function BookingModal({
               <Label htmlFor="booking-service" className="text-[11px] uppercase tracking-wider text-[#A1A1AA]">
                 Local de Atendimento
               </Label>
-              <Select value={service} onValueChange={(v) => setService(v as BookingServiceType)}>
+              <Select
+                value={service}
+                onValueChange={(v) => setService(v as BookingServiceType)}
+                disabled={loading}
+              >
                 <SelectTrigger
                   id="booking-service"
-                  className="h-10 rounded-none border-border bg-black/40 text-sm text-white focus:ring-0 focus:border-primary"
+                  className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white focus:ring-0 focus:border-[#9be5ff]"
                 >
                   <SelectValue placeholder="Selecione o local" />
                 </SelectTrigger>
-                <SelectContent className="rounded-none border-border bg-[#18181b] text-white">
-                  <SelectItem value="studio" className="cursor-pointer focus:bg-[#27272a] focus:text-white">
+                <SelectContent className="rounded-none border-neutral-800 bg-[#121214] text-white">
+                  <SelectItem value="studio" className="cursor-pointer focus:bg-[#27272a] focus:text-white rounded-none">
                     Estúdio Privado (Palhoça)
                   </SelectItem>
-                  <SelectItem value="home" className="cursor-pointer focus:bg-[#27272a] focus:text-white">
+                  <SelectItem value="home" className="cursor-pointer focus:bg-[#27272a] focus:text-white rounded-none">
                     Atendimento a Domicílio (Florianópolis / São José / Região)
                   </SelectItem>
-                  <SelectItem value="flash" className="cursor-pointer focus:bg-[#27272a] focus:text-white">
+                  <SelectItem value="flash" className="cursor-pointer focus:bg-[#27272a] focus:text-white rounded-none">
                     Outra Cidade / Eventos
                   </SelectItem>
                 </SelectContent>
@@ -168,8 +247,11 @@ export function BookingModal({
               <Textarea
                 id="booking-notes"
                 rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Descreva brevemente sua ideia, tamanho aproximado e local..."
-                className="rounded-none border-border bg-black/40 text-sm text-white placeholder:text-zinc-600 focus-visible:border-primary focus-visible:ring-0 resize-none"
+                disabled={loading}
+                className="rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0 resize-none"
               />
             </div>
 
@@ -177,13 +259,22 @@ export function BookingModal({
               Atendimento presencial e a domicílio em toda a Grande Florianópolis.
             </p>
 
+            {error && (
+              <div className="text-center text-xs text-red-400 tracking-wide font-medium bg-red-950/30 border border-red-800/40 p-2.5">
+                {error}
+              </div>
+            )}
+
             <div className="pt-2">
               <Button
                 type="submit"
+                disabled={loading}
                 variant="editorial"
-                className="w-full h-12 text-xs uppercase tracking-[0.2em] font-semibold bg-[#9be5ff] text-black hover:bg-white transition-all"
+                className={`w-full h-12 text-xs uppercase tracking-[0.2em] font-semibold bg-[#9be5ff] text-black hover:bg-white transition-all rounded-none ${
+                  loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
               >
-                Confirmar Solicitação
+                {loading ? "ENVIANDO..." : "Confirmar Solicitação"}
               </Button>
             </div>
           </form>
