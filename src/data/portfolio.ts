@@ -16,16 +16,16 @@ export interface PortfolioItem {
 export const portfolioItems: PortfolioItem[] = [
   {
     id: "1",
-    imageUrl: tattoo01,
-    instagramUrl: "https://www.instagram.com/karlitostattooo/",
-    caption: "Tatuagem geométrica e fine line autoral no antebraço",
+    imageUrl: "/portfolio/foto1.jpeg",
+    instagramUrl: "https://www.instagram.com/p/Dcj5Iw9GpqQ/?img_index=1",
+    caption: "Tatuagem autoral — Karlos Art Tattoo",
     type: "image",
   },
   {
     id: "2",
-    imageUrl: tattoo02,
-    instagramUrl: "https://www.instagram.com/karlitostattooo/",
-    caption: "Retrato editorial com composição abstrata nas costas",
+    imageUrl: "/portfolio/foto2.jpg",
+    instagramUrl: "https://www.instagram.com/p/Db0csN6gfg9/",
+    caption: "Tatuagem autoral — Karlos Art Tattoo",
     type: "image",
   },
   {

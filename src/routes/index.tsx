@@ -282,7 +282,7 @@ function Index() {
                 loading="lazy"
                 width={800}
                 height={1000}
-                className="h-full w-full object-cover grayscale transition-transform duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0"
+                className="h-full w-full object-cover grayscale contrast-125 brightness-95 transition-all duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0 group-hover:contrast-100 group-hover:brightness-100"
               />
 
               {/* Video Indicator Badge */}
