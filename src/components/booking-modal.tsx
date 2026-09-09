@@ -6,17 +6,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export type BookingServiceType =
   | "studio"
@@ -28,6 +18,24 @@ interface BookingModalProps {
   onOpenChange: (open: boolean) => void;
   defaultService?: BookingServiceType;
 }
+
+const locationOptions: { id: BookingServiceType; label: string; sub: string }[] = [
+  {
+    id: "studio",
+    label: "Estúdio Privado",
+    sub: "Palhoça",
+  },
+  {
+    id: "home",
+    label: "Atendimento VIP",
+    sub: "Domicílio / Floripa",
+  },
+  {
+    id: "flash",
+    label: "Outra Cidade",
+    sub: "Guest / Eventos",
+  },
+];
 
 const locationLabels: Record<BookingServiceType, string> = {
   studio: "Estúdio Privado (Palhoça)",
@@ -127,15 +135,15 @@ export function BookingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#070707] text-foreground p-6 sm:p-8 rounded-none border-[1.5px] border-[#9be5ff] shadow-2xl">
-        <DialogHeader className="space-y-2 text-left">
+      <DialogContent className="w-full max-w-lg md:max-w-xl max-h-[90vh] overflow-y-auto bg-[#0a0a0c] text-foreground p-6 sm:p-8 rounded-none border border-white/10 shadow-2xl [&>button]:text-neutral-400 [&>button]:hover:text-[#9be5ff] [&>button]:transition-colors [&>button]:rounded-none">
+        <DialogHeader className="space-y-1 text-left">
           <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9be5ff]">
-            KARLOS ART TATTOO · Ateliê Autoral
+            KARLOS ART TATTOO · ATELIÊ AUTORAL
           </p>
-          <DialogTitle className="text-xl font-bold uppercase tracking-[0.2em] text-white">
-            Solicitar Horário
+          <DialogTitle className="text-base sm:text-lg font-bold uppercase tracking-[0.25em] text-white">
+            SOLICITAR AGENDAMENTO
           </DialogTitle>
-          <DialogDescription className="text-xs text-[#A1A1AA] tracking-wide">
+          <DialogDescription className="text-xs text-neutral-400 tracking-wider mt-1 mb-4">
             Preencha os dados abaixo para receber nossa proposta autoral e disponibilidade com Karlos.
           </DialogDescription>
         </DialogHeader>
@@ -148,57 +156,58 @@ export function BookingModal({
             <h4 className="text-lg font-bold tracking-[0.25em] text-[#9be5ff] uppercase">
               SOLICITAÇÃO ENVIADA
             </h4>
-            <p className="text-xs text-[#A1A1AA] leading-relaxed max-w-sm mx-auto">
+            <p className="text-xs text-neutral-400 leading-relaxed max-w-sm mx-auto">
               Obrigado! Recebemos sua ideia. O Karlos analisará a proposta e entrará em contato via WhatsApp/E-mail para alinhar disponibilidade e orçamento.
             </p>
-            <Button
+            <button
               type="button"
-              variant="editorial"
-              className="mt-4 w-full h-11 text-xs uppercase tracking-[0.2em] font-semibold bg-[#9be5ff] text-black hover:bg-white transition-all rounded-none"
+              className="w-full mt-6 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer"
               onClick={handleClose}
             >
               FECHAR
-            </Button>
+            </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="booking-name" className="text-[11px] uppercase tracking-wider text-[#A1A1AA]">
+          <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+            {/* Nome Completo */}
+            <div>
+              <Label htmlFor="booking-name" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
                 Nome Completo
               </Label>
-              <Input
+              <input
                 ref={firstInputRef}
                 id="booking-name"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Seu nome"
+                placeholder="Seu nome completo"
                 disabled={loading}
-                className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0"
+                className="w-full bg-black/50 border border-white/15 focus:border-[#9be5ff] text-white text-sm px-3.5 py-2.5 outline-none transition-all rounded-none placeholder:text-neutral-600"
               />
             </div>
 
+            {/* WhatsApp e E-mail */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="booking-phone" className="text-[11px] uppercase tracking-wider text-[#A1A1AA]">
+              <div>
+                <Label htmlFor="booking-phone" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
                   WhatsApp / Celular
                 </Label>
-                <Input
+                <input
                   id="booking-phone"
                   required
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="(11) 99999-9999"
+                  placeholder="(48) 99999-9999"
                   disabled={loading}
-                  className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0"
+                  className="w-full bg-black/50 border border-white/15 focus:border-[#9be5ff] text-white text-sm px-3.5 py-2.5 outline-none transition-all rounded-none placeholder:text-neutral-600"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="booking-email" className="text-[11px] uppercase tracking-wider text-[#A1A1AA]">
+              <div>
+                <Label htmlFor="booking-email" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
                   E-mail
                 </Label>
-                <Input
+                <input
                   id="booking-email"
                   required
                   type="email"
@@ -206,76 +215,79 @@ export function BookingModal({
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="voce@email.com"
                   disabled={loading}
-                  className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0"
+                  className="w-full bg-black/50 border border-white/15 focus:border-[#9be5ff] text-white text-sm px-3.5 py-2.5 outline-none transition-all rounded-none placeholder:text-neutral-600"
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="booking-service" className="text-[11px] uppercase tracking-wider text-[#A1A1AA]">
+            {/* Seleção de Local de Atendimento (Pílulas / Grid Editorial) */}
+            <div>
+              <Label className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
                 Local de Atendimento
               </Label>
-              <Select
-                value={service}
-                onValueChange={(v) => setService(v as BookingServiceType)}
-                disabled={loading}
-              >
-                <SelectTrigger
-                  id="booking-service"
-                  className="h-10 rounded-none border-neutral-800 bg-black/60 text-sm text-white focus:ring-0 focus:border-[#9be5ff]"
-                >
-                  <SelectValue placeholder="Selecione o local" />
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-neutral-800 bg-[#121214] text-white">
-                  <SelectItem value="studio" className="cursor-pointer focus:bg-[#27272a] focus:text-white rounded-none">
-                    Estúdio Privado (Palhoça)
-                  </SelectItem>
-                  <SelectItem value="home" className="cursor-pointer focus:bg-[#27272a] focus:text-white rounded-none">
-                    Atendimento a Domicílio (Florianópolis / São José / Região)
-                  </SelectItem>
-                  <SelectItem value="flash" className="cursor-pointer focus:bg-[#27272a] focus:text-white rounded-none">
-                    Outra Cidade / Eventos
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {locationOptions.map((opt) => {
+                  const isSelected = service === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      disabled={loading}
+                      onClick={() => setService(opt.id)}
+                      className={`py-2 px-2 text-center transition-all rounded-none cursor-pointer flex flex-col items-center justify-center ${
+                        isSelected
+                          ? "bg-[#9be5ff]/10 border border-[#9be5ff] text-[#9be5ff] font-medium"
+                          : "bg-black/40 border border-white/10 text-neutral-400 hover:border-white/30"
+                      }`}
+                    >
+                      <span className="text-xs tracking-wider uppercase font-semibold">
+                        {opt.label}
+                      </span>
+                      <span className={`text-[10px] tracking-wide mt-0.5 ${isSelected ? "text-[#9be5ff]/80" : "text-neutral-500"}`}>
+                        {opt.sub}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="booking-notes" className="text-[11px] uppercase tracking-wider text-[#A1A1AA]">
+            {/* Ideia / Referência */}
+            <div>
+              <Label htmlFor="booking-notes" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
                 Ideia / Local do Corpo / Referência
               </Label>
-              <Textarea
+              <textarea
                 id="booking-notes"
                 rows={3}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Descreva brevemente sua ideia, tamanho aproximado e local..."
+                placeholder="Descreva brevemente sua ideia, tamanho aproximado e local do corpo..."
                 disabled={loading}
-                className="rounded-none border-neutral-800 bg-black/60 text-sm text-white placeholder:text-zinc-600 focus-visible:border-[#9be5ff] focus-visible:ring-0 resize-none"
+                className="w-full bg-black/50 border border-white/15 focus:border-[#9be5ff] text-white text-sm px-3.5 py-2.5 outline-none transition-all rounded-none placeholder:text-neutral-600 resize-none"
               />
             </div>
 
-            <p className="text-center text-[10px] uppercase tracking-[0.16em] text-[#A1A1AA] pt-1">
-              Atendimento presencial e a domicílio em toda a Grande Florianópolis.
+            <p className="text-center text-[10px] uppercase tracking-[0.16em] text-neutral-500 pt-0.5">
+              Atendimento presencial no ateliê e domiciliar em toda a Grande Florianópolis.
             </p>
 
             {error && (
-              <div className="text-center text-xs text-red-400 tracking-wide font-medium bg-red-950/30 border border-red-800/40 p-2.5">
+              <div className="text-center text-xs text-red-400 tracking-wide font-medium bg-red-950/30 border border-red-800/40 p-2.5 rounded-none">
                 {error}
               </div>
             )}
 
-            <div className="pt-2">
-              <Button
+            <div className="pt-2 pb-1">
+              <button
                 type="submit"
                 disabled={loading}
-                variant="editorial"
-                className={`w-full h-12 text-xs uppercase tracking-[0.2em] font-semibold bg-[#9be5ff] text-black hover:bg-white transition-all rounded-none ${
+                className={`w-full mt-2 sm:mt-4 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer ${
                   loading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >
-                {loading ? "ENVIANDO..." : "Confirmar Solicitação"}
-              </Button>
+                {loading ? "ENVIANDO..." : "CONFIRMAR SOLICITAÇÃO"}
+              </button>
             </div>
           </form>
         )}
