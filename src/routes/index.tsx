@@ -160,7 +160,7 @@ function Index() {
         <Mark />
         <nav aria-label="Contato" className="flex items-center gap-5">
           <a href="https://www.instagram.com/karlitostattooo/" target="_blank" rel="noreferrer" aria-label="Instagram" className="text-foreground transition-colors hover:text-primary"><Instagram strokeWidth={1.25} /></a>
-          <a href="mailto:contato@noxtattoo.com" aria-label="E-mail" className="text-foreground transition-colors hover:text-primary"><Mail strokeWidth={1.25} /></a>
+          <a href="mailto:karlosmonsalve14@gmail.com" aria-label="E-mail" className="text-foreground transition-colors hover:text-primary"><Mail strokeWidth={1.25} /></a>
         </nav>
       </header>
 
