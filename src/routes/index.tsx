@@ -25,10 +25,7 @@ export const Route = createFileRoute("/")({
 function Mark() {
   return (
     <a href="#inicio" aria-label="KARLOS ART TATTOO — início" className="group flex items-center gap-3">
-      <svg viewBox="0 0 40 40" className="h-9 w-9 text-primary" aria-hidden="true">
-        <path d="M4 4h32v32H4zM4 4l32 32M36 4L4 36M20 4v32" fill="none" stroke="currentColor" strokeWidth="1" />
-        <path d="M12 20h16" stroke="currentColor" strokeWidth="2" />
-      </svg>
+      <img src="/logo-karlostattoo.png" alt="KARLOS ART TATTOO" className="h-9 w-auto object-contain" />
       <span className="hidden text-[13px] font-medium uppercase tracking-[0.25em] text-[#F5F5F7] sm:block">
         KARLOS ART TATTOO
       </span>
