@@ -74,21 +74,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
-      { name: "description", content: "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina." },
+      {
+        name: "description",
+        content:
+          "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina.",
+      },
       { name: "author", content: "KARLOS ART TATTOO" },
       { property: "og:title", content: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
-      { property: "og:description", content: "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina." },
+      {
+        property: "og:description",
+        content:
+          "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina.",
+      },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://karlosarttattoo.vercel.app/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
+      { rel: "canonical", href: "https://karlosarttattoo.vercel.app/" },
       {
         rel: "stylesheet",
         href: appCss,
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap",
+      },
       { rel: "icon", href: "/favicon-k.png", type: "image/png" },
     ],
   }),

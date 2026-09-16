@@ -13,6 +13,13 @@ export default defineConfig({
     server: { entry: "server" },
   },
   nitro: {
-    preset: "vercel"
-  }
+    preset: "vercel",
+    routeRules: {
+      "/sitemap.xml": {
+        headers: {
+          "Content-Type": "application/xml; charset=utf-8",
+        },
+      },
+    },
+  },
 });
