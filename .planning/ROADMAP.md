@@ -6,11 +6,11 @@
 - [x] Implement GSAP editorial animations.
 - [x] Implement booking modal with Formspree integration.
 
-## Phase 2: Brand Manifesto, Local SEO & Native Lead Engine (Planned)
-- [ ] Seção Manifesto Editorial (`src/components/Manifesto.tsx`) com 3 pilares e estética dark editorial.
-- [ ] SEO Local Agressivo e Autoridade de Marca (JSON-LD `TattooParlor`, meta tags para "karlitostattoo" e "tatuador em palhoça", H1 semântico).
-- [ ] Native Lead Engine: rota de API Nitro (`/api/leads`), persistência relacional e notificação automática de novos leads.
-- [ ] Painel Administrativo autenticado (`/admin`): gestão de status dos leads com link direto para WhatsApp e cards de métricas do GA4.
+## Phase 2: Brand Manifesto, Local SEO & Native Lead Engine (Completed)
+- [x] Seção Manifesto Editorial (`src/components/Manifesto.tsx`) com 3 pilares e estética dark editorial.
+- [x] SEO Local Agressivo e Autoridade de Marca (JSON-LD `TattooParlor`, meta tags para "karlitostattoo" e "tatuador em palhoça", H1 semântico).
+- [x] Native Lead Engine: rota de API Nitro (`/api/leads`), persistência relacional e notificação automática de novos leads.
+- [x] Painel Administrativo autenticado (`/admin`): gestão de status dos leads com link direto para WhatsApp e cards de métricas do GA4.
 
 ## Phase 3: Expansion (Future)
 - [ ] Add an FAQ page.
