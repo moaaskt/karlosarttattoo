@@ -101,13 +101,12 @@ export function BookingModal({
       name,
       phone,
       email,
-      location: locationLabels[service] || service,
+      service: locationLabels[service] || service,
       message,
-      _subject: "Novo Orçamento Autoral — Karlos Art Tattoo",
     };
 
     try {
-      const response = await fetch("https://formspree.io/f/xqpkwdzp", {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,14 +119,14 @@ export function BookingModal({
         setSubmitted(true);
       } else {
         const data = await response.json().catch(() => null);
-        if (data && data.errors && data.errors.length > 0) {
-          setError(data.errors.map((err: { message: string }) => err.message).join(", "));
+        if (data && data.error) {
+          setError(data.error);
         } else {
-          setError("Ocorreu um erro ao enviar. Tente novamente ou entre em contato pelo Instagram.");
+          setError("Ocorreu um erro ao processar seu pedido. Tente novamente ou contate pelo Instagram.");
         }
       }
     } catch {
-      setError("Ocorreu um erro ao enviar. Tente novamente ou entre em contato pelo Instagram.");
+      setError("Falha de conexão com o servidor. Tente novamente em instantes.");
     } finally {
       setLoading(false);
     }

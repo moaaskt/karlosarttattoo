@@ -22,4 +22,53 @@ export default defineConfig({
       },
     },
   },
+  vite: {
+    plugins: [
+      {
+        name: "leads-api-dev-server",
+        apply: "serve",
+        configureServer(server) {
+          server.middlewares.use(async (req, res, next) => {
+            if (!req.url || (!req.url.startsWith("/api/leads") && req.url !== "/api/leads")) {
+              return next();
+            }
+            try {
+              const { handleLeadsRequest } = await server.ssrLoadModule("/src/server/api/leads.ts");
+              const protocol = req.headers["x-forwarded-proto"] || "http";
+              const host = req.headers.host || "localhost:3000";
+              const fullUrl = `${protocol}://${host}${req.url}`;
+
+              const chunks: Buffer[] = [];
+              for await (const chunk of req) {
+                chunks.push(Buffer.from(chunk));
+              }
+              const body =
+                chunks.length > 0 && req.method !== "GET" && req.method !== "HEAD"
+                  ? Buffer.concat(chunks)
+                  : undefined;
+
+              const webRequest = new Request(fullUrl, {
+                method: req.method,
+                headers: req.headers as HeadersInit,
+                body,
+              });
+
+              const webResponse: Response = await handleLeadsRequest(webRequest);
+              res.statusCode = webResponse.status;
+              webResponse.headers.forEach((val, key) => {
+                res.setHeader(key, val);
+              });
+              const responseText = await webResponse.text();
+              res.end(responseText);
+            } catch (err) {
+              console.error("[Leads Dev API Error]", err);
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({ error: "Internal Server Error in Leads Dev API" }));
+            }
+          });
+        },
+      },
+    ],
+  },
 });
