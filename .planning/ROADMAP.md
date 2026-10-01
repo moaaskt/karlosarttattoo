@@ -1,18 +1,13 @@
 # Roadmap
 
-## Phase 1: MVP Landing Page (Completed)
-- [x] Setup TanStack Start & Tailwind CSS v4.
-- [x] Create core UI structure (Header, Hero, Locations, Portfolio).
-- [x] Implement GSAP editorial animations.
-- [x] Implement booking modal with Formspree integration.
+## Milestones Archived
+- **[Milestone v1.0: Karlos Art Tattoo Editorial Engine](file:///home/moa-dev/projetos/ink-sharp-editorial/.planning/milestones/v1.0-ROADMAP.md)** — Shipped 2026-10-01 (Phase 1: MVP Landing Page + Phase 2: Brand Manifesto, Local SEO & Native Lead Engine).
 
-## Phase 2: Brand Manifesto, Local SEO & Native Lead Engine (Completed)
-- [x] Seção Manifesto Editorial (`src/components/Manifesto.tsx`) com 3 pilares e estética dark editorial.
-- [x] SEO Local Agressivo e Autoridade de Marca (JSON-LD `TattooParlor`, meta tags para "karlitostattoo" e "tatuador em palhoça", H1 semântico).
-- [x] Native Lead Engine: rota de API Nitro (`/api/leads`), persistência relacional e notificação automática de novos leads.
-- [x] Painel Administrativo autenticado (`/admin`): gestão de status dos leads com link direto para WhatsApp e cards de métricas do GA4.
+---
 
-## Phase 3: Expansion (Future)
-- [ ] Add an FAQ page.
-- [ ] Add a dedicated "Aftercare" instruction section.
-- [ ] Implement a dynamic blog or articles section for SEO.
+## Next Milestone (v1.1 / Expansion)
+
+### Phase 3: Expansion & Content Authority (Planned)
+- [ ] Seção de Perguntas Frequentes (FAQ) interativa e estruturada com Schema FAQPage.
+- [ ] Guia e Seção dedicada de Cuidados Pós-Tatuagem ("Aftercare Guide").
+- [ ] Módulo dinâmico de artigos e publicações editoriais para fortalecimento de SEO orgânico.
