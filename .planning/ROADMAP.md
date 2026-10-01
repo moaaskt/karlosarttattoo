@@ -6,10 +6,11 @@
 - [x] Implement GSAP editorial animations.
 - [x] Implement booking modal with Formspree integration.
 
-## Phase 2: Content Management & Optimization (Planned)
-- [ ] Migrate hardcoded portfolio data in `src/data/portfolio.ts` to a CMS (e.g., Sanity) or direct Instagram Graph API integration.
-- [ ] Add comprehensive automated testing (Unit tests with Vitest, E2E tests with Playwright).
-- [ ] Implement server-side form handling and validation to replace direct client-to-Formspree submission.
+## Phase 2: Brand Manifesto, Local SEO & Native Lead Engine (Planned)
+- [ ] Seção Manifesto Editorial (`src/components/Manifesto.tsx`) com 3 pilares e estética dark editorial.
+- [ ] SEO Local Agressivo e Autoridade de Marca (JSON-LD `TattooParlor`, meta tags para "karlitostattoo" e "tatuador em palhoça", H1 semântico).
+- [ ] Native Lead Engine: rota de API Nitro (`/api/leads`), persistência relacional e notificação automática de novos leads.
+- [ ] Painel Administrativo autenticado (`/admin`): gestão de status dos leads com link direto para WhatsApp e cards de métricas do GA4.
 
 ## Phase 3: Expansion (Future)
 - [ ] Add an FAQ page.
