@@ -5,16 +5,18 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useSmoothScroll } from "@/hooks/use-smooth-scroll";
 import { BookingModal, type BookingServiceType } from "@/components/booking-modal";
+import { Manifesto } from "@/components/Manifesto";
 import { portfolioItems } from "@/data/portfolio";
 import tattoo02 from "@/assets/tattoo-detail-02.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
-      { name: "description", content: "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina." },
-      { property: "og:title", content: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
-      { property: "og:description", content: "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina." },
+      { title: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral | Karlos Art Tattoo" },
+      { name: "description", content: "Karlitos Tattoo (Karlos Art Tattoo) — tatuador em Palhoça, Florianópolis e Grande Florianópolis. Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado e atendimento VIP a domicílio." },
+      { name: "keywords", content: "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo" },
+      { property: "og:title", content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral" },
+      { property: "og:description", content: "Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado em Palhoça e atendimento VIP a domicílio em Florianópolis e Grande Florianópolis." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -89,6 +91,16 @@ function useEditorialAnimations(root: React.RefObject<HTMLElement | null>) {
               scrollTrigger: { trigger: title, start: "top 85%" },
             },
           );
+        });
+
+        // Manifesto pillars
+        gsap.from("[data-anim='manifesto-pillar']", {
+          y: 30,
+          opacity: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          stagger: 0.15,
+          scrollTrigger: { trigger: "#manifesto", start: "top 78%" },
         });
 
         // Location columns
@@ -178,7 +190,7 @@ function Index() {
         <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.3em] text-neutral-600 md:block z-10">SANTA CATARINA — BRASIL</p>
         <div className="relative z-10 flex w-full max-w-md flex-col gap-3">
           <p data-anim="hero-item" className="mb-4 text-center text-[10px] font-medium uppercase tracking-[0.45em] text-[#9be5ff] opacity-90">Tatuagem autoral · 2026</p>
-          <h1 className="sr-only">KARLOS ART TATTOO — tatuagem autoral</h1>
+          <h1 className="sr-only">Karlitos Tattoo — Karlos Art Tattoo | Tatuador em Palhoça, Florianópolis e Grande Florianópolis | Tatuagem Autoral Fine Line</h1>
           <Button
             data-anim="hero-item"
             type="button"
@@ -209,6 +221,8 @@ function Index() {
         </div>
         <a href="#locais" aria-label="Ver locais" className="absolute bottom-7 left-1/2 -translate-x-1/2 text-[#9be5ff] z-10"><ArrowDown className="h-5 w-5 animate-bounce" strokeWidth={1} /></a>
       </section>
+
+      <Manifesto />
 
       <section id="locais" className="border-y border-border px-6 py-24 md:px-12 md:py-36 bg-black">
         <div className="mx-auto max-w-6xl">

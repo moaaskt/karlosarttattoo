@@ -73,18 +73,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
+      { title: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral | Karlos Art Tattoo" },
       {
         name: "description",
         content:
-          "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina.",
+          "Karlitos Tattoo (Karlos Art Tattoo) — tatuador em Palhoça, Florianópolis e Grande Florianópolis. Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado e atendimento VIP a domicílio.",
       },
-      { name: "author", content: "KARLOS ART TATTOO" },
-      { property: "og:title", content: "KARLOS ART TATTOO — Ateliê Autoral & Fine Line" },
+      { name: "keywords", content: "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo" },
+      { name: "author", content: "Karlos Art Tattoo" },
+      { property: "og:title", content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral" },
       {
         property: "og:description",
         content:
-          "Tatuagem autoral, ateliê privado e atendimento a domicílio em Palhoça, Florianópolis e toda Santa Catarina.",
+          "Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado em Palhoça e atendimento VIP a domicílio em Florianópolis e Grande Florianópolis.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://karlosarttattoo.vercel.app/" },
@@ -116,6 +117,57 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "TattooParlor",
+              name: "Karlos Art Tattoo",
+              alternateName: "Karlitos Tattoo",
+              description:
+                "Tatuagem autoral fine line, microrrealismo e geometria sagrada. Ateliê privado em Palhoça e atendimento VIP a domicílio em Florianópolis e Grande Florianópolis.",
+              url: "https://karlosarttattoo.vercel.app/",
+              image: "https://karlosarttattoo.vercel.app/logo-karlostattoo.png",
+              telephone: "",
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Palhoça",
+                addressRegion: "SC",
+                addressCountry: "BR",
+              },
+              geo: {
+                "@type": "GeoCoordinates",
+                latitude: -27.6453,
+                longitude: -48.6697,
+              },
+              areaServed: [
+                { "@type": "City", name: "Palhoça" },
+                { "@type": "City", name: "Florianópolis" },
+                { "@type": "City", name: "São José" },
+                { "@type": "AdministrativeArea", name: "Grande Florianópolis" },
+              ],
+              hasMap:
+                "https://www.google.com/maps/place/Palho%C3%A7a,+SC/",
+              sameAs: [
+                "https://www.instagram.com/karlitostattooo/",
+              ],
+              priceRange: "$$",
+              openingHoursSpecification: {
+                "@type": "OpeningHoursSpecification",
+                dayOfWeek: [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                ],
+                opens: "09:00",
+                closes: "19:00",
+              },
+            }),
+          }}
+        />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-KV170XZ94S"></script>
         <script
           dangerouslySetInnerHTML={{
