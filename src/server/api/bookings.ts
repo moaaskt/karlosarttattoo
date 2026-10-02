@@ -6,33 +6,55 @@ import {
   updateBookingStatus,
   updateDepositStatus,
   rescheduleBooking,
-  type Booking,
 } from "../../lib/db";
+import { ISO_UTC_RE } from "../../lib/booking-utils";
 import { isAuthorized, unauthorizedResponse, jsonResponse, corsHeaders } from "./auth";
 
-// Schemas de validação Zod
-const createBookingSchema = z.object({
-  lead_id: z.string().nullable().optional(),
-  client_name: z.string().min(2, "Nome do cliente é obrigatório"),
-  client_phone: z.string().min(8, "Telefone do cliente é obrigatório"),
-  client_email: z.string().email("E-mail inválido").nullable().optional().or(z.literal("")),
-  location: z.enum(["estudio", "domicilio", "evento"], {
-    errorMap: () => ({ message: "Local deve ser 'estudio', 'domicilio' ou 'evento'" }),
-  }),
-  session_type: z.enum(["tatuagem", "flash", "retoque", "projeto", "outro"], {
-    errorMap: () => ({ message: "Tipo de sessão inválido" }),
-  }),
-  start_at: z.string().min(1, "start_at é obrigatório"),
-  end_at: z.string().min(1, "end_at é obrigatório"),
-  status: z.enum(["pendente", "confirmado"]).optional().default("pendente"),
-  deposit_cents: z.number().int().min(0).optional().default(0),
-  deposit_status: z.enum(["pendente", "pago", "dispensado"]).optional().default("pendente"),
-  price_total_cents: z.number().int().min(0).optional().default(0),
-  project_id: z.string().nullable().optional(),
-  session_number: z.number().int().positive().nullable().optional(),
-  notes: z.string().nullable().optional(),
-  force: z.boolean().optional().default(false),
-});
+// Schemas rigorosos de validação Zod
+const phoneRegex = /^[\d\s()+-]{8,25}$/;
+
+const createBookingSchema = z
+  .object({
+    lead_id: z.string().nullable().optional(),
+    client_name: z.string().trim().min(2, "Nome do cliente deve ter ao menos 2 caracteres"),
+    client_phone: z
+      .string()
+      .trim()
+      .min(8, "Telefone do cliente deve ter ao menos 8 dígitos")
+      .regex(phoneRegex, "Formato de telefone inválido"),
+    client_email: z.string().email("E-mail inválido").nullable().optional().or(z.literal("")),
+    location: z.enum(["estudio", "domicilio", "evento"], {
+      errorMap: () => ({ message: "Local deve ser 'estudio', 'domicilio' ou 'evento'" }),
+    }),
+    session_type: z.enum(["tatuagem", "flash", "retoque", "projeto", "outro"], {
+      errorMap: () => ({ message: "Tipo de sessão inválido" }),
+    }),
+    start_at: z
+      .string()
+      .regex(ISO_UTC_RE, "start_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T13:00:00.000Z)"),
+    end_at: z
+      .string()
+      .regex(ISO_UTC_RE, "end_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T15:00:00.000Z)"),
+    status: z.enum(["pendente", "confirmado"]).optional().default("pendente"),
+    deposit_cents: z.number().int("deposit_cents deve ser inteiro").min(0, "deposit_cents não pode ser negativo").optional().default(0),
+    deposit_status: z.enum(["pendente", "pago", "dispensado"]).optional().default("pendente"),
+    price_total_cents: z.number().int("price_total_cents deve ser inteiro").min(0, "price_total_cents não pode ser negativo").optional().default(0),
+    project_id: z.string().nullable().optional(),
+    session_number: z.number().int().positive().nullable().optional(),
+    notes: z.string().nullable().optional(),
+    force: z.boolean().optional().default(false),
+  })
+  .refine((data) => data.end_at > data.start_at, {
+    message: "end_at deve ser estritamente posterior a start_at",
+    path: ["end_at"],
+  })
+  .refine(
+    (data) => data.price_total_cents === 0 || data.deposit_cents <= data.price_total_cents,
+    {
+      message: "deposit_cents não pode ser superior a price_total_cents",
+      path: ["deposit_cents"],
+    }
+  );
 
 const updateStatusSchema = z.object({
   status: z.enum(["pendente", "confirmado", "concluido", "cancelado", "no_show"], {
@@ -46,16 +68,25 @@ const updateDepositSchema = z.object({
   deposit_status: z.enum(["pendente", "pago", "dispensado", "retido", "devolvido"], {
     errorMap: () => ({ message: "Status de sinal inválido" }),
   }),
-  deposit_cents: z.number().int().min(0).optional(),
+  deposit_cents: z.number().int().min(0, "deposit_cents não pode ser negativo").optional(),
   note: z.string().optional(),
 });
 
-const rescheduleSchema = z.object({
-  start_at: z.string().min(1, "start_at é obrigatório"),
-  end_at: z.string().min(1, "end_at é obrigatório"),
-  force: z.boolean().optional().default(false),
-  note: z.string().optional(),
-});
+const rescheduleSchema = z
+  .object({
+    start_at: z
+      .string()
+      .regex(ISO_UTC_RE, "start_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T13:00:00.000Z)"),
+    end_at: z
+      .string()
+      .regex(ISO_UTC_RE, "end_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T15:00:00.000Z)"),
+    force: z.boolean().optional().default(false),
+    note: z.string().optional(),
+  })
+  .refine((data) => data.end_at > data.start_at, {
+    message: "end_at deve ser estritamente posterior a start_at",
+    path: ["end_at"],
+  });
 
 /**
  * Handler principal para rota /api/bookings
@@ -74,19 +105,12 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
 
   const url = new URL(request.url);
   const pathParts = url.pathname.replace(/^\/api\/bookings\/?/, "").split("/").filter(Boolean);
-  // pathParts:
-  // [] -> /api/bookings
-  // [id] -> /api/bookings/:id
-  // [id, 'status'] -> /api/bookings/:id/status
-  // [id, 'deposit'] -> /api/bookings/:id/deposit
-  // [id, 'reschedule'] -> /api/bookings/:id/reschedule
 
   // -------------------------------------------------------------
   // 1. GET /api/bookings e GET /api/bookings/:id
   // -------------------------------------------------------------
   if (method === "GET") {
     if (pathParts.length === 0) {
-      // Listagem com filtros
       const from = url.searchParams.get("from") || undefined;
       const to = url.searchParams.get("to") || undefined;
       const status = url.searchParams.get("status") || undefined;
@@ -101,7 +125,6 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
     }
 
     if (pathParts.length === 1) {
-      // Busca por ID com auditoria
       const id = pathParts[0];
       try {
         const booking = getBookingById(id);
@@ -134,6 +157,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
           {
             error: "Dados de agendamento inválidos.",
             details: parsed.error.format(),
+            message: parsed.error.errors.map((e) => e.message).join("; "),
           },
           422
         );
@@ -277,7 +301,11 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
       const parsed = rescheduleSchema.safeParse(body);
       if (!parsed.success) {
         return jsonResponse(
-          { error: parsed.error.errors[0]?.message || "Dados inválidos." },
+          {
+            error: "Dados de remarcação inválidos.",
+            details: parsed.error.format(),
+            message: parsed.error.errors.map((e) => e.message).join("; "),
+          },
           422
         );
       }
@@ -293,7 +321,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
       if (result.error === "not_found") {
         return jsonResponse({ error: result.message }, 404);
       }
-      if (result.error === "validation_error") {
+      if (result.error === "validation_error" || result.error === "invalid_status") {
         return jsonResponse({ error: result.error, message: result.message }, 422);
       }
       if (result.error === "time_block_conflict" || result.error === "booking_conflict") {

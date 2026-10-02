@@ -122,7 +122,7 @@ export interface CreateTimeBlockInput {
 
 let dbInstance: DatabaseSync | null = null;
 
-function applyPragmasAndSchema(db: DatabaseSync) {
+export function applyPragmasAndSchema(db: DatabaseSync) {
   // D-06: Pragmas obrigatórios
   db.exec(`
     PRAGMA journal_mode = WAL;
@@ -246,10 +246,28 @@ function applyPragmasAndSchema(db: DatabaseSync) {
   `);
 }
 
-export function getDatabase(): DatabaseSync {
+/**
+ * Retorna a instância ativa do SQLite.
+ * Suporta injeção de caminho temporário via DB_PATH ou customPath (para testes isolados).
+ */
+export function getDatabase(customPath?: string): DatabaseSync {
+  if (customPath) {
+    const customDb = new DatabaseSync(customPath);
+    applyPragmasAndSchema(customDb);
+    return customDb;
+  }
+
   if (dbInstance) return dbInstance;
 
   try {
+    // 1. Verifica se foi especificado DB_PATH em variável de ambiente (ex: ':memory:' para testes)
+    if (process.env.DB_PATH) {
+      dbInstance = new DatabaseSync(process.env.DB_PATH);
+      applyPragmasAndSchema(dbInstance);
+      return dbInstance;
+    }
+
+    // 2. Persistência padrão em data/leads.db
     const dbDir = path.resolve(process.cwd(), "data");
     if (!fs.existsSync(dbDir)) {
       try {
@@ -312,6 +330,19 @@ export function getDatabase(): DatabaseSync {
     dbInstance = new DatabaseSync(":memory:");
     applyPragmasAndSchema(dbInstance);
     return dbInstance;
+  }
+}
+
+/**
+ * Fecha e reseta a conexão ativa com o banco.
+ * Essencial para que suites de teste possam alternar de banco com segurança.
+ */
+export function closeDatabase(): void {
+  if (dbInstance) {
+    try {
+      dbInstance.close();
+    } catch {}
+    dbInstance = null;
   }
 }
 
@@ -657,6 +688,17 @@ export function createBooking(
     };
   }
 
+  const depositCents = data.deposit_cents || 0;
+  const priceTotalCents = data.price_total_cents || 0;
+
+  // Invariante: sinal não pode ser superior ao valor total se total for definido
+  if (priceTotalCents > 0 && depositCents > priceTotalCents) {
+    return {
+      error: "validation_error",
+      message: "O valor do sinal (deposit_cents) não pode ser superior ao valor total (price_total_cents).",
+    };
+  }
+
   // 2. Validação de horário de trabalho (expediente) — D-09
   const settings = getSettings();
   const timezone = settings["timezone"] || "America/Sao_Paulo";
@@ -682,7 +724,7 @@ export function createBooking(
   db.exec("BEGIN IMMEDIATE");
 
   try {
-    // 4.1 Checar conflito com time_blocks (bloqueio duro — sem buffer, sem force)
+    // 4.1 Checar conflito com time_blocks (bloqueio duro — sem buffer, SEM BYPASS mesmo com force: true!)
     const timeBlockConflictStmt = db.prepare(`
       SELECT id, reason_tag, note, start_at, end_at FROM time_blocks
       WHERE ? < end_at AND start_at < ?
@@ -700,7 +742,7 @@ export function createBooking(
       return {
         error: "time_block_conflict",
         conflicts: tbConflicts,
-        message: "Conflito com bloqueio de tempo (folga/viagem) existente no período.",
+        message: "Conflito com bloqueio de tempo (folga/viagem) existente no período. Bloqueio absoluto.",
       };
     }
 
@@ -731,8 +773,6 @@ export function createBooking(
     const now = serializeDate(new Date());
     const status = data.status || "pendente";
     const depositStatus = data.deposit_status || "pendente";
-    const depositCents = data.deposit_cents || 0;
-    const priceTotalCents = data.price_total_cents || 0;
 
     // Regra: se status for criado direto como confirmado, exige sinal pago ou dispensado
     if (status === "confirmado" && depositStatus !== "pago" && depositStatus !== "dispensado") {
@@ -821,14 +861,14 @@ export function createBooking(
     try {
       db.exec("ROLLBACK");
     } catch {
-      // Ignora erro secundário de rollback se transação já fechou
+      // safe
     }
     throw err;
   }
 }
 
 /**
- * Atualização de status seguindo a máquina de estados rígida (D-10).
+ * Atualização de status seguindo a máquina de estados rígida (D-10) e invariantes.
  */
 export function updateBookingStatus(
   id: string,
@@ -852,9 +892,18 @@ export function updateBookingStatus(
       return { error: "not_found", message: "Agendamento não encontrado." };
     }
 
-    // Validar máquina de estados (D-10)
+    // INVARIANTE: Estados terminais ('cancelado', 'no_show', 'concluido') não podem ter seu status alterado
+    if (current.status === "cancelado" || current.status === "no_show" || current.status === "concluido") {
+      db.exec("ROLLBACK");
+      return {
+        error: "invalid_transition",
+        message: `Transição recusada. Agendamentos com status '${current.status}' são finais e não permitem novas alterações de status.`,
+      };
+    }
+
+    // Validar máquina de estados para agendamentos em andamento
     if (newStatus === "confirmado") {
-      if (current.status !== "pendente" && current.status !== "confirmado") {
+      if (current.status !== "pendente") {
         db.exec("ROLLBACK");
         return {
           error: "invalid_transition",
@@ -869,14 +918,6 @@ export function updateBookingStatus(
         };
       }
     } else if (newStatus === "cancelado" || newStatus === "no_show") {
-      if (current.status === "concluido") {
-        db.exec("ROLLBACK");
-        return {
-          error: "invalid_transition",
-          message: "Não é possível cancelar ou marcar falta em um agendamento já concluído.",
-        };
-      }
-
       // Regra de sinal: se deposit_status for 'pago', exige escolher retido ou devolvido
       if (current.deposit_status === "pago") {
         if (!options?.depositAction || (options.depositAction !== "retido" && options.depositAction !== "devolvido")) {
@@ -893,6 +934,15 @@ export function updateBookingStatus(
         return {
           error: "invalid_transition",
           message: `Não é possível concluir um agendamento com status '${current.status}'.`,
+        };
+      }
+    } else if (newStatus === "pendente") {
+      // Não é permitido rebaixar confirmado para pendente
+      if (current.status === "confirmado") {
+        db.exec("ROLLBACK");
+        return {
+          error: "invalid_transition",
+          message: "Não é permitido reverter um agendamento confirmado para pendente.",
         };
       }
     }
@@ -967,6 +1017,7 @@ export function updateBookingStatus(
 
 /**
  * Remarcação de agendamento — D-11 (Ação que mantém o status atual e audita)
+ * INVARIANTE: Apenas agendamentos 'pendente' ou 'confirmado' podem ser remarcados.
  */
 export function rescheduleBooking(
   id: string,
@@ -976,7 +1027,7 @@ export function rescheduleBooking(
   note?: string
 ): {
   booking?: Booking;
-  error?: "not_found" | "validation_error" | "time_block_conflict" | "booking_conflict";
+  error?: "not_found" | "validation_error" | "invalid_status" | "time_block_conflict" | "booking_conflict";
   warning?: "outside_hours";
   conflicts?: Array<{ id: string; client_name?: string; start_at: string; end_at: string }>;
   message?: string;
@@ -1024,7 +1075,16 @@ export function rescheduleBooking(
       return { error: "not_found", message: "Agendamento não encontrado." };
     }
 
-    // 1. Checa time_blocks no novo horário
+    // INVARIANTE: Remarcação só pode ocorrer em agendamentos pendentes ou confirmados
+    if (current.status !== "pendente" && current.status !== "confirmado") {
+      db.exec("ROLLBACK");
+      return {
+        error: "invalid_status",
+        message: `Apenas agendamentos 'pendente' ou 'confirmado' podem ser remarcados. Status atual: '${current.status}'.`,
+      };
+    }
+
+    // 1. Checa time_blocks no novo horário (bloqueio duro, sem bypass)
     const timeBlockConflictStmt = db.prepare(`
       SELECT id, reason_tag, note, start_at, end_at FROM time_blocks
       WHERE ? < end_at AND start_at < ?
@@ -1112,6 +1172,9 @@ export function rescheduleBooking(
 
 /**
  * Atualização específica do status do sinal (D-10)
+ * INVARIANTES:
+ * - Se confirmado, não pode mudar para 'pendente' (confirmado exige pago ou dispensado).
+ * - 'retido' e 'devolvido' são válidos apenas quando cancelado ou no_show.
  */
 export function updateDepositStatus(
   id: string,
@@ -1133,7 +1196,16 @@ export function updateDepositStatus(
       return { error: "not_found", message: "Agendamento não encontrado." };
     }
 
-    // Regra: 'retido' e 'devolvido' só válidos após cancelado ou no_show
+    // INVARIANTE: Se já confirmado, não pode voltar sinal para pendente
+    if (current.status === "confirmado" && depositStatus === "pendente") {
+      db.exec("ROLLBACK");
+      return {
+        error: "invalid_deposit_status",
+        message: "Agendamento com status 'confirmado' exige sinal pago ou dispensado. Não é permitido retornar o sinal para 'pendente'.",
+      };
+    }
+
+    // INVARIANTE: 'retido' e 'devolvido' só válidos após cancelado ou no_show
     if (depositStatus === "retido" || depositStatus === "devolvido") {
       if (current.status !== "cancelado" && current.status !== "no_show") {
         db.exec("ROLLBACK");
@@ -1144,8 +1216,18 @@ export function updateDepositStatus(
       }
     }
 
-    const now = serializeDate(new Date());
     const nextCents = typeof depositCents === "number" ? depositCents : current.deposit_cents;
+
+    // Invariante de valor: deposit_cents <= price_total_cents
+    if (current.price_total_cents > 0 && nextCents > current.price_total_cents) {
+      db.exec("ROLLBACK");
+      return {
+        error: "invalid_deposit_status",
+        message: "O valor do sinal não pode ser superior ao valor total do agendamento.",
+      };
+    }
+
+    const now = serializeDate(new Date());
 
     db.prepare(`
       UPDATE bookings

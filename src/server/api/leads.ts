@@ -68,29 +68,7 @@ async function triggerLeadNotification(lead: Lead) {
   }
 }
 
-// Verificação de autenticação administrativa simples (D-11)
-function isAuthorized(request: Request): boolean {
-  const adminSecret = process.env.ADMIN_PASSWORD || "karlos2026";
-  const authHeader = request.headers.get("authorization");
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    const token = authHeader.substring(7);
-    if (token === adminSecret) return true;
-  }
-
-  // Verifica cookie admin_token
-  const cookieHeader = request.headers.get("cookie") || "";
-  if (cookieHeader.includes(`admin_token=${adminSecret}`)) {
-    return true;
-  }
-
-  // Permite acesso caso o admin envie query token para testes locais
-  const url = new URL(request.url);
-  if (url.searchParams.get("token") === adminSecret) {
-    return true;
-  }
-
-  return false;
-}
+import { isAuthorized } from "./auth";
 
 /**
  * Handler principal para rota de API /api/leads

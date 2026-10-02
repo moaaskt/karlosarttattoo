@@ -4,18 +4,39 @@ import {
   listTimeBlocks,
   deleteTimeBlock,
 } from "../../lib/db";
+import { ISO_UTC_RE } from "../../lib/booking-utils";
 import { isAuthorized, unauthorizedResponse, jsonResponse, corsHeaders } from "./auth";
 
-const createTimeBlockSchema = z.object({
-  start_at: z.string().min(1, "start_at é obrigatório"),
-  end_at: z.string().optional(),
-  all_day: z.number().int().min(0).max(1).optional().default(0),
-  reason_tag: z.enum(["viagem_guest", "folga_criacao", "evento", "pessoal", "outro"], {
-    errorMap: () => ({ message: "Motivo do bloqueio inválido" }),
-  }),
-  note: z.string().nullable().optional(),
-  force: z.boolean().optional().default(false),
-});
+const createTimeBlockSchema = z
+  .object({
+    start_at: z.string().min(1, "start_at é obrigatório"),
+    end_at: z.string().optional(),
+    all_day: z.number().int().min(0).max(1).optional().default(0),
+    reason_tag: z.enum(["viagem_guest", "folga_criacao", "evento", "pessoal", "outro"], {
+      errorMap: () => ({ message: "Motivo do bloqueio inválido" }),
+    }),
+    note: z.string().nullable().optional(),
+    force: z.boolean().optional().default(false),
+  })
+  .refine(
+    (data) => {
+      if (data.all_day === 1) {
+        return /^\d{4}-\d{2}-\d{2}/.test(data.start_at);
+      }
+      return ISO_UTC_RE.test(data.start_at);
+    },
+    { message: "start_at deve ser formato ISO UTC estrito (ou YYYY-MM-DD se all_day=1)", path: ["start_at"] }
+  )
+  .refine(
+    (data) => {
+      if (!data.end_at) return true;
+      if (data.all_day === 1) {
+        return /^\d{4}-\d{2}-\d{2}/.test(data.end_at);
+      }
+      return ISO_UTC_RE.test(data.end_at);
+    },
+    { message: "end_at deve ser formato ISO UTC estrito (ou YYYY-MM-DD se all_day=1)", path: ["end_at"] }
+  );
 
 export async function handleTimeBlocksRequest(request: Request): Promise<Response> {
   const method = request.method.toUpperCase();
@@ -55,7 +76,11 @@ export async function handleTimeBlocksRequest(request: Request): Promise<Respons
       const parsed = createTimeBlockSchema.safeParse(body);
       if (!parsed.success) {
         return jsonResponse(
-          { error: "Dados inválidos.", details: parsed.error.format() },
+          {
+            error: "Dados inválidos.",
+            details: parsed.error.format(),
+            message: parsed.error.errors.map((e) => e.message).join("; "),
+          },
           422
         );
       }
