@@ -178,3 +178,65 @@ html { scroll-behavior: smooth; }
   }
 }
 
+/* FullCalendar Dark Theme — Ateliê Karlos Art Tattoo */
+.karlos-fullcalendar-container {
+  --fc-border-color: rgba(255, 255, 255, 0.08);
+  --fc-button-bg-color: #0d0d0d;
+  --fc-button-border-color: rgba(155, 229, 255, 0.2);
+  --fc-button-text-color: #9be5ff;
+  --fc-button-hover-bg-color: rgba(155, 229, 255, 0.1);
+  --fc-button-hover-border-color: rgba(155, 229, 255, 0.5);
+  --fc-button-active-bg-color: rgba(155, 229, 255, 0.2);
+  --fc-today-bg-color: rgba(155, 229, 255, 0.04);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: #070707;
+  --fc-event-text-color: #070707;
+  --fc-list-event-hover-bg-color: rgba(155, 229, 255, 0.05);
+}
+
+.karlos-fullcalendar-container .fc {
+  font-family: inherit;
+}
+
+.karlos-fullcalendar-container .fc-toolbar-title {
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+}
+
+.karlos-fullcalendar-container .fc-col-header-cell-cushion {
+  color: #a3a3a3;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 0;
+}
+
+.karlos-fullcalendar-container .fc-timegrid-slot-label-cushion,
+.karlos-fullcalendar-container .fc-timegrid-axis-cushion {
+  color: #737373;
+  font-family: monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.karlos-fullcalendar-container .fc-button {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+.karlos-fullcalendar-container .fc-event {
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+
