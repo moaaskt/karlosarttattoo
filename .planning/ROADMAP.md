@@ -7,10 +7,10 @@
 
 ## Milestone v2.0: Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration (In Progress)
 
-### Phase 03: Aceternity UI Foundation & ApexCharts Migration (Planned)
-- [ ] Primitivos Aceternity UI adaptados para Tailwind v4 (Bento Grid, Glowing Cards, Shimmer Buttons, Background Beams).
-- [ ] Instalação e configuração de ApexCharts com tema dark editorial (#070707, #9be5ff, neon accents).
-- [ ] Redesign completo da interface do `/admin` em layout Bento Grid com gráficos interativos em ApexCharts.
+### Phase 03: Aceternity UI Foundation & ApexCharts Migration (Completed)
+- [x] Primitivos Aceternity UI adaptados para Tailwind v4 (Bento Grid, Glowing Cards, Shimmer Buttons, Background Beams).
+- [x] Instalação e configuração de ApexCharts com tema dark editorial (#070707, #9be5ff, neon accents).
+- [x] Redesign completo da interface do `/admin` em layout Bento Grid com gráficos interativos em ApexCharts.
 
 ### Phase 04: Agenda & Calendar Booking Engine (Planned)
 - [ ] Modelagem e migração da tabela `bookings` no SQLite (`src/lib/db.ts`) com status, slots de horários e vinculação de leads.
