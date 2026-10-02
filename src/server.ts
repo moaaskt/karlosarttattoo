@@ -2,6 +2,11 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { handleLeadsRequest } from "./server/api/leads";
+import { handleBookingsRequest } from "./server/api/bookings";
+import { handleTimeBlocksRequest } from "./server/api/time-blocks";
+import { handleSettingsRequest } from "./server/api/settings";
+import { handleAvailabilityRulesRequest } from "./server/api/availability-rules";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -44,14 +49,26 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
-import { handleLeadsRequest } from "./server/api/leads";
-
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
-      if (url.pathname === "/api/leads" || url.pathname.startsWith("/api/leads")) {
+
+      // Rotas de API Backend
+      if (url.pathname === "/api/leads" || url.pathname.startsWith("/api/leads/")) {
         return await handleLeadsRequest(request);
+      }
+      if (url.pathname === "/api/bookings" || url.pathname.startsWith("/api/bookings/")) {
+        return await handleBookingsRequest(request);
+      }
+      if (url.pathname === "/api/time-blocks" || url.pathname.startsWith("/api/time-blocks/")) {
+        return await handleTimeBlocksRequest(request);
+      }
+      if (url.pathname === "/api/settings" || url.pathname.startsWith("/api/settings/")) {
+        return await handleSettingsRequest(request);
+      }
+      if (url.pathname === "/api/availability-rules" || url.pathname.startsWith("/api/availability-rules/")) {
+        return await handleAvailabilityRulesRequest(request);
       }
 
       const handler = await getServerEntry();
