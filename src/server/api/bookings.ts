@@ -6,12 +6,50 @@ import {
   updateBookingStatus,
   updateDepositStatus,
   rescheduleBooking,
+  updateBookingData,
 } from "../../lib/db";
 import { ISO_UTC_RE } from "../../lib/booking-utils";
 import { isAuthorized, unauthorizedResponse, jsonResponse, corsHeaders } from "./auth";
 
 // Schemas rigorosos de validação Zod
 const phoneRegex = /^[\d\s()+-]{8,25}$/;
+
+const updateBookingDataSchema = z
+  .object({
+    client_name: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres").optional(),
+    client_phone: z
+      .string()
+      .trim()
+      .min(8, "Telefone deve ter ao menos 8 dígitos")
+      .regex(phoneRegex, "Formato de telefone inválido")
+      .optional(),
+    client_email: z.string().email("E-mail inválido").nullable().optional().or(z.literal("")),
+    location: z.enum(["estudio", "domicilio", "evento"]).optional(),
+    session_type: z.enum(["tatuagem", "flash", "retoque", "projeto", "outro"]).optional(),
+    price_total_cents: z.number().int().min(0, "price_total_cents não pode ser negativo").optional(),
+    deposit_cents: z.number().int().min(0, "deposit_cents não pode ser negativo").optional(),
+    notes: z.string().nullable().optional(),
+  })
+  .refine(
+    (data) => Object.keys(data).length > 0,
+    { message: "Ao menos um campo deve ser fornecido para atualização." }
+  )
+  .refine(
+    (data) => {
+      if (
+        data.price_total_cents !== undefined &&
+        data.deposit_cents !== undefined &&
+        data.price_total_cents > 0
+      ) {
+        return data.deposit_cents <= data.price_total_cents;
+      }
+      return true;
+    },
+    {
+      message: "deposit_cents não pode ser superior a price_total_cents",
+      path: ["deposit_cents"],
+    }
+  );
 
 const createBookingSchema = z
   .object({
@@ -231,7 +269,44 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
   }
 
   // -------------------------------------------------------------
-  // 3. PATCH rotas (/status, /deposit, /reschedule)
+  // 3. PATCH /api/bookings/:id (edição de dados cadastrais/sessão - TASK-05b)
+  // -------------------------------------------------------------
+  if (method === "PATCH" && pathParts.length === 1) {
+    const id = pathParts[0];
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return jsonResponse({ error: "Corpo da requisição inválido ou vazio." }, 400);
+    }
+
+    const parsed = updateBookingDataSchema.safeParse(body);
+    if (!parsed.success) {
+      return jsonResponse(
+        {
+          error: "Dados de atualização inválidos.",
+          details: parsed.error.format(),
+          message: parsed.error.errors.map((e) => e.message).join("; "),
+        },
+        422
+      );
+    }
+
+    const result = updateBookingData(id, parsed.data);
+    if (result.error === "not_found") {
+      return jsonResponse({ error: result.message }, 404);
+    }
+    if (
+      result.error === "invalid_transition" ||
+      result.error === "invalid_deposit" ||
+      result.error === "validation_error"
+    ) {
+      return jsonResponse({ error: result.error, message: result.message }, 422);
+    }
+
+    return jsonResponse({ success: true, booking: result.booking });
+  }
+
+  // -------------------------------------------------------------
+  // 4. PATCH sub-rotas (/status, /deposit, /reschedule)
   // -------------------------------------------------------------
   if (method === "PATCH" && pathParts.length === 2) {
     const [id, action] = pathParts;

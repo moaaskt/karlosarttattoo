@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import * as React from "react";
-import { Lock, ArrowLeft, RefreshCw, LogOut, ShieldCheck, Sparkles, LayoutDashboard, Users } from "lucide-react";
+import { Lock, ArrowLeft, RefreshCw, LogOut, ShieldCheck, Sparkles, LayoutDashboard, Users, Calendar as CalendarIcon } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { BentoOverview } from "@/components/admin/bento-overview";
+import { AgendaTab } from "@/components/admin/agenda-tab";
+import { Toaster } from "@/components/ui/sonner";
 import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import type { Lead } from "@/lib/db";
@@ -21,7 +23,8 @@ export function AdminPage() {
   const [authKey, setAuthKey] = React.useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [loginError, setLoginError] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"bento" | "leads">("bento");
+  const [activeTab, setActiveTab] = React.useState<"bento" | "leads" | "agenda">("bento");
+  const [leadToSchedule, setLeadToSchedule] = React.useState<Lead | null>(null);
 
   const [leads, setLeads] = React.useState<Lead[]>([]);
   const [stats, setStats] = React.useState({
@@ -79,12 +82,18 @@ export function AdminPage() {
     verifyAndFetch(authKey.trim());
   };
 
-  const handleLogout = () => {
+  const handleLogout = React.useCallback(() => {
     sessionStorage.removeItem("admin_auth_token");
     setIsAuthenticated(false);
     setAuthKey("");
     setLeads([]);
-  };
+  }, []);
+
+  React.useEffect(() => {
+    const onLogout = () => handleLogout();
+    window.addEventListener("admin:logout", onLogout);
+    return () => window.removeEventListener("admin:logout", onLogout);
+  }, [handleLogout]);
 
   const handleStatusChange = async (id: string, newStatus: Lead["status"]) => {
     try {
@@ -273,6 +282,18 @@ export function AdminPage() {
               {leads.length}
             </span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("agenda")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs uppercase font-extrabold tracking-[0.2em] transition-all cursor-pointer border ${
+              activeTab === "agenda"
+                ? "bg-[#9be5ff] text-[#070707] border-[#9be5ff] shadow-[0_0_15px_rgba(155,229,255,0.3)]"
+                : "bg-black/40 text-neutral-400 border-white/10 hover:border-white/30 hover:text-white"
+            }`}
+          >
+            <CalendarIcon className="w-4 h-4" />
+            AGENDA DO ATELIÊ
+          </button>
         </div>
       </nav>
 
@@ -295,7 +316,7 @@ export function AdminPage() {
               onNavigateToLeads={() => setActiveTab("leads")}
             />
           </section>
-        ) : (
+        ) : activeTab === "leads" ? (
           <section className="space-y-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <div>
@@ -314,11 +335,25 @@ export function AdminPage() {
             <LeadTable
               leads={leads}
               onStatusChange={handleStatusChange}
+              onScheduleLead={(lead) => {
+                setLeadToSchedule(lead);
+                setActiveTab("agenda");
+              }}
               isLoading={isLoading}
+            />
+          </section>
+        ) : (
+          <section className="space-y-6">
+            <AgendaTab
+              leadToSchedule={leadToSchedule}
+              onLeadScheduled={() => setLeadToSchedule(null)}
             />
           </section>
         )}
       </main>
+
+      {/* Toaster do Sonner montado para notificações de feedback */}
+      <Toaster position="top-right" richColors theme="dark" />
     </div>
   );
 }
