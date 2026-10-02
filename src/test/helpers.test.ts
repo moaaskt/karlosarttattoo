@@ -126,12 +126,15 @@ test("timeBlockToEvent", () => {
     start_at: "2026-10-15T12:00:00.000Z",
     end_at: "2026-10-15T14:00:00.000Z",
     all_day: 0,
-    reason: "Almoço",
+    reason_tag: "folga_criacao",
+    note: "Desenho autoral",
   } as TimeBlock;
   const ev = timeBlockToEvent(tb);
   assert.equal(ev.id, "tb-tb-1");
+  assert.equal(ev.title, "Folga / Criação: Desenho autoral");
   assert.equal(ev.display, "background");
   assert.equal(ev.editable, false);
+  assert.equal(ev.backgroundColor, "rgba(239, 68, 68, 0.25)");
 });
 
 test("deriveSlotMinTime e deriveSlotMaxTime", () => {
