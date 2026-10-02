@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import * as React from "react";
-import { Lock, ArrowLeft, RefreshCw, LogOut, ShieldCheck, Sparkles } from "lucide-react";
+import { Lock, ArrowLeft, RefreshCw, LogOut, ShieldCheck, Sparkles, LayoutDashboard, Users } from "lucide-react";
 import { LeadTable } from "@/components/admin/lead-table";
-import { AnalyticsCards } from "@/components/admin/analytics-cards";
+import { BentoOverview } from "@/components/admin/bento-overview";
+import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
+import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import type { Lead } from "@/lib/db";
 
 export const Route = createFileRoute("/admin")({
@@ -19,6 +21,7 @@ export function AdminPage() {
   const [authKey, setAuthKey] = React.useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [loginError, setLoginError] = React.useState<string | null>(null);
+  const [activeTab, setActiveTab] = React.useState<"bento" | "leads">("bento");
 
   const [leads, setLeads] = React.useState<Lead[]>([]);
   const [stats, setStats] = React.useState({
@@ -95,13 +98,11 @@ export function AdminPage() {
       });
 
       if (response.ok) {
-        // Atualiza estado local imediatamente
         setLeads((prev) =>
           prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead))
         );
-        // Atualiza stats
         verifyAndFetch(authKey);
-        setFeedbackMsg("Status do lead atualizado.");
+        setFeedbackMsg("Status atualizado!");
         setTimeout(() => setFeedbackMsg(null), 3000);
       } else {
         alert("Erro ao atualizar o status do lead.");
@@ -111,11 +112,13 @@ export function AdminPage() {
     }
   };
 
-  // 1. Tela de Login Dark Editorial
+  // 1. Tela de Login Dark Editorial com BackgroundBeams e ShimmerButton
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#070707] text-white flex flex-col items-center justify-center p-6 selection:bg-[#9be5ff] selection:text-black">
-        <div className="w-full max-w-md bg-[#0b0b0e] border border-white/10 p-8 space-y-6 shadow-2xl">
+      <div className="relative min-h-screen bg-[#070707] text-white flex flex-col items-center justify-center p-6 selection:bg-[#9be5ff] selection:text-black overflow-hidden">
+        <BackgroundBeams />
+
+        <div className="relative z-10 w-full max-w-md bg-[#0b0b0e]/90 backdrop-blur-xl border border-white/10 p-8 space-y-6 shadow-2xl">
           <div className="text-center space-y-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#9be5ff]">
               KARLOS ART TATTOO
@@ -124,7 +127,7 @@ export function AdminPage() {
               PAINEL DO ATELIÊ
             </h1>
             <p className="text-xs text-neutral-400 tracking-wider">
-              Área de acesso restrito para gestão de orçamentos e métricas.
+              Área restrita de gestão de agenda, métricas e orçamentos.
             </p>
           </div>
 
@@ -142,7 +145,7 @@ export function AdminPage() {
                   type="password"
                   value={authKey}
                   onChange={(e) => setAuthKey(e.target.value)}
-                  placeholder="Insira sua senha de administrador"
+                  placeholder="Insira sua chave de acesso"
                   disabled={isLoading}
                   autoFocus
                   className="w-full bg-black/60 border border-white/20 focus:border-[#9be5ff] text-white text-sm px-4 py-3 outline-none transition-all rounded-none placeholder:text-neutral-600"
@@ -157,13 +160,15 @@ export function AdminPage() {
               </div>
             )}
 
-            <button
+            <ShimmerButton
               type="submit"
               disabled={isLoading || !authKey.trim()}
-              className="w-full py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer disabled:opacity-50"
+              shimmerColor="#9be5ff"
+              background="#0b0b0e"
+              className="w-full !py-3.5 border-white/20 hover:border-[#9be5ff]"
             >
               {isLoading ? "VERIFICANDO..." : "ACESSAR PAINEL"}
-            </button>
+            </ShimmerButton>
           </form>
 
           <div className="text-center pt-2">
@@ -179,12 +184,14 @@ export function AdminPage() {
     );
   }
 
-  // 2. Painel Administrativo Autenticado
+  // 2. Painel Administrativo Autenticado com Abas Modulares e BackgroundBeams
   return (
-    <div className="min-h-screen bg-[#070707] text-white selection:bg-[#9be5ff] selection:text-black">
+    <div className="relative min-h-screen bg-[#070707] text-white selection:bg-[#9be5ff] selection:text-black overflow-x-hidden">
+      <BackgroundBeams />
+
       {/* Barra de Navegação Superior */}
-      <header className="border-b border-white/10 bg-[#0a0a0d] px-6 py-4 sticky top-0 z-40 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <header className="relative z-30 border-b border-white/10 bg-[#0a0a0d]/80 backdrop-blur-xl px-6 py-4 sticky top-0">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link
               to="/"
@@ -196,11 +203,11 @@ export function AdminPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#9be5ff] flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-[#9be5ff]" /> PAINEL ADMINISTRATIVO
+                  <ShieldCheck className="w-3 h-3 text-[#9be5ff]" /> PAINEL ADMINISTRATIVO ACETERNITY
                 </span>
               </div>
               <h1 className="text-lg font-extrabold uppercase tracking-[0.18em] text-white">
-                KARLOS ART TATTOO · ATELIÊ & LEADS
+                KARLOS ART TATTOO · ATELIÊ & DASHBOARD
               </h1>
             </div>
           </div>
@@ -233,44 +240,84 @@ export function AdminPage() {
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-10">
-        {/* Seção 1: Métricas de Tráfego e Funil (GA4 + Conversão) */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-            <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#9be5ff]" /> Visão Geral de Performance & Funil
-            </h2>
-            <span className="text-[10px] uppercase tracking-wider text-neutral-500">
-              Palhoça & Grande Floripa
+      {/* Barra de Abas Modulares (D-01) */}
+      <nav className="relative z-20 border-b border-white/10 bg-[#070707]/90 backdrop-blur-md px-6 py-2.5">
+        <div className="max-w-7xl mx-auto flex items-center gap-3">
+          <button
+            onClick={() => setActiveTab("bento")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs uppercase font-extrabold tracking-[0.2em] transition-all cursor-pointer border ${
+              activeTab === "bento"
+                ? "bg-[#9be5ff] text-[#070707] border-[#9be5ff] shadow-[0_0_15px_rgba(155,229,255,0.3)]"
+                : "bg-black/40 text-neutral-400 border-white/10 hover:border-white/30 hover:text-white"
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            VISÃO GERAL BENTO
+          </button>
+
+          <button
+            onClick={() => setActiveTab("leads")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs uppercase font-extrabold tracking-[0.2em] transition-all cursor-pointer border ${
+              activeTab === "leads"
+                ? "bg-[#9be5ff] text-[#070707] border-[#9be5ff] shadow-[0_0_15px_rgba(155,229,255,0.3)]"
+                : "bg-black/40 text-neutral-400 border-white/10 hover:border-white/30 hover:text-white"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            GESTÃO DE LEADS
+            <span
+              className={`ml-1 px-1.5 py-0.2 text-[10px] font-mono ${
+                activeTab === "leads" ? "bg-black text-[#9be5ff]" : "bg-white/10 text-neutral-300"
+              }`}
+            >
+              {leads.length}
             </span>
-          </div>
+          </button>
+        </div>
+      </nav>
 
-          <AnalyticsCards stats={stats} leads={leads} />
-        </section>
-
-        {/* Seção 2: Gestão de Leads com Ação WhatsApp */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-            <div>
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white">
-                Gestão de Orçamentos & Contatos
+      {/* Conteúdo Principal Renderizado Conforme Aba Ativa */}
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+        {activeTab === "bento" ? (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#9be5ff]" /> Visão Analítica do Estúdio & Métricas
               </h2>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                Leads recebidos através do modal de agendamento do site
-              </p>
+              <span className="text-[10px] uppercase tracking-wider text-neutral-500">
+                Palhoça & Florianópolis
+              </span>
             </div>
-            <span className="text-xs font-mono text-[#9be5ff]">
-              {leads.length} solicitaç{leads.length === 1 ? "ão" : "ões"}
-            </span>
-          </div>
 
-          <LeadTable
-            leads={leads}
-            onStatusChange={handleStatusChange}
-            isLoading={isLoading}
-          />
-        </section>
+            <BentoOverview
+              stats={stats}
+              leads={leads}
+              onNavigateToLeads={() => setActiveTab("leads")}
+            />
+          </section>
+        ) : (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <div>
+                <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white">
+                  Triagem & Contato com Clientes
+                </h2>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Orçamentos recebidos pelo site — inicie conversas personalizadas no WhatsApp
+                </p>
+              </div>
+              <span className="text-xs font-mono text-[#9be5ff]">
+                {leads.length} orçament{leads.length === 1 ? "o" : "os"}
+              </span>
+            </div>
+
+            <LeadTable
+              leads={leads}
+              onStatusChange={handleStatusChange}
+              isLoading={isLoading}
+            />
+          </section>
+        )}
       </main>
     </div>
   );

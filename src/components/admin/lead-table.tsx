@@ -1,5 +1,6 @@
 import * as React from "react";
 import { MessageSquare, Phone, Mail, Calendar, CheckCircle2, Clock, Archive, Sparkles, Filter } from "lucide-react";
+import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import type { Lead } from "@/lib/db";
 
 interface LeadTableProps {
@@ -194,15 +195,21 @@ export function LeadTable({ leads, onStatusChange, isLoading }: LeadTableProps) 
 
               {/* Ações: Botão WhatsApp + Seletor de Status */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-                {/* Botão de Ação Direta no WhatsApp (D-12) */}
+                {/* Botão de Ação Direta no WhatsApp com ShimmerButton (D-04, D-12) */}
                 <a
                   href={getWhatsAppLink(lead)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#20ba59] text-black font-bold text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_15px_rgba(37,211,102,0.25)] active:scale-[0.99] cursor-pointer"
+                  className="inline-block"
                 >
-                  <MessageSquare className="w-4 h-4 fill-black" />
-                  CONVERSAR NO WHATSAPP
+                  <ShimmerButton
+                    background="#112217"
+                    shimmerColor="#25D366"
+                    className="!py-2.5 !px-5 text-[#25D366] border-[#25D366]/40 hover:border-[#25D366] hover:shadow-[0_0_20px_rgba(37,211,102,0.3)] !text-xs !tracking-[0.18em]"
+                  >
+                    <MessageSquare className="w-4 h-4 fill-[#25D366]" />
+                    CONVERSAR NO WHATSAPP
+                  </ShimmerButton>
                 </a>
 
                 {/* Alteração rápida de Status */}
