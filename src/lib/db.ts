@@ -1268,3 +1268,195 @@ export function updateDepositStatus(
     throw err;
   }
 }
+
+export interface UpdateBookingDataPatch {
+  client_name?: string;
+  client_phone?: string;
+  client_email?: string | null;
+  location?: "estudio" | "domicilio" | "evento";
+  session_type?: "tatuagem" | "flash" | "retoque" | "projeto" | "outro";
+  price_total_cents?: number;
+  deposit_cents?: number;
+  notes?: string | null;
+}
+
+/**
+ * Atualização de dados cadastrais/sessão do agendamento (TASK-05b)
+ * - Ignora campos que não foram alterados (sem erro 422 por reenvio).
+ * - Impede alteração de dados de contato em status 'cancelado' ou 'no_show'.
+ * - 'concluido' aceita edição de contato e notas.
+ * - Valida deposit_cents <= price_total_cents sobre valores mesclados se price_total_cents > 0.
+ * - Bloqueia alteração de deposit_cents se sinal já pago/retido/devolvido.
+ * - Registra 'note_updated' em booking_events se notes for alterado.
+ */
+export function updateBookingData(
+  id: string,
+  patch: UpdateBookingDataPatch
+): {
+  booking?: Booking;
+  error?: "not_found" | "invalid_transition" | "invalid_deposit" | "validation_error";
+  message?: string;
+} {
+  const db = getDatabase();
+  db.exec("BEGIN IMMEDIATE");
+
+  try {
+    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as Booking | undefined;
+    if (!current) {
+      db.exec("ROLLBACK");
+      return { error: "not_found", message: "Agendamento não encontrado." };
+    }
+
+    // Identifica campos que realmente mudaram
+    const changedFields: Partial<UpdateBookingDataPatch> = {};
+    if (patch.client_name !== undefined && patch.client_name !== current.client_name) {
+      changedFields.client_name = patch.client_name;
+    }
+    if (patch.client_phone !== undefined && patch.client_phone !== current.client_phone) {
+      changedFields.client_phone = patch.client_phone;
+    }
+    if (patch.client_email !== undefined && patch.client_email !== current.client_email) {
+      changedFields.client_email = patch.client_email;
+    }
+    if (patch.location !== undefined && patch.location !== current.location) {
+      changedFields.location = patch.location;
+    }
+    if (patch.session_type !== undefined && patch.session_type !== current.session_type) {
+      changedFields.session_type = patch.session_type;
+    }
+    if (patch.price_total_cents !== undefined && patch.price_total_cents !== current.price_total_cents) {
+      changedFields.price_total_cents = patch.price_total_cents;
+    }
+    if (patch.deposit_cents !== undefined && patch.deposit_cents !== current.deposit_cents) {
+      changedFields.deposit_cents = patch.deposit_cents;
+    }
+    if (patch.notes !== undefined && patch.notes !== current.notes) {
+      changedFields.notes = patch.notes;
+    }
+
+    // Se nenhum campo mudou, retorna o booking atual sem erro (idempotente)
+    if (Object.keys(changedFields).length === 0) {
+      db.exec("COMMIT");
+      return { booking: current };
+    }
+
+    // INVARIANTE: 'cancelado' e 'no_show' recusam alteração de contato
+    if (current.status === "cancelado" || current.status === "no_show") {
+      if (
+        changedFields.client_name !== undefined ||
+        changedFields.client_phone !== undefined ||
+        changedFields.client_email !== undefined
+      ) {
+        db.exec("ROLLBACK");
+        return {
+          error: "invalid_transition",
+          message: "Não é permitido alterar dados de contato de agendamento cancelado ou marcado como falta.",
+        };
+      }
+    }
+
+    // Validação de sinal mesclado
+    const nextDeposit =
+      changedFields.deposit_cents !== undefined ? changedFields.deposit_cents : current.deposit_cents;
+    const nextPrice =
+      changedFields.price_total_cents !== undefined
+        ? changedFields.price_total_cents
+        : current.price_total_cents;
+
+    if (nextPrice > 0 && nextDeposit > nextPrice) {
+      db.exec("ROLLBACK");
+      return {
+        error: "validation_error",
+        message: "O valor do sinal não pode ser superior ao valor total do agendamento.",
+      };
+    }
+
+    // Se sinal já foi pago/retido/devolvido, não pode alterar o valor de deposit_cents
+    if (
+      changedFields.deposit_cents !== undefined &&
+      (current.deposit_status === "pago" ||
+        current.deposit_status === "retido" ||
+        current.deposit_status === "devolvido")
+    ) {
+      db.exec("ROLLBACK");
+      return {
+        error: "invalid_deposit",
+        message:
+          "Valor do sinal não pode ser editado quando sinal já está pago, retido ou devolvido. Use a rota /deposit.",
+      };
+    }
+
+    const now = serializeDate(new Date());
+
+    // Constrói query dinâmica com campos alterados
+    const setClauses: string[] = ["updated_at = ?"];
+    const params: (string | number | null)[] = [now];
+
+    if (changedFields.client_name !== undefined) {
+      setClauses.push("client_name = ?");
+      params.push(changedFields.client_name);
+    }
+    if (changedFields.client_phone !== undefined) {
+      setClauses.push("client_phone = ?");
+      params.push(changedFields.client_phone);
+    }
+    if (changedFields.client_email !== undefined) {
+      setClauses.push("client_email = ?");
+      params.push(changedFields.client_email);
+    }
+    if (changedFields.location !== undefined) {
+      setClauses.push("location = ?");
+      params.push(changedFields.location);
+    }
+    if (changedFields.session_type !== undefined) {
+      setClauses.push("session_type = ?");
+      params.push(changedFields.session_type);
+    }
+    if (changedFields.price_total_cents !== undefined) {
+      setClauses.push("price_total_cents = ?");
+      params.push(changedFields.price_total_cents);
+    }
+    if (changedFields.deposit_cents !== undefined) {
+      setClauses.push("deposit_cents = ?");
+      params.push(changedFields.deposit_cents);
+    }
+    if (changedFields.notes !== undefined) {
+      setClauses.push("notes = ?");
+      params.push(changedFields.notes);
+    }
+
+    params.push(id);
+
+    db.prepare(`UPDATE bookings SET ${setClauses.join(", ")} WHERE id = ?`).run(...params);
+
+    // Se notas foram alteradas, grava evento note_updated em booking_events
+    if (changedFields.notes !== undefined) {
+      const eventId = generateId("bke");
+      db.prepare(`
+        INSERT INTO booking_events (id, booking_id, event_type, old_value, new_value, note, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        eventId,
+        id,
+        "note_updated",
+        current.notes || null,
+        changedFields.notes || null,
+        "Observações do agendamento atualizadas",
+        now
+      );
+    }
+
+    db.exec("COMMIT");
+
+    const updated = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as Booking;
+    return { booking: updated };
+  } catch (err) {
+    try {
+      db.exec("ROLLBACK");
+    } catch {
+      // safe
+    }
+    throw err;
+  }
+}
+

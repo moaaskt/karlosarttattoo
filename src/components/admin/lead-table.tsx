@@ -6,10 +6,11 @@ import type { Lead } from "@/lib/db";
 interface LeadTableProps {
   leads: Lead[];
   onStatusChange: (id: string, newStatus: Lead["status"]) => Promise<void>;
+  onScheduleLead?: (lead: Lead) => void;
   isLoading?: boolean;
 }
 
-export function LeadTable({ leads, onStatusChange, isLoading }: LeadTableProps) {
+export function LeadTable({ leads, onStatusChange, onScheduleLead, isLoading }: LeadTableProps) {
   const [filter, setFilter] = React.useState<string>("todos");
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
 
@@ -193,24 +194,36 @@ export function LeadTable({ leads, onStatusChange, isLoading }: LeadTableProps) 
                 </div>
               )}
 
-              {/* Ações: Botão WhatsApp + Seletor de Status */}
+              {/* Ações: Botão WhatsApp + Agendar + Seletor de Status */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-                {/* Botão de Ação Direta no WhatsApp com ShimmerButton (D-04, D-12) */}
-                <a
-                  href={getWhatsAppLink(lead)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block"
-                >
-                  <ShimmerButton
-                    background="#112217"
-                    shimmerColor="#25D366"
-                    className="!py-2.5 !px-5 text-[#25D366] border-[#25D366]/40 hover:border-[#25D366] hover:shadow-[0_0_20px_rgba(37,211,102,0.3)] !text-xs !tracking-[0.18em]"
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Botão de Ação Direta no WhatsApp com ShimmerButton (D-04, D-12) */}
+                  <a
+                    href={getWhatsAppLink(lead)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block"
                   >
-                    <MessageSquare className="w-4 h-4 fill-[#25D366]" />
-                    CONVERSAR NO WHATSAPP
-                  </ShimmerButton>
-                </a>
+                    <ShimmerButton
+                      background="#112217"
+                      shimmerColor="#25D366"
+                      className="!py-2.5 !px-5 text-[#25D366] border-[#25D366]/40 hover:border-[#25D366] hover:shadow-[0_0_20px_rgba(37,211,102,0.3)] !text-xs !tracking-[0.18em]"
+                    >
+                      <MessageSquare className="w-4 h-4 fill-[#25D366]" />
+                      CONVERSAR NO WHATSAPP
+                    </ShimmerButton>
+                  </a>
+
+                  {onScheduleLead && (
+                    <button
+                      onClick={() => onScheduleLead(lead)}
+                      className="flex items-center gap-1.5 px-4 py-2.5 text-xs uppercase font-extrabold tracking-[0.18em] bg-[#9be5ff]/10 hover:bg-[#9be5ff]/20 text-[#9be5ff] border border-[#9be5ff]/30 transition-all cursor-pointer"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      AGENDAR SESSÃO ↗
+                    </button>
+                  )}
+                </div>
 
                 {/* Alteração rápida de Status */}
                 <div className="flex items-center gap-2 self-end sm:self-auto">

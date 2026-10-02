@@ -12,6 +12,7 @@ import {
   deleteTimeBlock,
   getSettings,
   listBookings,
+  updateBookingData,
 } from "../lib/db";
 import {
   expandWindow,
@@ -20,6 +21,7 @@ import {
   isValidISODate,
 } from "../lib/booking-utils";
 import { isAuthorized } from "../server/api/auth";
+import { handleBookingsRequest } from "../server/api/bookings";
 
 // Assegura que todos os testes executam estritamente em memória
 process.env.DB_PATH = ":memory:";
@@ -798,6 +800,342 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
         headers: { Authorization: "Bearer senha_errada" },
       });
       assert.equal(isAuthorized(invalidReq), false);
+    });
+  });
+
+  // =========================================================================
+  // 12. TASK-05b — Edição de Dados, Regras de Depósito e Filtros de Sobreposição
+  // =========================================================================
+  describe("12. TASK-05b — Edição de Dados, Regras de Depósito e Filtros de Sobreposição", () => {
+    const authHeaders = {
+      Authorization: "Bearer teste_pass",
+      "Content-Type": "application/json",
+    };
+
+    beforeEach(() => {
+      process.env.ADMIN_PASSWORD = "teste_pass";
+    });
+
+    test("POST /api/bookings: deposit_cents > price_total_cents quando price_total_cents > 0 retorna 422", async () => {
+      const req = new Request("http://localhost:3000/api/bookings", {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_name: "Cliente Invalido",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          price_total_cents: 10000,
+          deposit_cents: 15000,
+        }),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 422);
+    });
+
+    test("POST /api/bookings: deposit_cents > 0 quando price_total_cents === 0 é aceito", async () => {
+      const req = new Request("http://localhost:3000/api/bookings", {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_name: "Cliente Preco Livre",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          price_total_cents: 0,
+          deposit_cents: 5000,
+        }),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 201);
+    });
+
+    test("PATCH /api/bookings/:id/deposit: deposit_cents > price_total_cents retorna 422", async () => {
+      const b = createBooking(
+        {
+          client_name: "Cliente Teste",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          price_total_cents: 20000,
+          deposit_cents: 5000,
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      const req = new Request(`http://localhost:3000/api/bookings/${b.booking.id}/deposit`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          deposit_status: "pago",
+          deposit_cents: 25000, // Maior que price_total_cents (20000)
+        }),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 422);
+    });
+
+    test("PATCH /api/bookings/:id: edita client_name de booking pendente com sucesso", async () => {
+      const b = createBooking(
+        {
+          client_name: "Nome Antigo",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      const req = new Request(`http://localhost:3000/api/bookings/${b.booking.id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_name: "Nome Novo",
+        }),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.booking.client_name, "Nome Novo");
+    });
+
+    test("PATCH /api/bookings/:id: reenvio de campos com mesmo valor não lança erro 422", async () => {
+      const b = createBooking(
+        {
+          client_name: "Nome Inalterado",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      const req = new Request(`http://localhost:3000/api/bookings/${b.booking.id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_name: "Nome Inalterado",
+        }),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 200);
+    });
+
+    test("PATCH /api/bookings/:id: recusa alteração de contato em booking cancelado", async () => {
+      const b = createBooking(
+        {
+          client_name: "Cliente Cancelado",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+        },
+        true
+      );
+      assert.ok(b.booking);
+      updateBookingStatus(b.booking.id, "cancelado");
+
+      const req = new Request(`http://localhost:3000/api/bookings/${b.booking.id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_name: "Novo Nome",
+        }),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 422);
+    });
+
+    test("PATCH /api/bookings/:id: permite alteração de contato em booking concluído", async () => {
+      const b = createBooking(
+        {
+          client_name: "Cliente Concluido",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          deposit_status: "pago",
+          status: "confirmado",
+        },
+        true
+      );
+      assert.ok(b.booking);
+      updateBookingStatus(b.booking.id, "concluido");
+
+      const req = new Request(`http://localhost:3000/api/bookings/${b.booking.id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_name: "Nome Corrigido",
+        }),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.booking.client_name, "Nome Corrigido");
+    });
+
+    test("PATCH /api/bookings/:id: body vazio retorna 422", async () => {
+      const b = createBooking(
+        {
+          client_name: "Cliente",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      const req = new Request(`http://localhost:3000/api/bookings/${b.booking.id}`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({}),
+      });
+
+      const res = await handleBookingsRequest(req);
+      assert.equal(res.status, 422);
+    });
+
+    test("PATCH /api/bookings/:id: validação mesclada recusa deposit_cents > price_total_cents", async () => {
+      const b = createBooking(
+        {
+          client_name: "Cliente",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          price_total_cents: 30000,
+          deposit_cents: 10000,
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      // Reduz o preço total para menos do que o depósito atual (10000)
+      const res = updateBookingData(b.booking.id, {
+        price_total_cents: 5000,
+      });
+      assert.equal(res.error, "validation_error");
+    });
+
+    test("PATCH /api/bookings/:id: recusa alterar deposit_cents se sinal já foi pago", async () => {
+      const b = createBooking(
+        {
+          client_name: "Cliente",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          price_total_cents: 30000,
+          deposit_cents: 10000,
+          deposit_status: "pago",
+          status: "confirmado",
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      const res = updateBookingData(b.booking.id, {
+        deposit_cents: 15000,
+      });
+      assert.equal(res.error, "invalid_deposit");
+    });
+
+    test("PATCH /api/bookings/:id: gravar note_updated em booking_events ao alterar notes", async () => {
+      const b = createBooking(
+        {
+          client_name: "Cliente Notas",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          notes: "Nota inicial",
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      const res = updateBookingData(b.booking.id, {
+        notes: "Nova nota do cliente",
+      });
+      assert.ok(res.booking);
+
+      const db = getDatabase();
+      const events = db
+        .prepare("SELECT * FROM booking_events WHERE booking_id = ? AND event_type = 'note_updated'")
+        .all(b.booking.id) as Array<{ old_value: string; new_value: string }>;
+      assert.equal(events.length, 1);
+      assert.equal(events[0].old_value, "Nota inicial");
+      assert.equal(events[0].new_value, "Nova nota do cliente");
+    });
+
+    test("cobertura do filtro de sobreposição em listBookings e listTimeBlocks", () => {
+      // Cria booking das 10:00 às 12:00 local (13:00Z às 15:00Z) com force: true
+      const b = createBooking(
+        {
+          client_name: "Cliente Filtro",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+        },
+        true
+      );
+      assert.ok(b.booking);
+
+      // Sobreposição parcial: 12:00Z às 14:00Z -> deve incluir o booking
+      const listSob = listBookings("2026-10-15T12:00:00.000Z", "2026-10-15T14:00:00.000Z");
+      assert.equal(listSob.some((item) => item.id === b.booking!.id), true);
+
+      // Adjacência exata: 15:00Z às 17:00Z (fim do booking = início da busca) -> NÃO deve incluir
+      const listAdj = listBookings("2026-10-15T15:00:00.000Z", "2026-10-15T17:00:00.000Z");
+      assert.equal(listAdj.some((item) => item.id === b.booking!.id), false);
+
+      // TimeBlocks: cria bloqueio das 13:00Z às 15:00Z
+      const tb = createTimeBlock(
+        {
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+          reason_tag: "outro",
+        },
+        true
+      );
+      assert.ok(tb.timeBlock);
+
+      const tbSob = listTimeBlocks("2026-10-15T12:00:00.000Z", "2026-10-15T14:00:00.000Z");
+      assert.equal(tbSob.some((item) => item.id === tb.timeBlock!.id), true);
+
+      const tbAdj = listTimeBlocks("2026-10-15T15:00:00.000Z", "2026-10-15T17:00:00.000Z");
+      assert.equal(tbAdj.some((item) => item.id === tb.timeBlock!.id), false);
     });
   });
 });
