@@ -1,30 +1,38 @@
 ---
 gsd_state_version: "1.0"
-status: completed
-stopped_at: Phase 2 Completed (Brand Manifesto, Local SEO & Native Lead Engine)
-last_updated: "2026-10-01T21:52:00.000Z"
+status: phase_planned
+milestone: "v2.0"
+phase: "03"
+stopped_at: Phase 03 Plans Generated
+last_updated: "2026-10-02T00:36:00.000Z"
 progress:
-  total_phases: 3
-  completed_phases: 2
+  total_phases: 4
+  completed_phases: 0
   total_plans: 2
-  completed_plans: 2
-  percent: 66
+  completed_plans: 0
+  percent: 0
 ---
 
-# Project State
+# Project State: Milestone v2.0
 
 ## Current Status
 
-- **Development**: The core MVP features are fully implemented and functional.
-- **Design**: The styling is consistent, leveraging a dark, premium aesthetic with GSAP animations.
-- **Next Immediate Actions**: Codebase has been onboarded into GSD. The project is ready for future development phases.
+- **Active Milestone**: v2.0 — *Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration*.
+- **Active Phase**: Phase 03 — *Aceternity UI Foundation & ApexCharts Migration*.
+- **Status**: Plans generated (`03-01-PLAN.md` e `03-02-PLAN.md`).
+- **Next Immediate Actions**: Execute Phase 03 via `/gsd-execute-phase 3`.
 
-## Ongoing Workstreams
+## Phase 03 Plan Breakdown
 
-- None active. Ready for new feature planning via `/gsd-plan-phase`.
+- **Plan 03-01 (Wave 1)**: Aceternity UI Primitives & ApexCharts Setup
+  - Task 1: Instalar apexcharts e implementar ApexChartClient seguro para SSR
+  - Task 2: Construir primitivos visuais da Aceternity UI adaptados para Tailwind v4
+- **Plan 03-02 (Wave 2)**: Bento Grid Dashboard Redesign & ApexCharts Migration
+  - Task 1: Construir o componente BentoOverview com ApexCharts de Área e Radial/Donut
+  - Task 2: Atualizar a rota /admin com Abas Modulares e Background Beams da Aceternity UI
 
 ## Session
 
-**Last session:** 2026-10-01T21:12:59.136Z
-**Stopped at:** Phase 2 Plan 01 executed (Brand Manifesto + Local SEO)
-**Resume file:** .planning/phases/02-brand-manifesto-local-seo-native-lead-engine-planned/02-02-PLAN.md
+**Last session:** 2026-10-02T00:36:00.000Z  
+**Stopped at:** Phase 03 Plans Generated  
+**Active Plan:** .planning/phases/03-aceternity-ui-foundation-apexcharts-migration/03-01-PLAN.md  
