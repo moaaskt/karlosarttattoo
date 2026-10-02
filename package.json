@@ -3,6 +3,9 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "registries": {
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
