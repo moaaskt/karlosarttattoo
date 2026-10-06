@@ -22,10 +22,58 @@ import {
   Eye,
   EyeOff,
   Plus,
-  Clock,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+
+// Constantes estáticas fora do componente para preservar identidade referencial estrita
+const HEADER_TOOLBAR = {
+  left: "prev,next today",
+  center: "title",
+  right: "",
+} as const;
+
+const CALENDAR_LOCALES = [ptBrLocale];
+
+const SLOT_LABEL_FORMAT = {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+} as const;
+
+const EVENT_ALLOW = (dropInfo: any) => !dropInfo.allDay;
+
+function areBookingsEqual(prev: Booking[], next: Booking[]): boolean {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    if (
+      prev[i].id !== next[i].id ||
+      prev[i].status !== next[i].status ||
+      prev[i].start_at !== next[i].start_at ||
+      prev[i].end_at !== next[i].end_at ||
+      prev[i].deposit_status !== next[i].deposit_status
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function areTimeBlocksEqual(prev: TimeBlock[], next: TimeBlock[]): boolean {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    if (
+      prev[i].id !== next[i].id ||
+      prev[i].start_at !== next[i].start_at ||
+      prev[i].end_at !== next[i].end_at ||
+      prev[i].all_day !== next[i].all_day
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
 
 export interface AgendaTabProps {
   leadToSchedule?: Lead | null;
@@ -43,7 +91,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
   const [showCancelled, setShowCancelled] = React.useState<boolean>(false);
   const [currentView, setCurrentView] = React.useState<string>("timeGridDay");
 
-  // Estados de Drawer, Modal e Diálogos da Onda B
+  // Estados de Drawer, Modal e Diálogos
   const [drawerBookingId, setDrawerBookingId] = React.useState<string | null>(null);
   const [modalState, setModalState] = React.useState<{
     open: boolean;
@@ -62,9 +110,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
   } | null>(null);
   const [showRescheduleConfirm, setShowRescheduleConfirm] = React.useState<boolean>(false);
 
-  // Ref para controlar range visível e descartar requisições obsoletas
+  // Refs para controle de faixa estável e prevenção absoluta de loops
   const calendarRef = React.useRef<any>(null);
   const visibleRangeRef = React.useRef<{ from: string; to: string } | null>(null);
+  const currentRangeRef = React.useRef<{ from: string; to: string } | null>(null);
   const requestIdRef = React.useRef<number>(0);
 
   // 2. Fetch de configurações e regras de expediente iniciais
@@ -99,6 +148,14 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     const currentRequestId = ++requestIdRef.current;
     setIsLoading(true);
 
+    // Instrumentação de depuração acessível no console/DevTools
+    if (typeof window !== "undefined") {
+      (window as any).__agendaFetchCount = ((window as any).__agendaFetchCount || 0) + 1;
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[AgendaTab] API Fetch (#${(window as any).__agendaFetchCount}): ${from} -> ${to}`);
+      }
+    }
+
     try {
       const [bookingsRes, timeBlocksRes] = await Promise.all([
         apiFetch<{ success?: boolean; bookings?: Booking[] }>(
@@ -112,11 +169,13 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       // Descarta se uma requisição mais recente já tiver sido disparada
       if (currentRequestId !== requestIdRef.current) return;
 
-      if (bookingsRes.ok) {
-        setBookings(bookingsRes.data.bookings ?? []);
+      if (bookingsRes.ok && bookingsRes.data?.bookings) {
+        const next = bookingsRes.data.bookings;
+        setBookings((prev) => (areBookingsEqual(prev, next) ? prev : next));
       }
-      if (timeBlocksRes.ok) {
-        setTimeBlocks(timeBlocksRes.data.timeBlocks ?? []);
+      if (timeBlocksRes.ok && timeBlocksRes.data?.timeBlocks) {
+        const next = timeBlocksRes.data.timeBlocks;
+        setTimeBlocks((prev) => (areTimeBlocksEqual(prev, next) ? prev : next));
       }
     } catch (err) {
       console.error("[AgendaTab] Erro ao buscar agendamentos do intervalo:", err);
@@ -127,17 +186,29 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     }
   }, []);
 
+  // Força atualização manual mesmo no mesmo range
   const handleRefresh = React.useCallback(() => {
     if (visibleRangeRef.current) {
       fetchEventsForRange(visibleRangeRef.current.from, visibleRangeRef.current.to);
     }
   }, [fetchEventsForRange]);
 
-  // 4. Callback datesSet do FullCalendar
+  // 4. Callback datesSet do FullCalendar com blindagem anti-loop
   const handleDatesSet = React.useCallback(
     (info: DatesSetArg) => {
       const from = toUTCString(info.start);
       const to = toUTCString(info.end);
+
+      // BLINDAGEM CRÍTICA: ignora chamadas com a mesma faixa já buscada
+      if (
+        currentRangeRef.current &&
+        currentRangeRef.current.from === from &&
+        currentRangeRef.current.to === to
+      ) {
+        return;
+      }
+
+      currentRangeRef.current = { from, to };
       visibleRangeRef.current = { from, to };
       setCurrentView(info.view.type);
       fetchEventsForRange(from, to);
@@ -159,7 +230,6 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
   const slotMaxTime = React.useMemo(() => deriveSlotMaxTime(rules), [rules]);
   const timezone = settings["timezone"] || "America/Sao_Paulo";
 
-  // Onda B: interactive = true (permite mover e redimensionar)
   const events = React.useMemo(() => {
     const bEvents = bookings
       .map((b) => bookingToEvent(b, showCancelled, true))
@@ -179,7 +249,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     }
   }, [leadToSchedule, isReady]);
 
-  // 6. Custom Event Content Renderer
+  // 6. Custom Event Content Renderer memorizado
   const renderEventContent = React.useCallback((arg: EventContentArg) => {
     if (arg.event.display === "background") {
       return (
@@ -215,73 +285,81 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     );
   }, []);
 
-  // 7. Handlers de Interação (Onda B)
-  const handleEventClick = (info: EventClickArg) => {
+  // 7. Handlers de Interação memorizados
+  const handleEventClick = React.useCallback((info: EventClickArg) => {
     const b = info.event.extendedProps?.booking as Booking | undefined;
     if (b) {
       setDrawerBookingId(b.id);
     }
-  };
+  }, []);
 
-  const handleSelect = (info: DateSelectArg) => {
-    if (!isReady) return;
+  const handleSelect = React.useCallback(
+    (info: DateSelectArg) => {
+      if (!isReady) return;
 
-    if (info.view.type === "dayGridMonth") {
-      setModalState({
-        open: true,
-        mode: "create",
-        defaultDate: info.startStr.slice(0, 10),
+      if (info.view.type === "dayGridMonth") {
+        setModalState({
+          open: true,
+          mode: "create",
+          defaultDate: info.startStr.slice(0, 10),
+        });
+      } else {
+        const localStart = utcToLocal(toUTCString(info.start), timezone);
+        const localEnd = utcToLocal(toUTCString(info.end), timezone);
+        setModalState({
+          open: true,
+          mode: "create",
+          defaultDate: localStart.date,
+          defaultTime: localStart.time,
+          defaultEndTime: localEnd.time,
+        });
+      }
+    },
+    [isReady, timezone]
+  );
+
+  const handleRescheduleDropOrResize = React.useCallback(
+    async (info: any) => {
+      const id = info.event.id;
+      const newStart = toUTCString(info.event.start);
+      const newEnd = toUTCString(info.event.end);
+
+      const res = await apiFetch<{
+        success?: boolean;
+        error?: string;
+        warning?: string;
+        message?: string;
+        conflicts?: Array<{ client_name: string }>;
+      }>(`/api/bookings/${id}/reschedule`, {
+        method: "PATCH",
+        body: JSON.stringify({ start_at: newStart, end_at: newEnd, force: false }),
       });
-    } else {
-      const localStart = utcToLocal(toUTCString(info.start), timezone);
-      const localEnd = utcToLocal(toUTCString(info.end), timezone);
-      setModalState({
-        open: true,
-        mode: "create",
-        defaultDate: localStart.date,
-        defaultTime: localStart.time,
-        defaultEndTime: localEnd.time,
-      });
-    }
-  };
 
-  const handleRescheduleDropOrResize = async (info: any) => {
-    const id = info.event.id;
-    const newStart = toUTCString(info.event.start);
-    const newEnd = toUTCString(info.event.end);
-
-    const res = await apiFetch<{
-      success?: boolean;
-      error?: string;
-      warning?: string;
-      message?: string;
-      conflicts?: Array<{ client_name: string }>;
-    }>(`/api/bookings/${id}/reschedule`, {
-      method: "PATCH",
-      body: JSON.stringify({ start_at: newStart, end_at: newEnd, force: false }),
-    });
-
-    if (!res.ok) {
-      info.revert();
-      if (res.data?.warning === "outside_hours") {
-        setRescheduleConfirmState({ id, newStart, newEnd });
-        setShowRescheduleConfirm(true);
+      if (!res.ok) {
+        info.revert();
+        if (res.data?.warning === "outside_hours") {
+          setRescheduleConfirmState({ id, newStart, newEnd });
+          setShowRescheduleConfirm(true);
+          return;
+        }
+        const conflicts = res.data?.conflicts;
+        if (conflicts && conflicts.length > 0) {
+          toast.error(
+            `${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`
+          );
+        } else {
+          toast.error(res.data?.message || getErrorMessage(res.data?.error));
+        }
         return;
       }
-      const conflicts = res.data?.conflicts;
-      if (conflicts && conflicts.length > 0) {
-        toast.error(`${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`);
-      } else {
-        toast.error(res.data?.message || getErrorMessage(res.data?.error));
-      }
-      return;
-    }
 
-    toast.success("Agendamento remarcado com sucesso!");
-    handleRefresh();
-  };
+      toast.success("Agendamento remarcado com sucesso!");
+      handleRefresh();
+    },
+    [handleRefresh]
+  );
 
-  const handleConfirmRescheduleForce = async () => {
+  const handleConfirmRescheduleForce = React.useCallback(async () => {
     if (!rescheduleConfirmState) return;
     const { id, newStart, newEnd } = rescheduleConfirmState;
 
@@ -303,7 +381,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     } else {
       toast.error(res.data?.message || getErrorMessage(res.data?.error));
     }
-  };
+  }, [rescheduleConfirmState, handleRefresh]);
 
   // 8. Early return de renderização SOMENTE após todos os hooks
   if (!isReady) {
@@ -411,7 +489,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           <button
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50 cursor-pointer"
             title="Recarregar agendamentos"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
@@ -449,17 +527,13 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         </div>
       </div>
 
-      {/* Calendário FullCalendar — Onda B (Interativo: Click, Select, Drop, Resize) */}
+      {/* Calendário FullCalendar — Onda B (Interativo com props estritamente estáveis) */}
       <div className="bg-[#070707] border border-white/10 p-4 min-h-[650px]">
         <FullCalendarClient
           ref={calendarRef}
           initialView="timeGridDay"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "",
-          }}
-          locales={[ptBrLocale]}
+          headerToolbar={HEADER_TOOLBAR}
+          locales={CALENDAR_LOCALES}
           locale="pt-br"
           timeZone={timezone}
           slotMinTime={slotMinTime}
@@ -467,11 +541,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           businessHours={businessHours}
           slotDuration="00:30:00"
           slotLabelInterval="01:00"
-          slotLabelFormat={{
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }}
+          slotLabelFormat={SLOT_LABEL_FORMAT}
           allDaySlot={true}
           allDayText="Dia Inteiro"
           events={events}
@@ -480,7 +550,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           editable={true}
           selectable={true}
           eventDurationEditable={true}
-          eventAllow={(dropInfo) => !dropInfo.allDay}
+          eventAllow={EVENT_ALLOW}
           eventClick={handleEventClick}
           select={handleSelect}
           eventDrop={handleRescheduleDropOrResize}
