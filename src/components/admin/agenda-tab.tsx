@@ -414,10 +414,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           </div>
           <div>
             <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white flex items-center gap-2">
-              Agenda do Ateliê
-              <span className="text-[9px] font-mono px-2 py-0.5 bg-white/5 border border-white/10 text-neutral-400">
+              Agenda
+              {/* <span className="text-[9px] font-mono px-2 py-0.5 bg-white/5 border border-white/10 text-neutral-400">
                 {timezone}
-              </span>
+              </span> */}
             </h2>
             <p className="text-xs text-neutral-400 mt-0.5">
               Grade horária com detecção de expediente, intervalos e proteção de sobreposição
@@ -508,18 +508,18 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
             size="sm"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-8"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-[#31363f] text-[#eeeeee] hover:text-[#76abae] hover:border-[#76abae]/40 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-8"
             title="Recarregar agendamentos"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#76abae]" : ""}`} />
             Atualizar
           </Button>
         </div>
       </div>
 
       {/* Legenda de Status e Categorias */}
-      <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-black/30 border border-white/5 text-[11px] text-neutral-400">
-        <span className="font-extrabold uppercase tracking-wider text-neutral-500 mr-1">
+      <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-[#222831] border border-white/5 text-[11px] text-[#9da5b4]">
+        <span className="font-extrabold uppercase tracking-wider text-[#9da5b4] mr-1">
           Legenda:
         </span>
         <div className="flex items-center gap-1.5">
@@ -564,7 +564,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       </div>
 
       {/* Calendário FullCalendar — Onda B (Interativo com props estritamente estáveis) */}
-      <div className="bg-[#070707] border border-white/10 p-4 min-h-[650px]">
+      <div className="bg-[#31363f] border border-white/10 p-4 min-h-[650px]">
         <FullCalendarClient
           ref={calendarRef}
           initialView="timeGridDay"

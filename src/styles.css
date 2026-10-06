@@ -133,6 +133,36 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* Escopo Exclusivo do Painel Admin */
+.admin-theme {
+  --background: #222831;
+  --foreground: #eeeeee;
+  --card: #31363f;
+  --card-foreground: #eeeeee;
+  --popover: #31363f;
+  --popover-foreground: #eeeeee;
+  --primary: #76abae;
+  --primary-foreground: #222831;
+  --secondary: #31363f;
+  --secondary-foreground: #eeeeee;
+  --muted: #31363f;
+  --muted-foreground: #9da5b4;
+  --accent: #76abae;
+  --accent-foreground: #222831;
+  --border: #31363f;
+  --input: #31363f;
+  --ring: #76abae;
+  --chart-1: #76abae;
+  --sidebar: #31363f;
+  --sidebar-foreground: #eeeeee;
+  --sidebar-primary: #76abae;
+  --sidebar-primary-foreground: #222831;
+  --sidebar-accent: rgba(118, 171, 174, 0.15);
+  --sidebar-accent-foreground: #eeeeee;
+  --sidebar-border: #31363f;
+  --sidebar-ring: #76abae;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
