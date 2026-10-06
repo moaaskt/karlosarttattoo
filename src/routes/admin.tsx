@@ -394,7 +394,7 @@ function AdminPage() {
               <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-[0.18em] text-[#eeeeee] mt-0.5">
                 {activeTab === "bento" && "Visão Analítica & Métricas"}
                 {activeTab === "leads" && "Triagem & Gestão de Leads (Orçamentos)"}
-                {activeTab === "agenda" && "Agenda & Gestão de Sessões do Ateliê"}
+                {activeTab === "agenda" && "Agenda & Gestão de Sessões"}
               </h1>
             </div>
 
