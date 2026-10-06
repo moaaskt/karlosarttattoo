@@ -337,25 +337,25 @@ export function BookingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-2xl mx-auto p-4 sm:p-6 my-auto bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="relative w-full max-w-2xl mx-auto p-4 sm:p-6 my-auto bg-[#31363f] border border-white/10 rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-cyan-400 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#222831] border border-white/10 flex items-center justify-center text-[#76abae] shrink-0">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">
+              <h2 className="text-base font-semibold text-[#eeeeee]">
                 {mode === "reschedule" ? "Remarcar Sessão" : "Novo Agendamento"}
               </h2>
-              <span className="text-xs text-zinc-500 font-mono">Horário local: {timezone}</span>
+              <span className="text-xs text-[#9da5b4] font-mono">Horário local: {timezone}</span>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer shrink-0"
+            className="text-[#9da5b4] hover:text-[#eeeeee] hover:bg-[#222831] rounded-md transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -363,19 +363,19 @@ export function BookingModal({
 
         {/* Lead Vinculado (se houver) */}
         {leadData && (
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+          <div className="bg-[#222831]/80 border border-white/10 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-2.5 min-w-0 w-full sm:w-auto">
-              <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
-                <User className="w-4 h-4 text-cyan-400" />
+              <div className="w-7 h-7 rounded-full bg-[#31363f] flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-[#76abae]" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-sm font-medium text-zinc-200 block truncate">
+                <span className="text-sm font-medium text-[#eeeeee] block truncate">
                   {leadData.name}
                 </span>
-                <span className="text-xs text-zinc-400 block truncate">{leadData.phone}</span>
+                <span className="text-xs text-[#9da5b4] block truncate">{leadData.phone}</span>
               </div>
             </div>
-            <span className="bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs px-2.5 py-0.5 rounded-full shrink-0 font-medium self-start sm:self-auto">
+            <span className="bg-[#31363f] text-[#eeeeee] border border-white/10 text-xs px-2.5 py-0.5 rounded-full shrink-0 font-medium self-start sm:self-auto">
               {leadData.service === "studio"
                 ? "Palhoça (Estúdio)"
                 : leadData.service === "home"
@@ -391,17 +391,17 @@ export function BookingModal({
           {/* Seção 1: Horário da Sessão */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+              <h4 className="text-xs font-semibold text-[#9da5b4] uppercase tracking-wider">
                 Horário da Sessão
               </h4>
               {/* Presets de início - Segmented Control */}
-              <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md w-full sm:w-auto">
+              <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-[#222831] p-1 border border-white/10 rounded-md w-full sm:w-auto">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_manha")}
-                  className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
+                  className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2.5 rounded-sm"
                 >
                   Manhã ({settings["preset_manha"] || "09:00"})
                 </Button>
@@ -410,7 +410,7 @@ export function BookingModal({
                   variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_tarde")}
-                  className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
+                  className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2.5 rounded-sm"
                 >
                   Tarde ({settings["preset_tarde"] || "14:00"})
                 </Button>
@@ -419,7 +419,7 @@ export function BookingModal({
                   variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_noite")}
-                  className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
+                  className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2.5 rounded-sm"
                 >
                   Noite ({settings["preset_noite"] || "18:30"})
                 </Button>
@@ -430,7 +430,7 @@ export function BookingModal({
               <div>
                 <Label
                   htmlFor="booking-start-date"
-                  className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                  className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
                 >
                   Início da sessão
                 </Label>
@@ -440,14 +440,14 @@ export function BookingModal({
                     type="date"
                     value={startDate}
                     onChange={(e) => handleDateOrTimeChange(() => setStartDate(e.target.value))}
-                    className="flex-1 min-w-0 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
+                    className="flex-1 min-w-0 bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md"
                     required
                   />
                   <Input
                     type="time"
                     value={startTime}
                     onChange={(e) => handleDateOrTimeChange(() => setStartTime(e.target.value))}
-                    className="w-24 sm:w-28 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                    className="w-24 sm:w-28 bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                     required
                   />
                 </div>
@@ -457,14 +457,14 @@ export function BookingModal({
                 <div className="flex items-center justify-between mb-1.5">
                   <Label
                     htmlFor="booking-end-time"
-                    className="text-xs font-medium text-zinc-300 block"
+                    className="text-xs font-medium text-[#9da5b4] block"
                   >
                     Término da sessão
                   </Label>
                   {isNextDay && (
                     <Badge
                       variant="default"
-                      className="bg-amber-500 text-slate-950 text-[10px] font-semibold px-1.5 py-0.5 border-none"
+                      className="bg-amber-600 text-white text-[10px] font-semibold px-1.5 py-0.5 border-none"
                     >
                       Dia seguinte ({endDate})
                     </Badge>
@@ -476,17 +476,17 @@ export function BookingModal({
                     type="time"
                     value={endTime}
                     onChange={(e) => handleDateOrTimeChange(() => setEndTime(e.target.value))}
-                    className="flex-1 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                    className="flex-1 bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                     required
                   />
                   {/* Atalhos de Duração - Segmented Control */}
-                  <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-[#222831] p-1 border border-white/10 rounded-md">
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(2)}
-                      className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
+                      className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2 font-mono rounded-sm"
                     >
                       +2h
                     </Button>
@@ -495,7 +495,7 @@ export function BookingModal({
                       variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(4)}
-                      className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
+                      className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2 font-mono rounded-sm"
                     >
                       +4h
                     </Button>
@@ -504,7 +504,7 @@ export function BookingModal({
                       variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(6)}
-                      className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
+                      className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2 font-mono rounded-sm"
                     >
                       +6h
                     </Button>
@@ -519,7 +519,7 @@ export function BookingModal({
             <div>
               <Label
                 htmlFor="client-name"
-                className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
               >
                 Nome do cliente
               </Label>
@@ -529,7 +529,7 @@ export function BookingModal({
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 placeholder="Nome do cliente"
-                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md"
                 required
               />
             </div>
@@ -537,7 +537,7 @@ export function BookingModal({
             <div>
               <Label
                 htmlFor="client-phone"
-                className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
               >
                 WhatsApp / Telefone
               </Label>
@@ -547,7 +547,7 @@ export function BookingModal({
                 value={clientPhone}
                 onChange={(e) => setClientPhone(e.target.value)}
                 placeholder="(48) 99999-9999"
-                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                 required
               />
             </div>
@@ -555,7 +555,7 @@ export function BookingModal({
             <div>
               <Label
                 htmlFor="client-email"
-                className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
               >
                 E-mail
               </Label>
@@ -565,20 +565,20 @@ export function BookingModal({
                 value={clientEmail}
                 onChange={(e) => setClientEmail(e.target.value)}
                 placeholder="cliente@email.com"
-                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md"
               />
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">Local</Label>
+              <Label className="text-xs font-medium text-[#9da5b4] mb-1.5 block">Local</Label>
               <Select
                 value={location}
                 onValueChange={(val) => setLocation(val as Booking["location"])}
               >
-                <SelectTrigger className="bg-zinc-900/80 border-zinc-800 text-zinc-100 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md">
+                <SelectTrigger className="bg-[#222831] border-white/10 text-[#eeeeee] focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md">
                   <SelectValue placeholder="Selecione o local" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                <SelectContent className="bg-[#31363f] border-white/10 text-[#eeeeee]">
                   <SelectItem value="estudio">Estúdio</SelectItem>
                   <SelectItem value="domicilio">Domicílio</SelectItem>
                   <SelectItem value="evento">Evento</SelectItem>
@@ -587,17 +587,17 @@ export function BookingModal({
             </div>
 
             <div className="col-span-1 sm:col-span-2">
-              <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">
+              <Label className="text-xs font-medium text-[#9da5b4] mb-1.5 block">
                 Tipo de sessão
               </Label>
               <Select
                 value={sessionType}
                 onValueChange={(val) => setSessionType(val as Booking["session_type"])}
               >
-                <SelectTrigger className="bg-zinc-900/80 border-zinc-800 text-zinc-100 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md">
+                <SelectTrigger className="bg-[#222831] border-white/10 text-[#eeeeee] focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md">
                   <SelectValue placeholder="Tipo de sessão" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                <SelectContent className="bg-[#31363f] border-white/10 text-[#eeeeee]">
                   <SelectItem value="tatuagem">Tatuagem</SelectItem>
                   <SelectItem value="flash">Flash</SelectItem>
                   <SelectItem value="retoque">Retoque</SelectItem>
@@ -613,7 +613,7 @@ export function BookingModal({
                 <div>
                   <Label
                     htmlFor="booking-price"
-                    className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                    className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
                   >
                     Valor total (R$)
                   </Label>
@@ -622,7 +622,7 @@ export function BookingModal({
                     type="text"
                     value={priceDisplay}
                     onChange={(e) => setPriceDisplay(e.target.value)}
-                    className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                    className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                     placeholder="0,00"
                   />
                 </div>
@@ -630,7 +630,7 @@ export function BookingModal({
                 <div>
                   <Label
                     htmlFor="booking-deposit"
-                    className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                    className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
                   >
                     Sinal (R$)
                   </Label>
@@ -639,23 +639,23 @@ export function BookingModal({
                     type="text"
                     value={depositDisplay}
                     onChange={(e) => setDepositDisplay(e.target.value)}
-                    className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                    className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                     placeholder="0,00"
                   />
                 </div>
 
                 <div className="col-span-1 sm:col-span-2">
-                  <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">
+                  <Label className="text-xs font-medium text-[#9da5b4] mb-1.5 block">
                     Status do sinal
                   </Label>
                   <Select
                     value={depositStatus}
                     onValueChange={(val) => setDepositStatus(val as Booking["deposit_status"])}
                   >
-                    <SelectTrigger className="bg-zinc-900/80 border-zinc-800 text-zinc-100 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md">
+                    <SelectTrigger className="bg-[#222831] border-white/10 text-[#eeeeee] focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md">
                       <SelectValue placeholder="Status do sinal" />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                    <SelectContent className="bg-[#31363f] border-white/10 text-[#eeeeee]">
                       <SelectItem value="pendente">Pendente</SelectItem>
                       <SelectItem value="pago">Pago</SelectItem>
                       <SelectItem value="dispensado">Dispensado</SelectItem>
@@ -669,7 +669,7 @@ export function BookingModal({
             <div className="col-span-1 sm:col-span-2">
               <Label
                 htmlFor="booking-notes"
-                className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
               >
                 Observações / Ideia
               </Label>
@@ -678,7 +678,7 @@ export function BookingModal({
                 value={notes}
                 rows={2}
                 onChange={(e) => setNotes(e.target.value)}
-                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md resize-none min-h-[64px]"
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md resize-none min-h-[64px]"
                 placeholder="Detalhes da arte, local do corpo, referências..."
               />
             </div>
@@ -702,12 +702,12 @@ export function BookingModal({
           )}
 
           {/* Rodapé do Modal */}
-          <div className="border-t border-zinc-800 pt-4 mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3">
+          <div className="border-t border-white/10 pt-4 mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="w-full sm:w-auto text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              className="w-full sm:w-auto text-[#9da5b4] hover:text-[#eeeeee] hover:bg-[#222831]"
             >
               Cancelar
             </Button>
@@ -715,7 +715,7 @@ export function BookingModal({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full sm:w-auto bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-5 ${
+              className={`w-full sm:w-auto bg-[#76abae] hover:bg-[#76abae]/90 text-[#222831] font-bold px-5 ${
                 forceConfirmed
                   ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]"
                   : ""

@@ -261,16 +261,16 @@ export function BookingDrawer({
       />
 
       {/* Drawer Lateral */}
-      <aside className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-[#0c0c0e] border-l border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto">
+      <aside className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-[#31363f] border-l border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto">
         {/* Cabeçalho */}
-        <div className="p-6 border-b border-white/10 bg-[#070707]">
+        <div className="p-6 border-b border-white/10 bg-[#222831]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: STATUS_COLOR[booking.status] }}
               />
-              <span className="text-xs font-bold uppercase tracking-widest text-[#9be5ff]">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#76abae]">
                 Agendamento #{booking.id.slice(-6)}
               </span>
             </div>
@@ -278,14 +278,14 @@ export function BookingDrawer({
               variant="ghost"
               size="icon-sm"
               onClick={onClose}
-              className="text-neutral-400 hover:text-white transition-colors cursor-pointer rounded-none"
+              className="text-[#9da5b4] hover:text-[#eeeeee] transition-colors cursor-pointer rounded-none"
             >
               <X className="w-5 h-5" />
             </Button>
           </div>
 
           <div className="mt-4">
-            <h2 className="text-xl font-extrabold uppercase tracking-wide text-white">
+            <h2 className="text-xl font-extrabold uppercase tracking-wide text-[#eeeeee]">
               {booking.client_name}
             </h2>
             <div className="flex flex-wrap items-center gap-2 mt-2">
