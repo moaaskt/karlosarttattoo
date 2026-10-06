@@ -9,8 +9,8 @@ interface GlowingCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function GlowingCard({
-  glowColor = "#9be5ff",
-  glowOpacity = 0.15,
+  glowColor = "#76abae",
+  glowOpacity = 0.2,
   className,
   children,
   ...props
@@ -35,7 +35,7 @@ export function GlowingCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "relative overflow-hidden bg-[#0b0b0e] border border-white/10 rounded-none transition-colors duration-300",
+        "relative overflow-hidden bg-[#31363f] border border-white/10 rounded-none transition-colors duration-300",
         className,
       )}
       {...props}
