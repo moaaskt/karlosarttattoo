@@ -66,7 +66,7 @@ test("localToUTC e utcToLocal (fuso SP)", () => {
   // Ida e volta
   const roundTrip = utcToLocal(
     localToUTC("2026-10-15", "14:30", "America/Sao_Paulo"),
-    "America/Sao_Paulo"
+    "America/Sao_Paulo",
   );
   assert.deepEqual(roundTrip, { date: "2026-10-15", time: "14:30" });
 

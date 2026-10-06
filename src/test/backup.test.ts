@@ -45,7 +45,7 @@ describe("Backup SQLite — VACUUM INTO, Integridade e Restauração (TASK-13a)"
         start_at: "2026-10-15T13:00:00.000Z",
         end_at: "2026-10-15T15:00:00.000Z",
       },
-      true
+      true,
     );
 
     // Contagens originais do banco ativo
@@ -68,18 +68,30 @@ describe("Backup SQLite — VACUUM INTO, Integridade e Restauração (TASK-13a)"
     // Abre o banco de backup de forma independente para verificar integridade e restaurabilidade
     const backupDb = new DatabaseSync(backupResult.backupPath);
     try {
-      const integrity = backupDb.prepare("PRAGMA integrity_check;").all() as Array<{ integrity_check: string }>;
+      const integrity = backupDb.prepare("PRAGMA integrity_check;").all() as Array<{
+        integrity_check: string;
+      }>;
       assert.equal(integrity.length, 1, "Deve retornar exatamente um resultado de integridade");
       assert.equal(integrity[0].integrity_check, "ok", "PRAGMA integrity_check deve retornar 'ok'");
 
       // Valida contagem idêntica de dados
       const bLeadsCount = (backupDb.prepare("SELECT COUNT(*) as c FROM leads").get() as any).c;
-      const bBookingsCount = (backupDb.prepare("SELECT COUNT(*) as c FROM bookings").get() as any).c;
-      const bSettingsCount = (backupDb.prepare("SELECT COUNT(*) as c FROM settings").get() as any).c;
+      const bBookingsCount = (backupDb.prepare("SELECT COUNT(*) as c FROM bookings").get() as any)
+        .c;
+      const bSettingsCount = (backupDb.prepare("SELECT COUNT(*) as c FROM settings").get() as any)
+        .c;
 
       assert.equal(bLeadsCount, origLeadsCount, "Contagem de leads no backup deve ser idêntica");
-      assert.equal(bBookingsCount, origBookingsCount, "Contagem de bookings no backup deve ser idêntica");
-      assert.equal(bSettingsCount, origSettingsCount, "Contagem de settings no backup deve ser idêntica");
+      assert.equal(
+        bBookingsCount,
+        origBookingsCount,
+        "Contagem de bookings no backup deve ser idêntica",
+      );
+      assert.equal(
+        bSettingsCount,
+        origSettingsCount,
+        "Contagem de settings no backup deve ser idêntica",
+      );
     } finally {
       backupDb.close();
     }
@@ -92,14 +104,18 @@ describe("Backup SQLite — VACUUM INTO, Integridade e Restauração (TASK-13a)"
       fs.writeFileSync(path.join(tempDir, `leads_backup_${fakeTs}.db`), "fake db content");
     }
 
-    const filesBefore = fs.readdirSync(tempDir).filter((f) => f.startsWith("leads_backup_") && f.endsWith(".db"));
+    const filesBefore = fs
+      .readdirSync(tempDir)
+      .filter((f) => f.startsWith("leads_backup_") && f.endsWith(".db"));
     assert.equal(filesBefore.length, 30);
 
     // Dispara backup real
     const result = createDatabaseBackup(tempDir);
     assert.ok(result.success);
 
-    const filesAfter = fs.readdirSync(tempDir).filter((f) => f.startsWith("leads_backup_") && f.endsWith(".db"));
+    const filesAfter = fs
+      .readdirSync(tempDir)
+      .filter((f) => f.startsWith("leads_backup_") && f.endsWith(".db"));
     assert.equal(filesAfter.length, 28, "Rotação deve reter exatamente 28 backups");
   });
 });

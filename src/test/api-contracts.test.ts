@@ -49,7 +49,7 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -65,7 +65,7 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
       assert.equal(body.success, false);
       assert.equal(
         body.error,
-        "Agendamentos não podem ser excluídos fisicamente. Utilize PATCH para atualizar o status para 'cancelado'."
+        "Agendamentos não podem ser excluídos fisicamente. Utilize PATCH para atualizar o status para 'cancelado'.",
       );
 
       // Garante que o agendamento permanece intacto na base
@@ -102,7 +102,7 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
 
       // Tenta criar sobreposto
@@ -156,7 +156,11 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
       assert.equal(body.error, "Lead informado não existe");
 
       const countAfter = (db.prepare("SELECT COUNT(*) as c FROM bookings").get() as any).c;
-      assert.equal(countAfter, countBefore, "Nenhum booking deve ser persistido em caso de lead inválido");
+      assert.equal(
+        countAfter,
+        countBefore,
+        "Nenhum booking deve ser persistido em caso de lead inválido",
+      );
     });
 
     test("POST /api/bookings com lead_id existente avança lead de 'novo' para 'agendado'", async () => {
@@ -248,7 +252,7 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -263,7 +267,11 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
 
       // Como o lead não possui outros bookings, recua para contatado (não para novo)
       const checkLead = db.prepare("SELECT status FROM leads WHERE id = ?").get(lead.id) as any;
-      assert.equal(checkLead.status, "contatado", "Lead deve recuar para contatado ao perder todos bookings");
+      assert.equal(
+        checkLead.status,
+        "contatado",
+        "Lead deve recuar para contatado ao perder todos bookings",
+      );
     });
 
     test("Teste de rollback obrigatório com trigger SQLite BEFORE UPDATE ON leads", async () => {
@@ -285,7 +293,7 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -316,8 +324,14 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
         assert.ok(threw, "Deve abortar a operação");
 
         // Valida que o rollback foi completo: booking NÃO pode ter ficado como cancelado!
-        const checkBooking = db.prepare("SELECT status FROM bookings WHERE id = ?").get(b.booking.id) as any;
-        assert.equal(checkBooking.status, "pendente", "Booking deve permanecer em 'pendente' devido ao rollback");
+        const checkBooking = db
+          .prepare("SELECT status FROM bookings WHERE id = ?")
+          .get(b.booking.id) as any;
+        assert.equal(
+          checkBooking.status,
+          "pendente",
+          "Booking deve permanecer em 'pendente' devido ao rollback",
+        );
 
         const checkLead = db.prepare("SELECT status FROM leads WHERE id = ?").get(lead.id) as any;
         assert.equal(checkLead.status, "agendado", "Lead deve permanecer em 'agendado'");
@@ -384,7 +398,7 @@ describe("Contratos de API, Bloqueio 405 e Sincronização Lead ↔ Booking (TAS
       assert.ok(createdEvent, "Evento 'created' deve existir");
       assert.ok(
         createdEvent.note?.includes("Avisos ignorados com force: outside_hours"),
-        `Note deve registrar avisos ignorados. Recebido: ${createdEvent.note}`
+        `Note deve registrar avisos ignorados. Recebido: ${createdEvent.note}`,
       );
     });
   });

@@ -51,7 +51,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T13:00:00.000Z",
           end_at: "2026-10-13T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b1.booking, "Booking base deve ser criado");
 
@@ -65,7 +65,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T14:30:00.000Z",
           end_at: "2026-10-13T16:30:00.000Z",
         },
-        true
+        true,
       );
       assert.equal(b2.error, "booking_conflict");
       assert.ok(b2.conflicts && b2.conflicts.length > 0);
@@ -82,7 +82,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T13:00:00.000Z",
           end_at: "2026-10-13T15:00:00.000Z",
         },
-        true
+        true,
       );
 
       // Fim durante b1 (12:00 - 13:30 UTC)
@@ -95,7 +95,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T12:00:00.000Z",
           end_at: "2026-10-13T13:30:00.000Z",
         },
-        true
+        true,
       );
       assert.equal(bOverlap.error, "booking_conflict");
     });
@@ -111,7 +111,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T14:00:00.000Z",
           end_at: "2026-10-13T16:00:00.000Z",
         },
-        true
+        true,
       );
 
       // Novo engloba totalmente (13:00 - 17:00 UTC)
@@ -124,7 +124,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T13:00:00.000Z",
           end_at: "2026-10-13T17:00:00.000Z",
         },
-        true
+        true,
       );
       assert.equal(bEnveloping.error, "booking_conflict");
     });
@@ -140,7 +140,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T13:00:00.000Z",
           end_at: "2026-10-13T17:00:00.000Z",
         },
-        true
+        true,
       );
 
       // Novo contido (14:00 - 15:00 UTC)
@@ -153,7 +153,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T14:00:00.000Z",
           end_at: "2026-10-13T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.equal(bContained.error, "booking_conflict");
     });
@@ -174,7 +174,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T13:00:00.000Z",
           end_at: "2026-10-13T15:00:00.000Z",
         },
-        true
+        true,
       );
 
       // b2 começa exatamente às 15:00 UTC (adjacência exata, sem respiro)
@@ -187,7 +187,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T15:00:00.000Z",
           end_at: "2026-10-13T16:00:00.000Z",
         },
-        true
+        true,
       );
       assert.equal(bAdjacent.error, "booking_conflict");
     });
@@ -203,7 +203,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T13:00:00.000Z",
           end_at: "2026-10-13T15:00:00.000Z",
         },
-        true
+        true,
       );
 
       // b2 começa em 15:30:00.000Z (exatos 30 min depois)
@@ -216,7 +216,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T15:30:00.000Z",
           end_at: "2026-10-13T17:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(bBorder.booking, "Deve ser criado na borda exata do buffer");
       assert.equal(bBorder.error, undefined);
@@ -233,7 +233,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T13:00:00.000Z",
           end_at: "2026-10-13T15:00:00.000Z",
         },
-        true
+        true,
       );
 
       // b2 tenta começar às 15:29:00.000Z (1 minuto antes da liberação do buffer)
@@ -246,7 +246,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-13T15:29:00.000Z",
           end_at: "2026-10-13T17:00:00.000Z",
         },
-        true
+        true,
       );
       assert.equal(bViolation1Min.error, "booking_conflict");
     });
@@ -269,7 +269,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: slotStart,
           end_at: slotEnd,
         },
-        true
+        true,
       );
       assert.ok(b1.booking);
 
@@ -286,7 +286,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: slotStart,
           end_at: slotEnd,
         },
-        true
+        true,
       );
       assert.ok(b2.booking, "Slot deve estar disponível após cancelamento");
       assert.equal(b2.booking.client_name, "Novo Cliente no Slot Liberado");
@@ -305,7 +305,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: slotStart,
           end_at: slotEnd,
         },
-        true
+        true,
       );
       assert.ok(b1.booking);
 
@@ -322,7 +322,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: slotStart,
           end_at: slotEnd,
         },
-        true
+        true,
       );
       assert.ok(b2.booking, "Slot deve estar disponível após no_show");
     });
@@ -343,7 +343,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-14T13:00:00.000Z",
           end_at: "2026-10-14T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b1.booking);
 
@@ -352,7 +352,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
         b1.booking.id,
         "2026-10-14T13:30:00.000Z",
         "2026-10-14T15:30:00.000Z",
-        true
+        true,
       );
       assert.ok(resched.booking, "Não deve colidir com o próprio ID");
       assert.equal(resched.booking.start_at, "2026-10-14T13:30:00.000Z");
@@ -369,7 +369,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-14T13:00:00.000Z",
           end_at: "2026-10-14T15:00:00.000Z",
         },
-        true
+        true,
       );
 
       // b2: 17:00 - 19:00 UTC
@@ -382,7 +382,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-14T17:00:00.000Z",
           end_at: "2026-10-14T19:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b1.booking && b2.booking);
 
@@ -391,7 +391,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
         b1.booking.id,
         "2026-10-14T15:00:00.000Z",
         "2026-10-14T16:45:00.000Z",
-        true
+        true,
       );
       assert.equal(reschedConflict.error, "booking_conflict");
     });
@@ -412,7 +412,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-14T13:00:00.000Z",
           end_at: "2026-10-14T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b1.booking);
 
@@ -421,7 +421,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
         b1.booking.id,
         "2026-10-14T18:30:00.000Z",
         "2026-10-14T20:00:00.000Z",
-        true
+        true,
       );
       assert.equal(reschedTb.error, "time_block_conflict");
     });
@@ -436,7 +436,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-14T13:00:00.000Z",
           end_at: "2026-10-14T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b1.booking);
       updateBookingStatus(b1.booking.id, "cancelado");
@@ -445,7 +445,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
         b1.booking.id,
         "2026-10-14T16:00:00.000Z",
         "2026-10-14T18:00:00.000Z",
-        true
+        true,
       );
       assert.equal(reschedCancelled.error, "invalid_status");
     });
@@ -472,7 +472,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true // force: true NÃO DEVE burlar time_block
+        true, // force: true NÃO DEVE burlar time_block
       );
       assert.equal(bAttempt.error, "time_block_conflict");
       assert.equal(bAttempt.booking, undefined);
@@ -494,7 +494,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-18T15:00:00.000Z",
           end_at: "2026-10-18T18:00:00.000Z",
         },
-        false // sem force
+        false, // sem force
       );
       assert.ok(bSunday.requires_force, "Deve exigir force");
       assert.ok(bSunday.warnings, "Deve conter array de warnings");
@@ -512,7 +512,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-18T15:00:00.000Z",
           end_at: "2026-10-18T18:00:00.000Z",
         },
-        true // com force
+        true, // com force
       );
       assert.ok(bSundayForce.booking);
       assert.ok(bSundayForce.warnings);
@@ -535,7 +535,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-16T17:00:00.000Z",
           end_at: "2026-10-16T19:00:00.000Z",
         },
-        true
+        true,
       );
 
       // Tenta criar time block sem force cobrindo o booking
@@ -545,7 +545,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           end_at: "2026-10-16T20:00:00.000Z",
           reason_tag: "folga_criacao",
         },
-        false
+        false,
       );
       assert.equal(tbRes.error, "booking_conflict");
       assert.ok(tbRes.conflicts && tbRes.conflicts.length > 0);
@@ -561,7 +561,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-16T17:00:00.000Z",
           end_at: "2026-10-16T19:00:00.000Z",
         },
-        true
+        true,
       );
 
       const tbForce = createTimeBlock(
@@ -570,7 +570,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           end_at: "2026-10-16T20:00:00.000Z",
           reason_tag: "folga_criacao",
         },
-        true
+        true,
       );
       assert.ok(tbForce.timeBlock);
     });
@@ -615,7 +615,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: slotStart,
           end_at: slotEnd,
         },
-        true
+        true,
       );
 
       const c2 = createBooking(
@@ -627,7 +627,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: slotStart,
           end_at: slotEnd,
         },
-        true
+        true,
       );
 
       assert.ok(c1.booking, "O primeiro deve vencer");
@@ -650,7 +650,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           end_at: "2026-10-21T15:00:00.000Z",
           deposit_status: "pendente",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -675,7 +675,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           deposit_status: "pago",
           status: "confirmado",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -701,7 +701,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-21T19:00:00.000Z",
           end_at: "2026-10-21T21:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -728,7 +728,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           deposit_status: "dispensado",
           status: "confirmado",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -746,7 +746,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-22T16:00:00.000Z",
           end_at: "2026-10-22T18:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -769,7 +769,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           deposit_cents: 50000,
           price_total_cents: 30000, // Menor que o sinal!
         },
-        true
+        true,
       );
       assert.equal(bExcessDeposit.error, "validation_error");
     });
@@ -871,7 +871,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           price_total_cents: 20000,
           deposit_cents: 5000,
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -898,7 +898,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -926,7 +926,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -952,7 +952,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
       updateBookingStatus(b.booking.id, "cancelado");
@@ -981,7 +981,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           deposit_status: "pago",
           status: "confirmado",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
       updateBookingStatus(b.booking.id, "concluido");
@@ -1010,7 +1010,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -1036,7 +1036,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           price_total_cents: 30000,
           deposit_cents: 10000,
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -1061,7 +1061,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           deposit_status: "pago",
           status: "confirmado",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -1082,7 +1082,7 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           end_at: "2026-10-15T15:00:00.000Z",
           notes: "Nota inicial",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
@@ -1093,7 +1093,9 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
 
       const db = getDatabase();
       const events = db
-        .prepare("SELECT * FROM booking_events WHERE booking_id = ? AND event_type = 'note_updated'")
+        .prepare(
+          "SELECT * FROM booking_events WHERE booking_id = ? AND event_type = 'note_updated'",
+        )
         .all(b.booking.id) as Array<{ old_value: string; new_value: string }>;
       assert.equal(events.length, 1);
       assert.equal(events[0].old_value, "Nota inicial");
@@ -1111,17 +1113,23 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           start_at: "2026-10-15T13:00:00.000Z",
           end_at: "2026-10-15T15:00:00.000Z",
         },
-        true
+        true,
       );
       assert.ok(b.booking);
 
       // Sobreposição parcial: 12:00Z às 14:00Z -> deve incluir o booking
       const listSob = listBookings("2026-10-15T12:00:00.000Z", "2026-10-15T14:00:00.000Z");
-      assert.equal(listSob.some((item) => item.id === b.booking!.id), true);
+      assert.equal(
+        listSob.some((item) => item.id === b.booking!.id),
+        true,
+      );
 
       // Adjacência exata: 15:00Z às 17:00Z (fim do booking = início da busca) -> NÃO deve incluir
       const listAdj = listBookings("2026-10-15T15:00:00.000Z", "2026-10-15T17:00:00.000Z");
-      assert.equal(listAdj.some((item) => item.id === b.booking!.id), false);
+      assert.equal(
+        listAdj.some((item) => item.id === b.booking!.id),
+        false,
+      );
 
       // TimeBlocks: cria bloqueio das 13:00Z às 15:00Z
       const tb = createTimeBlock(
@@ -1130,15 +1138,21 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
           end_at: "2026-10-15T15:00:00.000Z",
           reason_tag: "outro",
         },
-        true
+        true,
       );
       assert.ok(tb.timeBlock);
 
       const tbSob = listTimeBlocks("2026-10-15T12:00:00.000Z", "2026-10-15T14:00:00.000Z");
-      assert.equal(tbSob.some((item) => item.id === tb.timeBlock!.id), true);
+      assert.equal(
+        tbSob.some((item) => item.id === tb.timeBlock!.id),
+        true,
+      );
 
       const tbAdj = listTimeBlocks("2026-10-15T15:00:00.000Z", "2026-10-15T17:00:00.000Z");
-      assert.equal(tbAdj.some((item) => item.id === tb.timeBlock!.id), false);
+      assert.equal(
+        tbAdj.some((item) => item.id === tb.timeBlock!.id),
+        false,
+      );
     });
   });
 });
