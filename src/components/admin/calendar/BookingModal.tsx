@@ -337,102 +337,102 @@ export function BookingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-[#0c0c0e] border border-white/10 shadow-2xl p-6 my-8 space-y-5">
+      <div className="relative w-full max-w-xl bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl p-6 my-8">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-[#9be5ff]/10 border border-[#9be5ff]/30 flex items-center justify-center text-[#9be5ff]">
+        <div className="flex items-center justify-between pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-cyan-400">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.15em] text-white">
+              <h2 className="text-base font-semibold text-zinc-100">
                 {mode === "reschedule" ? "Remarcar Sessão" : "Novo Agendamento"}
               </h2>
-              <span className="text-[10px] text-neutral-400 font-mono">
-                Horário Local: {timezone}
-              </span>
+              <span className="text-xs text-zinc-500 font-mono">Horário local: {timezone}</span>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
-            className="text-neutral-500 hover:text-white transition-colors cursor-pointer rounded-none"
+            className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Lead Vinculado (se houver) */}
         {leadData && (
-          <div className="bg-cyan-500 text-slate-950 font-semibold px-3 py-2 rounded-md text-xs flex items-center justify-between gap-2 shadow-sm">
-            <div className="flex items-center gap-1.5 truncate">
-              <Link2 className="w-3.5 h-3.5 shrink-0" />
-              <span className="uppercase tracking-wider font-bold">Lead Vinculado:</span>
-              <span className="truncate">
-                {leadData.name} ({leadData.phone})
-              </span>
+          <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-3 flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2.5 truncate mr-2">
+              <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="truncate">
+                <span className="text-sm font-medium text-zinc-200 block truncate">
+                  {leadData.name}
+                </span>
+                <span className="text-xs text-zinc-400 block truncate">{leadData.phone}</span>
+              </div>
             </div>
-            <Badge
-              variant="outline"
-              className="bg-slate-900/60 border-slate-700 text-slate-300 text-[10px] uppercase font-mono tracking-wider shrink-0"
-            >
+            <span className="bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs px-2.5 py-0.5 rounded-full shrink-0 font-medium">
               {leadData.service === "studio"
-                ? "PALHOÇA (ESTÚDIO)"
+                ? "Palhoça (Estúdio)"
                 : leadData.service === "home"
-                  ? "VIP (DOMICÍLIO)"
-                  : leadData.service || "PALHOÇA (ESTÚDIO)"}
-            </Badge>
+                  ? "VIP (Domicílio)"
+                  : leadData.service === "flash"
+                    ? "Outra Cidade / Eventos"
+                    : leadData.service || "Palhoça (Estúdio)"}
+            </span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Seletor de Data e Horário com Presets */}
-          <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-md space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
-              <Label className="text-xs font-medium text-slate-400 uppercase tracking-wider block mb-0">
+        <form onSubmit={handleSubmit}>
+          {/* Seção 1: Horário da Sessão */}
+          <div className="mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
                 Horário da Sessão
-              </Label>
-              {/* Presets de início */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] text-slate-500">Presets:</span>
+              </h4>
+              {/* Presets de início - Segmented Control */}
+              <div className="flex gap-1.5 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_manha")}
-                  className="text-xs font-medium border-slate-800 hover:bg-slate-800 hover:text-white transition-all h-7 px-2.5"
+                  className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
                 >
                   Manhã ({settings["preset_manha"] || "09:00"})
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_tarde")}
-                  className="text-xs font-medium border-slate-800 hover:bg-slate-800 hover:text-white transition-all h-7 px-2.5"
+                  className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
                 >
                   Tarde ({settings["preset_tarde"] || "14:00"})
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_noite")}
-                  className="text-xs font-medium border-slate-800 hover:bg-slate-800 hover:text-white transition-all h-7 px-2.5"
+                  className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
                 >
                   Noite ({settings["preset_noite"] || "18:30"})
                 </Button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label
                   htmlFor="booking-start-date"
-                  className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block"
+                  className="text-xs font-medium text-zinc-300 mb-1.5 block"
                 >
-                  Início (Data & Hora)
+                  Início da sessão
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
@@ -440,14 +440,14 @@ export function BookingModal({
                     type="date"
                     value={startDate}
                     onChange={(e) => handleDateOrTimeChange(() => setStartDate(e.target.value))}
-                    className="flex-1 bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100"
+                    className="flex-1 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
                     required
                   />
                   <Input
                     type="time"
                     value={startTime}
                     onChange={(e) => handleDateOrTimeChange(() => setStartTime(e.target.value))}
-                    className="w-28 bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100 font-mono"
+                    className="w-28 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
                     required
                   />
                 </div>
@@ -457,9 +457,9 @@ export function BookingModal({
                 <div className="flex items-center justify-between mb-1.5">
                   <Label
                     htmlFor="booking-end-time"
-                    className="text-xs font-medium text-slate-400 uppercase tracking-wider block"
+                    className="text-xs font-medium text-zinc-300 block"
                   >
-                    Término (Hora)
+                    Término da sessão
                   </Label>
                   {isNextDay && (
                     <Badge
@@ -476,35 +476,35 @@ export function BookingModal({
                     type="time"
                     value={endTime}
                     onChange={(e) => handleDateOrTimeChange(() => setEndTime(e.target.value))}
-                    className="flex-1 bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100 font-mono"
+                    className="flex-1 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
                     required
                   />
-                  {/* Atalhos de Duração */}
-                  <div className="flex items-center gap-1">
+                  {/* Atalhos de Duração - Segmented Control */}
+                  <div className="flex gap-1 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md">
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(2)}
-                      className="text-xs font-medium border-slate-800 hover:bg-slate-800 hover:text-white transition-all h-9 px-2 font-mono"
+                      className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
                     >
                       +2h
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(4)}
-                      className="text-xs font-medium border-slate-800 hover:bg-slate-800 hover:text-white transition-all h-9 px-2 font-mono"
+                      className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
                     >
                       +4h
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(6)}
-                      className="text-xs font-medium border-slate-800 hover:bg-slate-800 hover:text-white transition-all h-9 px-2 font-mono"
+                      className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
                     >
                       +6h
                     </Button>
@@ -514,12 +514,12 @@ export function BookingModal({
             </div>
           </div>
 
-          {/* Dados Cadastrais */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Seção 2: Grid de 2 Colunas */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label
                 htmlFor="client-name"
-                className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block"
+                className="text-xs font-medium text-zinc-300 mb-1.5 block"
               >
                 Nome do cliente
               </Label>
@@ -529,7 +529,7 @@ export function BookingModal({
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 placeholder="Nome do cliente"
-                className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100"
+                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
                 required
               />
             </div>
@@ -537,7 +537,7 @@ export function BookingModal({
             <div>
               <Label
                 htmlFor="client-phone"
-                className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block"
+                className="text-xs font-medium text-zinc-300 mb-1.5 block"
               >
                 WhatsApp / Telefone
               </Label>
@@ -547,17 +547,15 @@ export function BookingModal({
                 value={clientPhone}
                 onChange={(e) => setClientPhone(e.target.value)}
                 placeholder="(48) 99999-9999"
-                className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100 font-mono"
+                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
                 required
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <Label
                 htmlFor="client-email"
-                className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block"
+                className="text-xs font-medium text-zinc-300 mb-1.5 block"
               >
                 E-mail
               </Label>
@@ -567,22 +565,20 @@ export function BookingModal({
                 value={clientEmail}
                 onChange={(e) => setClientEmail(e.target.value)}
                 placeholder="cliente@email.com"
-                className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100"
+                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
               />
             </div>
 
             <div>
-              <Label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block">
-                Local
-              </Label>
+              <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">Local</Label>
               <Select
                 value={location}
                 onValueChange={(val) => setLocation(val as Booking["location"])}
               >
-                <SelectTrigger className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100">
+                <SelectTrigger className="bg-zinc-900/80 border-zinc-800 text-zinc-100 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md">
                   <SelectValue placeholder="Selecione o local" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
                   <SelectItem value="estudio">Estúdio</SelectItem>
                   <SelectItem value="domicilio">Domicílio</SelectItem>
                   <SelectItem value="evento">Evento</SelectItem>
@@ -590,18 +586,18 @@ export function BookingModal({
               </Select>
             </div>
 
-            <div>
-              <Label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block">
+            <div className="col-span-2">
+              <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">
                 Tipo de sessão
               </Label>
               <Select
                 value={sessionType}
                 onValueChange={(val) => setSessionType(val as Booking["session_type"])}
               >
-                <SelectTrigger className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100">
+                <SelectTrigger className="bg-zinc-900/80 border-zinc-800 text-zinc-100 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md">
                   <SelectValue placeholder="Tipo de sessão" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
                   <SelectItem value="tatuagem">Tatuagem</SelectItem>
                   <SelectItem value="flash">Flash</SelectItem>
                   <SelectItem value="retoque">Retoque</SelectItem>
@@ -610,88 +606,88 @@ export function BookingModal({
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          {/* Valores Financeiros (se modo Create) */}
-          {mode === "create" && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-slate-800/80 pt-3">
-              <div>
-                <Label
-                  htmlFor="booking-price"
-                  className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block"
-                >
-                  Valor total (R$)
-                </Label>
-                <Input
-                  id="booking-price"
-                  type="text"
-                  value={priceDisplay}
-                  onChange={(e) => setPriceDisplay(e.target.value)}
-                  className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100 font-mono"
-                  placeholder="0,00"
-                />
-              </div>
+            {/* Valores Financeiros (se modo Create) */}
+            {mode === "create" && (
+              <>
+                <div>
+                  <Label
+                    htmlFor="booking-price"
+                    className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                  >
+                    Valor total (R$)
+                  </Label>
+                  <Input
+                    id="booking-price"
+                    type="text"
+                    value={priceDisplay}
+                    onChange={(e) => setPriceDisplay(e.target.value)}
+                    className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                    placeholder="0,00"
+                  />
+                </div>
 
-              <div>
-                <Label
-                  htmlFor="booking-deposit"
-                  className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block"
-                >
-                  Sinal (R$)
-                </Label>
-                <Input
-                  id="booking-deposit"
-                  type="text"
-                  value={depositDisplay}
-                  onChange={(e) => setDepositDisplay(e.target.value)}
-                  className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100 font-mono"
-                  placeholder="0,00"
-                />
-              </div>
+                <div>
+                  <Label
+                    htmlFor="booking-deposit"
+                    className="text-xs font-medium text-zinc-300 mb-1.5 block"
+                  >
+                    Sinal (R$)
+                  </Label>
+                  <Input
+                    id="booking-deposit"
+                    type="text"
+                    value={depositDisplay}
+                    onChange={(e) => setDepositDisplay(e.target.value)}
+                    className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                    placeholder="0,00"
+                  />
+                </div>
 
-              <div>
-                <Label className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block">
-                  Status do sinal
-                </Label>
-                <Select
-                  value={depositStatus}
-                  onValueChange={(val) => setDepositStatus(val as Booking["deposit_status"])}
-                >
-                  <SelectTrigger className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100">
-                    <SelectValue placeholder="Status do sinal" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="pago">Pago</SelectItem>
-                    <SelectItem value="dispensado">Dispensado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="col-span-2">
+                  <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">
+                    Status do sinal
+                  </Label>
+                  <Select
+                    value={depositStatus}
+                    onValueChange={(val) => setDepositStatus(val as Booking["deposit_status"])}
+                  >
+                    <SelectTrigger className="bg-zinc-900/80 border-zinc-800 text-zinc-100 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md">
+                      <SelectValue placeholder="Status do sinal" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="pago">Pago</SelectItem>
+                      <SelectItem value="dispensado">Dispensado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            {/* Observações / Ideia ocupando 2 colunas */}
+            <div className="col-span-2">
+              <Label
+                htmlFor="booking-notes"
+                className="text-xs font-medium text-zinc-300 mb-1.5 block"
+              >
+                Observações / Ideia
+              </Label>
+              <Textarea
+                id="booking-notes"
+                value={notes}
+                rows={2}
+                onChange={(e) => setNotes(e.target.value)}
+                className="bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md resize-none min-h-[64px]"
+                placeholder="Detalhes da arte, local do corpo, referências..."
+              />
             </div>
-          )}
-
-          {/* Observações */}
-          <div>
-            <Label
-              htmlFor="booking-notes"
-              className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 block"
-            >
-              Observações / Ideia
-            </Label>
-            <Textarea
-              id="booking-notes"
-              value={notes}
-              rows={2}
-              onChange={(e) => setNotes(e.target.value)}
-              className="bg-slate-900/80 border-slate-800 focus:border-cyan-500 text-slate-100 resize-none min-h-[64px]"
-              placeholder="Detalhes da arte, local do corpo, referências..."
-            />
           </div>
 
           {forceConfirmed && (
             <Alert
               variant="default"
-              className="border-amber-500/50 bg-amber-950/20 text-neutral-200"
+              className="mt-4 border-amber-500/50 bg-amber-950/20 text-neutral-200"
             >
               <Info className="h-4 w-4 text-amber-400" />
               <AlertTitle className="text-amber-300 font-semibold uppercase tracking-wider text-xs">
@@ -705,13 +701,13 @@ export function BookingModal({
             </Alert>
           )}
 
-          {/* Botões de Ação */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          {/* Rodapé do Modal */}
+          <div className="border-t border-zinc-800 pt-4 mt-6 flex justify-end gap-3">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-100 hover:bg-slate-800 text-xs font-medium cursor-pointer"
+              className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
             >
               Cancelar
             </Button>
@@ -719,10 +715,10 @@ export function BookingModal({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className={`text-xs font-semibold px-6 shadow-sm cursor-pointer transition-all ${
+              className={`bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-5 ${
                 forceConfirmed
                   ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]"
-                  : "bg-cyan-500 hover:bg-cyan-400 text-slate-950"
+                  : ""
               } disabled:opacity-50`}
             >
               {isSubmitting ? (
