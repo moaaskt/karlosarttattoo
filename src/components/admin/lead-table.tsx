@@ -1,17 +1,8 @@
 import * as React from "react";
-import {
-  MessageSquare,
-  Phone,
-  Mail,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Archive,
-  Sparkles,
-  Filter,
-} from "lucide-react";
+import { MessageSquare, Phone, Mail, Calendar, CheckCircle2, Filter } from "lucide-react";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import { Button } from "@/components/ui/button";
+import { StatusBadge, InfoBadge } from "@/components/ui/status-badge";
 import type { Lead } from "@/lib/db";
 
 interface LeadTableProps {
@@ -44,35 +35,6 @@ export function LeadTable({ leads, onStatusChange, onScheduleLead, isLoading }: 
     const cleanNumber = rawNumber.startsWith("55") ? rawNumber : `55${rawNumber}`;
     const initialMessage = `Olá ${lead.name}! Aqui é o Karlos da Karlos Art Tattoo. Recebi sua solicitação para ${lead.service}: "${lead.message || "sua ideia autoral"}". Vamos alinhar os detalhes da sua tatuagem autoral?`;
     return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(initialMessage)}`;
-  };
-
-  const getStatusBadge = (status: Lead["status"]) => {
-    switch (status) {
-      case "novo":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-[0.15em] bg-[#9be5ff]/10 text-[#9be5ff] border border-[#9be5ff]/30">
-            <Sparkles className="w-3 h-3" /> NOVO
-          </span>
-        );
-      case "contatado":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-[0.15em] bg-amber-500/10 text-amber-400 border border-amber-500/30">
-            <Clock className="w-3 h-3" /> CONTATADO
-          </span>
-        );
-      case "agendado":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-[0.15em] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <CheckCircle2 className="w-3 h-3" /> AGENDADO
-          </span>
-        );
-      case "arquivado":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-[0.15em] bg-white/5 text-neutral-400 border border-white/10">
-            <Archive className="w-3 h-3" /> ARQUIVADO
-          </span>
-        );
-    }
   };
 
   const formatDate = (isoDate: string) => {
@@ -164,16 +126,14 @@ export function LeadTable({ leads, onStatusChange, onScheduleLead, isLoading }: 
                   <h3 className="text-base font-bold uppercase tracking-[0.15em] text-white">
                     {lead.name}
                   </h3>
-                  {getStatusBadge(lead.status)}
+                  <StatusBadge status={lead.status} />
                 </div>
                 <div className="flex items-center gap-4 text-xs text-neutral-400">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-neutral-500" />
                     {formatDate(lead.createdAt)}
                   </span>
-                  <span className="text-[10px] uppercase tracking-wider text-neutral-500 bg-white/5 px-2 py-0.5 border border-white/5">
-                    ID: {lead.id}
-                  </span>
+                  <InfoBadge type="id">{lead.id}</InfoBadge>
                 </div>
               </div>
 
