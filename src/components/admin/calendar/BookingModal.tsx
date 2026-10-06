@@ -12,11 +12,13 @@ import {
   Tag,
   Sparkles,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch, displayToCents, getErrorMessage } from "../../../lib/api-client";
 import { localToUTC, utcToLocal } from "../../../lib/agenda-utils";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { Booking, Lead } from "../../../lib/db";
 
 export interface BookingModalProps {
@@ -611,6 +613,23 @@ export function BookingModal({
               placeholder="Detalhes da arte, local do corpo, referências..."
             />
           </div>
+
+          {forceConfirmed && (
+            <Alert
+              variant="default"
+              className="rounded-none border-amber-500/50 bg-amber-950/20 text-neutral-200"
+            >
+              <Info className="h-4 w-4 text-amber-400" />
+              <AlertTitle className="text-amber-300 font-semibold uppercase tracking-wider text-xs">
+                Aviso de Horário
+              </AlertTitle>
+              <AlertDescription className="text-neutral-300 text-xs">
+                Foram identificados avisos ou conflitos para este horário. Clique em "
+                {mode === "reschedule" ? "Remarcar mesmo assim" : "Criar mesmo assim"}" para
+                confirmar o agendamento forçado.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Botões de Ação */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
