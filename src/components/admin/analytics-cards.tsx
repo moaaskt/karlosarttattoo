@@ -40,15 +40,29 @@ export function AnalyticsCards({ stats, leads }: AnalyticsCardsProps) {
   const serviceBreakdown = [
     {
       tipo: "Estúdio Palhoça",
-      quantidade: leads.filter((l) => l.service.toLowerCase().includes("estúdio") || l.service.toLowerCase().includes("palhoça") || l.service === "studio").length || 2,
+      quantidade:
+        leads.filter(
+          (l) =>
+            l.service.toLowerCase().includes("estúdio") ||
+            l.service.toLowerCase().includes("palhoça") ||
+            l.service === "studio",
+        ).length || 2,
     },
     {
       tipo: "VIP Domicílio (Floripa/SJ)",
-      quantidade: leads.filter((l) => l.service.toLowerCase().includes("domicílio") || l.service.toLowerCase().includes("vip") || l.service === "home").length || 1,
+      quantidade:
+        leads.filter(
+          (l) =>
+            l.service.toLowerCase().includes("domicílio") ||
+            l.service.toLowerCase().includes("vip") ||
+            l.service === "home",
+        ).length || 1,
     },
     {
       tipo: "Guests / Outras Cidades",
-      quantidade: leads.filter((l) => l.service.toLowerCase().includes("outra") || l.service === "flash").length || 0,
+      quantidade:
+        leads.filter((l) => l.service.toLowerCase().includes("outra") || l.service === "flash")
+          .length || 0,
     },
   ];
 
@@ -64,28 +78,34 @@ export function AnalyticsCards({ stats, leads }: AnalyticsCardsProps) {
           </div>
           <div className="text-3xl font-extrabold text-white tracking-tight">{stats.total}</div>
           <p className="text-[11px] text-neutral-400 flex items-center gap-1.5 pt-1">
-            <span className="text-[#9be5ff] font-semibold">{stats.novos} novos</span> aguardando contato
+            <span className="text-[#9be5ff] font-semibold">{stats.novos} novos</span> aguardando
+            contato
           </p>
         </div>
 
         {/* Taxa de Conversão */}
         <div className="bg-[#0b0b0e] border border-white/10 p-5 space-y-2 relative overflow-hidden group hover:border-[#9be5ff]/50 transition-all">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Conversão em Sessão</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Conversão em Sessão
+            </span>
             <Target className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-3xl font-extrabold text-emerald-400 tracking-tight">
             {stats.conversionRate}
           </div>
           <p className="text-[11px] text-neutral-400 flex items-center gap-1.5 pt-1">
-            <span className="text-emerald-400 font-semibold">{stats.agendados} confirmados</span> na agenda
+            <span className="text-emerald-400 font-semibold">{stats.agendados} confirmados</span> na
+            agenda
           </p>
         </div>
 
         {/* Visitas GA4 Estimadas */}
         <div className="bg-[#0b0b0e] border border-white/10 p-5 space-y-2 relative overflow-hidden group hover:border-[#9be5ff]/50 transition-all">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Sessões GA4 (7D)</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Sessões GA4 (7D)
+            </span>
             <Activity className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-3xl font-extrabold text-white tracking-tight">1.335</div>
@@ -98,11 +118,16 @@ export function AnalyticsCards({ stats, leads }: AnalyticsCardsProps) {
         {/* Agendamentos no Mês */}
         <div className="bg-[#0b0b0e] border border-white/10 p-5 space-y-2 relative overflow-hidden group hover:border-[#9be5ff]/50 transition-all">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Status do Funil</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Status do Funil
+            </span>
             <CalendarCheck className="w-4 h-4 text-[#9be5ff]" />
           </div>
           <div className="text-3xl font-extrabold text-white tracking-tight">
-            {stats.agendados} <span className="text-xs text-neutral-500 font-normal">/ {stats.contatados + stats.novos + stats.agendados}</span>
+            {stats.agendados}{" "}
+            <span className="text-xs text-neutral-500 font-normal">
+              / {stats.contatados + stats.novos + stats.agendados}
+            </span>
           </div>
           <p className="text-[11px] text-neutral-400 pt-1">
             {stats.contatados} em negociação no WhatsApp
@@ -154,12 +179,7 @@ export function AnalyticsCards({ stats, leads }: AnalyticsCardsProps) {
                   tickLine={false}
                   axisLine={{ stroke: "#333" }}
                 />
-                <YAxis
-                  stroke="#666"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={{ stroke: "#333" }}
-                />
+                <YAxis stroke="#666" fontSize={11} tickLine={false} axisLine={{ stroke: "#333" }} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#070707",
@@ -232,12 +252,7 @@ export function AnalyticsCards({ stats, leads }: AnalyticsCardsProps) {
                   }}
                   itemStyle={{ color: "#fff" }}
                 />
-                <Bar
-                  dataKey="quantidade"
-                  fill="#9be5ff"
-                  radius={0}
-                  name="Interessados"
-                />
+                <Bar dataKey="quantidade" fill="#9be5ff" radius={0} name="Interessados" />
               </BarChart>
             </ResponsiveContainer>
           </div>

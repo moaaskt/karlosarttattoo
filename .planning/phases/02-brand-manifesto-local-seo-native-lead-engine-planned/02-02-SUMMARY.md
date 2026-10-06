@@ -2,12 +2,14 @@
 
 **Status:** Completed  
 **Completed Date:** 2026-10-01  
-**Wave:** 2  
+**Wave:** 2
 
 ## Overview
+
 Substituição da dependência do Formspree externo por infraestrutura própria de recepção de leads com API nativa Nitro (`/api/leads`), persistência relacional SQLite via módulo nativo `node:sqlite`, envio de notificações automáticas e painel administrativo `/admin` autenticado com métricas GA4 e gestão de contatos via WhatsApp.
 
 ## Key Deliverables
+
 - **Camada de Persistência Relacional (`src/lib/db.ts`):**
   - Tabela `leads` com campos: `id`, `name`, `phone`, `email`, `service`, `message`, `status`, `createdAt`.
   - Índices automáticos, migração/criação resiliente e funções auxiliares (`createLead`, `listLeads`, `updateLeadStatus`, `getLeadStats`).
@@ -27,6 +29,7 @@ Substituição da dependência do Formspree externo por infraestrutura própria 
   - Cards e gráficos de métricas (`src/components/admin/analytics-cards.tsx`) utilizando `recharts` para visualização de tráfego GA4 e funil de conversão.
 
 ## Verification
+
 - Teste funcional automatizado via Node/tsx validando:
   - Rejeição de payload inválido (422).
   - Inserção com sucesso e persistência (201).

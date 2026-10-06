@@ -1,5 +1,10 @@
 import * as React from "react";
-import type { DatesSetArg, EventContentArg, EventClickArg, DateSelectArg } from "@fullcalendar/core";
+import type {
+  DatesSetArg,
+  EventContentArg,
+  EventClickArg,
+  DateSelectArg,
+} from "@fullcalendar/core";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 import { FullCalendarClient } from "./calendar/FullCalendarClient";
 import { BookingDrawer } from "./calendar/BookingDrawer";
@@ -16,14 +21,9 @@ import {
   utcToLocal,
 } from "../../lib/agenda-utils";
 import type { Booking, TimeBlock, AvailabilityRule, Lead } from "../../lib/db";
-import {
-  Calendar as CalendarIcon,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  Plus,
-} from "lucide-react";
+import { Calendar as CalendarIcon, RefreshCw, Eye, EyeOff, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 // Constantes estáticas fora do componente para preservar identidade referencial estrita
 const HEADER_TOOLBAR = {
@@ -107,6 +107,8 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     id: string;
     newStart: string;
     newEnd: string;
+    warnings?: Array<{ code: string; message: string }>;
+    revertFn?: () => void;
   } | null>(null);
   const [showRescheduleConfirm, setShowRescheduleConfirm] = React.useState<boolean>(false);
 
@@ -148,21 +150,13 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     const currentRequestId = ++requestIdRef.current;
     setIsLoading(true);
 
-    // Instrumentação de depuração acessível no console/DevTools
-    if (typeof window !== "undefined") {
-      (window as any).__agendaFetchCount = ((window as any).__agendaFetchCount || 0) + 1;
-      if (process.env.NODE_ENV !== "production") {
-        console.log(`[AgendaTab] API Fetch (#${(window as any).__agendaFetchCount}): ${from} -> ${to}`);
-      }
-    }
-
     try {
       const [bookingsRes, timeBlocksRes] = await Promise.all([
         apiFetch<{ success?: boolean; bookings?: Booking[] }>(
-          `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+          `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
         ),
         apiFetch<{ success?: boolean; timeBlocks?: TimeBlock[] }>(
-          `/api/time-blocks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+          `/api/time-blocks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
         ),
       ]);
 
@@ -177,6 +171,11 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         const next = timeBlocksRes.data.timeBlocks;
         setTimeBlocks((prev) => (areTimeBlocksEqual(prev, next) ? prev : next));
       }
+
+      // Só marca a faixa como já buscada após a resposta chegar com sucesso
+      if (bookingsRes.ok && timeBlocksRes.ok) {
+        currentRangeRef.current = { from, to };
+      }
     } catch (err) {
       console.error("[AgendaTab] Erro ao buscar agendamentos do intervalo:", err);
     } finally {
@@ -186,9 +185,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     }
   }, []);
 
-  // Força atualização manual mesmo no mesmo range
+  // Força atualização manual mesmo no mesmo range (ignora a trava)
   const handleRefresh = React.useCallback(() => {
     if (visibleRangeRef.current) {
+      currentRangeRef.current = null;
       fetchEventsForRange(visibleRangeRef.current.from, visibleRangeRef.current.to);
     }
   }, [fetchEventsForRange]);
@@ -199,7 +199,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       const from = toUTCString(info.start);
       const to = toUTCString(info.end);
 
-      // BLINDAGEM CRÍTICA: ignora chamadas com a mesma faixa já buscada
+      // BLINDAGEM CRÍTICA: ignora chamadas com a mesma faixa já buscada com sucesso
       if (
         currentRangeRef.current &&
         currentRangeRef.current.from === from &&
@@ -208,12 +208,11 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         return;
       }
 
-      currentRangeRef.current = { from, to };
       visibleRangeRef.current = { from, to };
       setCurrentView(info.view.type);
       fetchEventsForRange(from, to);
     },
-    [fetchEventsForRange]
+    [fetchEventsForRange],
   );
 
   // 5. Cálculos memorizados (useMemo)
@@ -231,9 +230,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
   const timezone = settings["timezone"] || "America/Sao_Paulo";
 
   const events = React.useMemo(() => {
-    const bEvents = bookings
-      .map((b) => bookingToEvent(b, showCancelled, true))
-      .filter(Boolean);
+    const bEvents = bookings.map((b) => bookingToEvent(b, showCancelled, true)).filter(Boolean);
     const tbEvents = timeBlocks.map((tb) => timeBlockToEvent(tb));
     return [...bEvents, ...tbEvents];
   }, [bookings, timeBlocks, showCancelled]);
@@ -315,7 +312,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         });
       }
     },
-    [isReady, timezone]
+    [isReady, timezone],
   );
 
   const handleRescheduleDropOrResize = React.useCallback(
@@ -327,7 +324,8 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       const res = await apiFetch<{
         success?: boolean;
         error?: string;
-        warning?: string;
+        requires_force?: boolean;
+        warnings?: Array<{ code: string; message: string }>;
         message?: string;
         conflicts?: Array<{ client_name: string }>;
       }>(`/api/bookings/${id}/reschedule`, {
@@ -336,16 +334,25 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       });
 
       if (!res.ok) {
-        info.revert();
-        if (res.data?.warning === "outside_hours") {
-          setRescheduleConfirmState({ id, newStart, newEnd });
+        if (res.data?.requires_force && res.data?.warnings && res.data.warnings.length > 0) {
+          // Mantém a posição visual provisória e aguarda confirmação no diálogo de avisos
+          setRescheduleConfirmState({
+            id,
+            newStart,
+            newEnd,
+            warnings: res.data.warnings,
+            revertFn: () => info.revert(),
+          });
           setShowRescheduleConfirm(true);
           return;
         }
+
+        // Conflitos duros ou erros de validação: reverte imediatamente
+        info.revert();
         const conflicts = res.data?.conflicts;
         if (conflicts && conflicts.length > 0) {
           toast.error(
-            `${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`
+            `${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`,
           );
         } else {
           toast.error(res.data?.message || getErrorMessage(res.data?.error));
@@ -356,12 +363,12 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       toast.success("Agendamento remarcado com sucesso!");
       handleRefresh();
     },
-    [handleRefresh]
+    [handleRefresh],
   );
 
   const handleConfirmRescheduleForce = React.useCallback(async () => {
     if (!rescheduleConfirmState) return;
-    const { id, newStart, newEnd } = rescheduleConfirmState;
+    const { id, newStart, newEnd, revertFn } = rescheduleConfirmState;
 
     const res = await apiFetch<{
       success?: boolean;
@@ -376,9 +383,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     setRescheduleConfirmState(null);
 
     if (res.ok) {
-      toast.success("Agendamento remarcado fora do expediente com confirmação.");
+      toast.success("Agendamento remarcado com confirmação de avisos.");
       handleRefresh();
     } else {
+      revertFn?.();
       toast.error(res.data?.message || getErrorMessage(res.data?.error));
     }
   }, [rescheduleConfirmState, handleRefresh]);
@@ -420,105 +428,133 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         {/* Lado Direito: Ações e Filtros */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Botão Novo Agendamento */}
-          <button
+          <Button
+            size="sm"
             onClick={() => setModalState({ open: true, mode: "create" })}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-all cursor-pointer shadow-[0_0_12px_rgba(155,229,255,0.2)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-all cursor-pointer shadow-[0_0_12px_rgba(155,229,255,0.2)] rounded-none h-8"
           >
             <Plus className="w-3.5 h-3.5" />
             Novo Agendamento
-          </button>
+          </Button>
 
           {/* Seletor de visualizações rápidas */}
           <div className="flex items-center border border-white/10 bg-black/40 text-xs font-bold">
-            <button
+            <Button
+              variant={currentView === "timeGridDay" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 const api = calendarRef.current?.getApi?.() || calendarRef.current;
                 api?.changeView?.("timeGridDay");
               }}
-              className={`px-3 py-1.5 uppercase tracking-wider transition-colors ${
+              className={`px-3 py-1.5 uppercase tracking-wider transition-colors rounded-none h-8 ${
                 currentView === "timeGridDay"
-                  ? "bg-[#9be5ff] text-[#070707]"
+                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
               Dia
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={currentView === "timeGridWeek" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 const api = calendarRef.current?.getApi?.() || calendarRef.current;
                 api?.changeView?.("timeGridWeek");
               }}
-              className={`px-3 py-1.5 uppercase tracking-wider transition-colors border-x border-white/10 ${
+              className={`px-3 py-1.5 uppercase tracking-wider transition-colors border-x border-white/10 rounded-none h-8 ${
                 currentView === "timeGridWeek"
-                  ? "bg-[#9be5ff] text-[#070707]"
+                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
               Semana
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={currentView === "dayGridMonth" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 const api = calendarRef.current?.getApi?.() || calendarRef.current;
                 api?.changeView?.("dayGridMonth");
               }}
-              className={`px-3 py-1.5 uppercase tracking-wider transition-colors ${
+              className={`px-3 py-1.5 uppercase tracking-wider transition-colors rounded-none h-8 ${
                 currentView === "dayGridMonth"
-                  ? "bg-[#9be5ff] text-[#070707]"
+                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
               Mês
-            </button>
+            </Button>
           </div>
 
           {/* Toggle de Cancelados */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setShowCancelled((prev) => !prev)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border transition-colors rounded-none h-8 ${
               showCancelled
-                ? "bg-neutral-800 text-white border-white/30"
-                : "bg-black/40 text-neutral-400 border-white/10 hover:text-white"
+                ? "bg-neutral-800 text-white border-white/30 hover:bg-neutral-700"
+                : "bg-black/40 text-neutral-400 border-white/10 hover:text-white hover:border-white/30"
             }`}
             title="Exibir agendamentos cancelados e faltas"
           >
             {showCancelled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
             {showCancelled ? "Cancelados ON" : "Cancelados OFF"}
-          </button>
+          </Button>
 
           {/* Botão de Atualizar */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-8"
             title="Recarregar agendamentos"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
             Atualizar
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Legenda de Status e Categorias */}
       <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-black/30 border border-white/5 text-[11px] text-neutral-400">
-        <span className="font-extrabold uppercase tracking-wider text-neutral-500 mr-1">Legenda:</span>
+        <span className="font-extrabold uppercase tracking-wider text-neutral-500 mr-1">
+          Legenda:
+        </span>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.pendente }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.pendente }}
+          />
           <span>Pendente</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.confirmado }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.confirmado }}
+          />
           <span>Confirmado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.concluido }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.concluido }}
+          />
           <span>Concluído</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.cancelado }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.cancelado }}
+          />
           <span>Cancelado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.no_show }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.no_show }}
+          />
           <span>Falta (No-Show)</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -587,16 +623,27 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         onSuccess={handleRefresh}
       />
 
-      {/* Confirmação de fora de expediente ao arrastar ou redimensionar */}
+      {/* Confirmação de avisos (fora de expediente, passado, etc.) ao arrastar ou redimensionar */}
       <ConfirmDialog
         open={showRescheduleConfirm}
-        onOpenChange={setShowRescheduleConfirm}
-        title="Remarcar Fora do Expediente"
-        description="O novo horário selecionado está fora do horário regular de atendimento configurado no ateliê. Deseja confirmar a remarcação mesmo assim?"
+        onOpenChange={(open) => {
+          if (!open) {
+            rescheduleConfirmState?.revertFn?.();
+            setRescheduleConfirmState(null);
+          }
+          setShowRescheduleConfirm(open);
+        }}
+        title="Avisos de Remarcação"
+        description={
+          rescheduleConfirmState?.warnings && rescheduleConfirmState.warnings.length > 0
+            ? `Avisos detectados: ${rescheduleConfirmState.warnings.map((w) => w.message || getErrorMessage(w.code)).join(" • ")}. Deseja confirmar a remarcação mesmo assim?`
+            : "O novo horário selecionado possui avisos operacionais. Deseja confirmar a remarcação mesmo assim?"
+        }
         confirmLabel="Confirmar mesmo assim"
         cancelLabel="Voltar ao horário anterior"
         onConfirm={handleConfirmRescheduleForce}
         onCancel={() => {
+          rescheduleConfirmState?.revertFn?.();
           setShowRescheduleConfirm(false);
           setRescheduleConfirmState(null);
         }}

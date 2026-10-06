@@ -7,11 +7,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
-export type BookingServiceType =
-  | "studio"
-  | "home"
-  | "flash";
+export type BookingServiceType = "studio" | "home" | "flash";
 
 interface BookingModalProps {
   open: boolean;
@@ -43,11 +43,7 @@ const locationLabels: Record<BookingServiceType, string> = {
   flash: "Outra Cidade / Eventos",
 };
 
-export function BookingModal({
-  open,
-  onOpenChange,
-  defaultService = "studio",
-}: BookingModalProps) {
+export function BookingModal({ open, onOpenChange, defaultService = "studio" }: BookingModalProps) {
   const [name, setName] = React.useState("");
   const [phone, setPhone] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -122,7 +118,9 @@ export function BookingModal({
         if (data && data.error) {
           setError(data.error);
         } else {
-          setError("Ocorreu um erro ao processar seu pedido. Tente novamente ou contate pelo Instagram.");
+          setError(
+            "Ocorreu um erro ao processar seu pedido. Tente novamente ou contate pelo Instagram.",
+          );
         }
       }
     } catch {
@@ -143,7 +141,8 @@ export function BookingModal({
             SOLICITAR AGENDAMENTO
           </DialogTitle>
           <DialogDescription className="text-xs text-neutral-400 tracking-wider mt-1 mb-4">
-            Preencha os dados abaixo para receber nossa proposta autoral e disponibilidade com Karlos.
+            Preencha os dados abaixo para receber nossa proposta autoral e disponibilidade com
+            Karlos.
           </DialogDescription>
         </DialogHeader>
 
@@ -156,21 +155,25 @@ export function BookingModal({
               SOLICITAÇÃO ENVIADA
             </h4>
             <p className="text-xs text-neutral-400 leading-relaxed max-w-sm mx-auto">
-              Obrigado! Recebemos sua ideia. O Karlos analisará a proposta e entrará em contato via WhatsApp/E-mail para alinhar disponibilidade e orçamento.
+              Obrigado! Recebemos sua ideia. O Karlos analisará a proposta e entrará em contato via
+              WhatsApp/E-mail para alinhar disponibilidade e orçamento.
             </p>
-            <button
+            <Button
               type="button"
-              className="w-full mt-6 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer"
+              className="w-full mt-6 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer h-auto"
               onClick={handleClose}
             >
               FECHAR
-            </button>
+            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 pt-1">
             {/* Nome Completo */}
             <div>
-              <Label htmlFor="booking-name" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+              <Label
+                htmlFor="booking-name"
+                className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+              >
                 Nome Completo
               </Label>
               <input
@@ -188,7 +191,10 @@ export function BookingModal({
             {/* WhatsApp e E-mail */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="booking-phone" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+                <Label
+                  htmlFor="booking-phone"
+                  className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+                >
                   WhatsApp / Celular
                 </Label>
                 <input
@@ -203,7 +209,10 @@ export function BookingModal({
                 />
               </div>
               <div>
-                <Label htmlFor="booking-email" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+                <Label
+                  htmlFor="booking-email"
+                  className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+                >
                   E-mail
                 </Label>
                 <input
@@ -228,24 +237,27 @@ export function BookingModal({
                 {locationOptions.map((opt) => {
                   const isSelected = service === opt.id;
                   return (
-                    <button
+                    <Button
                       key={opt.id}
                       type="button"
+                      variant={isSelected ? "outline" : "ghost"}
                       disabled={loading}
                       onClick={() => setService(opt.id)}
-                      className={`py-2 px-2 text-center transition-all rounded-none cursor-pointer flex flex-col items-center justify-center ${
+                      className={`h-auto py-2 px-2 text-center transition-all rounded-none cursor-pointer flex flex-col items-center justify-center ${
                         isSelected
-                          ? "bg-[#9be5ff]/10 border border-[#9be5ff] text-[#9be5ff] font-medium"
-                          : "bg-black/40 border border-white/10 text-neutral-400 hover:border-white/30"
+                          ? "bg-[#9be5ff]/10 border-[#9be5ff] text-[#9be5ff] font-medium hover:bg-[#9be5ff]/15 hover:text-[#9be5ff]"
+                          : "bg-black/40 border border-white/10 text-neutral-400 hover:border-white/30 hover:text-white"
                       }`}
                     >
                       <span className="text-xs tracking-wider uppercase font-semibold">
                         {opt.label}
                       </span>
-                      <span className={`text-[10px] tracking-wide mt-0.5 ${isSelected ? "text-[#9be5ff]/80" : "text-neutral-500"}`}>
+                      <span
+                        className={`text-[10px] tracking-wide mt-0.5 ${isSelected ? "text-[#9be5ff]/80" : "text-neutral-500"}`}
+                      >
                         {opt.sub}
                       </span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -253,7 +265,10 @@ export function BookingModal({
 
             {/* Ideia / Referência */}
             <div>
-              <Label htmlFor="booking-notes" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+              <Label
+                htmlFor="booking-notes"
+                className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+              >
                 Ideia / Local do Corpo / Referência
               </Label>
               <textarea
@@ -272,21 +287,23 @@ export function BookingModal({
             </p>
 
             {error && (
-              <div className="text-center text-xs text-red-400 tracking-wide font-medium bg-red-950/30 border border-red-800/40 p-2.5 rounded-none">
-                {error}
-              </div>
+              <Alert variant="destructive" className="rounded-none">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Erro no envio</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             <div className="pt-2 pb-1">
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                className={`w-full mt-2 sm:mt-4 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer ${
+                className={`w-full mt-2 sm:mt-4 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer h-auto ${
                   loading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >
                 {loading ? "ENVIANDO..." : "CONFIRMAR SOLICITAÇÃO"}
-              </button>
+              </Button>
             </div>
           </form>
         )}

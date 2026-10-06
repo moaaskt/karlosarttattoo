@@ -1,10 +1,25 @@
 import * as React from "react";
 import type { ApexOptions } from "apexcharts";
-import { Users, Target, Activity, TrendingUp, Sparkles, MapPin, Calendar, ArrowUpRight } from "lucide-react";
+import { DateTime } from "luxon";
+import {
+  Users,
+  Target,
+  Activity,
+  TrendingUp,
+  Sparkles,
+  MapPin,
+  Calendar,
+  ArrowUpRight,
+  DollarSign,
+  Wallet,
+} from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/aceternity/bento-grid";
 import { GlowingCard } from "@/components/ui/aceternity/glowing-card";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ApexChartClient } from "@/components/admin/apex-chart-client";
-import type { Lead } from "@/lib/db";
+import { centsToDisplay } from "@/lib/api-client";
+import type { Lead, Booking } from "@/lib/db";
 
 interface BentoOverviewProps {
   stats: {
@@ -16,11 +31,50 @@ interface BentoOverviewProps {
     conversionRate: string;
   };
   leads: Lead[];
+  bookings?: Booking[];
+  timezone?: string;
   onNavigateToLeads?: () => void;
 }
 
-export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverviewProps) {
+export function BentoOverview({
+  stats,
+  leads,
+  bookings = [],
+  timezone = "America/Sao_Paulo",
+  onNavigateToLeads,
+}: BentoOverviewProps) {
   const [period, setPeriod] = React.useState<"7d" | "30d" | "90d">("7d");
+
+  // Fronteiras temporais semiabertas a partir da meia-noite local (TASK-15)
+  const { startUtc, endUtc } = React.useMemo(() => {
+    const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
+    const nowLocal = DateTime.now().setZone(timezone);
+    const startLocal = nowLocal.minus({ days }).startOf("day");
+    const endLocal = nowLocal.plus({ days: 1 }).startOf("day");
+    return {
+      startUtc: startLocal.toUTC().toISO() || "",
+      endUtc: endLocal.toUTC().toISO() || "",
+    };
+  }, [period, timezone]);
+
+  const filteredBookings = React.useMemo(() => {
+    if (!startUtc || !endUtc) return bookings;
+    return bookings.filter((b) => b.start_at >= startUtc && b.start_at < endUtc);
+  }, [bookings, startUtc, endUtc]);
+
+  // Sinais recebidos = soma deposit_cents com status 'pago' ou 'retido'
+  const sinaisRecebidosCents = React.useMemo(() => {
+    return filteredBookings
+      .filter((b) => b.deposit_status === "pago" || b.deposit_status === "retido")
+      .reduce((sum, b) => sum + (b.deposit_cents || 0), 0);
+  }, [filteredBookings]);
+
+  // Receita prevista = soma price_total_cents dos agendamentos ativos
+  const receitaPrevistaCents = React.useMemo(() => {
+    return filteredBookings
+      .filter((b) => b.status !== "cancelado" && b.status !== "no_show")
+      .reduce((sum, b) => sum + (b.price_total_cents || 0), 0);
+  }, [filteredBookings]);
 
   // Dados dinâmicos para o Gráfico de Área conforme período
   const areaData = React.useMemo(() => {
@@ -33,7 +87,17 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
     }
     if (period === "30d") {
       return {
-        categories: ["01/09", "04/09", "08/09", "12/09", "16/09", "20/09", "24/09", "28/09", "01/10"],
+        categories: [
+          "01/09",
+          "04/09",
+          "08/09",
+          "12/09",
+          "16/09",
+          "20/09",
+          "24/09",
+          "28/09",
+          "01/10",
+        ],
         sessoes: [340, 420, 510, 480, 620, 590, 710, 680, 840],
         leads: [8, 12, 14, 11, 18, 15, 22, 19, Math.max(stats.total, 24)],
       };
@@ -178,12 +242,16 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
   };
 
   // Contagem de modalidades de serviço
-  const studioCount = leads.filter(
-    (l) => l.service.toLowerCase().includes("estúdio") || l.service.toLowerCase().includes("palhoça")
-  ).length || 2;
-  const vipCount = leads.filter(
-    (l) => l.service.toLowerCase().includes("domicílio") || l.service.toLowerCase().includes("vip")
-  ).length || 1;
+  const studioCount =
+    leads.filter(
+      (l) =>
+        l.service.toLowerCase().includes("estúdio") || l.service.toLowerCase().includes("palhoça"),
+    ).length || 2;
+  const vipCount =
+    leads.filter(
+      (l) =>
+        l.service.toLowerCase().includes("domicílio") || l.service.toLowerCase().includes("vip"),
+    ).length || 1;
   const totalServices = Math.max(studioCount + vipCount, 1);
   const studioPercent = Math.round((studioCount / totalServices) * 100);
   const vipPercent = 100 - studioPercent;
@@ -201,7 +269,8 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
           <div className="my-3">
             <div className="text-3xl font-extrabold text-white tracking-tight">{stats.total}</div>
             <p className="text-[11px] text-neutral-400 mt-1">
-              <span className="text-[#9be5ff] font-semibold">{stats.novos} novos</span> aguardando contato
+              <span className="text-[#9be5ff] font-semibold">{stats.novos} novos</span> aguardando
+              contato
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
@@ -215,7 +284,9 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
         {/* Taxa de Conversão */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Taxa de Conversão</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Taxa de Conversão
+            </span>
             <Target className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="my-3">
@@ -223,7 +294,8 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
               {stats.conversionRate}
             </div>
             <p className="text-[11px] text-neutral-400 mt-1">
-              <span className="text-emerald-400 font-semibold">{stats.agendados} confirmados</span> na agenda
+              <span className="text-emerald-400 font-semibold">{stats.agendados} confirmados</span>{" "}
+              na agenda
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
@@ -234,38 +306,57 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
           </div>
         </GlowingCard>
 
-        {/* Sessões GA4 */}
+        {/* Sinais em Caixa (Pagos ou Retidos) */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Sessões GA4 (7D)</span>
-            <Activity className="w-4 h-4 text-amber-400" />
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Sinais em Caixa ({period.toUpperCase()})
+            </span>
+            <Wallet className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight">1.335</div>
+            <div className="text-3xl font-extrabold text-white tracking-tight">
+              {centsToDisplay(sinaisRecebidosCents)}
+            </div>
             <p className="text-[11px] text-neutral-400 mt-1 flex items-center gap-1">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-400 font-semibold">+18.4%</span> tráfego Palhoça/Floripa
+              <span className="text-emerald-400 font-semibold">
+                {
+                  filteredBookings.filter(
+                    (b) => b.deposit_status === "pago" || b.deposit_status === "retido",
+                  ).length
+                }{" "}
+                depósitos
+              </span>{" "}
+              pagos ou retidos
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
-            <div className="h-full bg-amber-400 w-3/4" />
+            <div className="h-full bg-emerald-400 w-3/4" />
           </div>
         </GlowingCard>
 
-        {/* Atendimentos VIP Domicílio */}
+        {/* Receita Prevista (Sessões Ativas) */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Demanda VIP / Floripa</span>
-            <MapPin className="w-4 h-4 text-[#9be5ff]" />
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Receita Prevista ({period.toUpperCase()})
+            </span>
+            <DollarSign className="w-4 h-4 text-[#9be5ff]" />
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold text-[#9be5ff] tracking-tight">{vipPercent}%</div>
+            <div className="text-3xl font-extrabold text-[#9be5ff] tracking-tight">
+              {centsToDisplay(receitaPrevistaCents)}
+            </div>
             <p className="text-[11px] text-neutral-400 mt-1">
-              Atendimento exclusivo a domicílio
+              {
+                filteredBookings.filter((b) => b.status !== "cancelado" && b.status !== "no_show")
+                  .length
+              }{" "}
+              sessões ativas no período
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
-            <div className="h-full bg-[#9be5ff]" style={{ width: `${vipPercent}%` }} />
+            <div className="h-full bg-[#9be5ff]" style={{ width: "100%" }} />
           </div>
         </GlowingCard>
       </div>
@@ -279,7 +370,8 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3 mb-2">
               <div>
                 <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-white flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#9be5ff]" /> Tráfego Orgânico vs Conversão de Leads
+                  <Sparkles className="w-3.5 h-3.5 text-[#9be5ff]" /> Tráfego Orgânico vs Conversão
+                  de Leads
                 </h3>
                 <p className="text-[11px] text-neutral-400 mt-0.5">
                   Correlação dinâmica entre sessões do site e agendamentos solicitados
@@ -289,17 +381,19 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
               {/* Seletor de Período 7D / 30D / 90D */}
               <div className="flex items-center gap-1 bg-black/60 p-1 border border-white/10 self-start sm:self-auto">
                 {(["7d", "30d", "90d"] as const).map((p) => (
-                  <button
+                  <Button
                     key={p}
+                    variant={period === p ? "default" : "ghost"}
+                    size="xs"
                     onClick={() => setPeriod(p)}
-                    className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer rounded-none h-auto ${
                       period === p
-                        ? "bg-[#9be5ff] text-black"
+                        ? "bg-[#9be5ff] text-black hover:bg-[#82d9f7]"
                         : "text-neutral-400 hover:text-white"
                     }`}
                   >
                     {p.toUpperCase()}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -390,12 +484,14 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
                 </p>
               </div>
               {onNavigateToLeads && (
-                <button
+                <Button
+                  variant="link"
+                  size="sm"
                   onClick={onNavigateToLeads}
-                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-[#9be5ff] hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-[#9be5ff] hover:underline cursor-pointer p-0 h-auto"
                 >
                   Ver Todos <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               )}
             </div>
           }
@@ -411,17 +507,7 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
                   <div className="text-[11px] text-neutral-400">{lead.service}</div>
                 </div>
                 <div className="text-right">
-                  <span
-                    className={`inline-block px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider ${
-                      lead.status === "novo"
-                        ? "bg-[#9be5ff]/10 text-[#9be5ff] border border-[#9be5ff]/30"
-                        : lead.status === "agendado"
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                        : "bg-white/5 text-neutral-400"
-                    }`}
-                  >
-                    {lead.status}
-                  </span>
+                  <StatusBadge status={lead.status} />
                   <div className="text-[10px] text-neutral-500 mt-1 flex items-center gap-1 justify-end">
                     <Calendar className="w-3 h-3" />
                     {new Date(lead.createdAt).toLocaleDateString("pt-BR")}

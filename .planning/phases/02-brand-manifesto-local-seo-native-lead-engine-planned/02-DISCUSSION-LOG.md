@@ -11,10 +11,10 @@
 
 ## Brand Manifesto & Local SEO Authority
 
-| Opção | Descrição | Selecionado |
-|-------|-----------|-------------|
-| Sanity CMS & Testes Unitários | Escopo genérico preliminar do Roadmap | |
-| Manifesto Editorial + SEO Local Agressivo | Seção `Manifesto.tsx` com 3 pilares e Schema JSON-LD `TattooParlor` com termos locais estratégicos | ✓ |
+| Opção                                     | Descrição                                                                                          | Selecionado |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------- |
+| Sanity CMS & Testes Unitários             | Escopo genérico preliminar do Roadmap                                                              |             |
+| Manifesto Editorial + SEO Local Agressivo | Seção `Manifesto.tsx` com 3 pilares e Schema JSON-LD `TattooParlor` com termos locais estratégicos | ✓           |
 
 **Decisão do Usuário:** Implementar seção de Manifesto com headline central e os 3 pilares do método, acompanhada de SEO agressivo para "karlitostattoo" e "tatuador em palhoça".  
 **Notas:** Posicionamento imediatamente após o Hero e antes de "Onde Me Encontrar".
@@ -23,10 +23,10 @@
 
 ## Native Lead Engine & Admin Dashboard
 
-| Opção | Descrição | Selecionado |
-|-------|-----------|-------------|
-| Formspree externo contínuo | Manter submissão direta do formulário pelo cliente | |
-| Lead Engine Nativo no Nitro + Dashboard `/admin` | API própria `/api/leads`, persistência em banco relacional, notificações automáticas e painel de gestão | ✓ |
+| Opção                                            | Descrição                                                                                               | Selecionado |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ----------- |
+| Formspree externo contínuo                       | Manter submissão direta do formulário pelo cliente                                                      |             |
+| Lead Engine Nativo no Nitro + Dashboard `/admin` | API própria `/api/leads`, persistência em banco relacional, notificações automáticas e painel de gestão | ✓           |
 
 **Decisão do Usuário:** Substituir o Formspree por uma infraestrutura própria de captação e gerenciamento com painel autenticado, links diretos de WhatsApp e métricas do GA4.  
 **Notas:** Elimina limites de envio de serviços externos e viabiliza acompanhamento comercial direto pelo artista.

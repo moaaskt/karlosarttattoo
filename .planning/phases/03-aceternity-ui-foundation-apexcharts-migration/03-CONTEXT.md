@@ -1,7 +1,7 @@
 # Phase 3: Aceternity UI Foundation & ApexCharts Migration - Context
 
 **Gathered:** 2026-10-01  
-**Status:** Ready for planning  
+**Status:** Ready for planning
 
 <domain>
 ## Phase Boundary
@@ -14,18 +14,21 @@ Modernizar integralmente a interface do painel administrativo (`/admin`) impleme
 ## Implementation Decisions
 
 ### 1. Organização e Layout do Painel /admin
+
 - **D-01:** Estrutura modular por abas interativas no `/admin`:
   - **Aba "Visão Geral Bento":** Layout Bento Grid com cards de KPIs, gráficos ApexCharts de tráfego/conversão e indicadores analíticos de performance.
   - **Aba "Gestão de Leads":** Foco operacional dedicado à triagem rápida, alteração de status em tempo real e ações imediatas para WhatsApp do cliente com mensagem autoral pré-preenchida.
   - Header fixo com status de conexão, atalho para o site principal e botão de logout estilizado.
 
 ### 2. Primitivos e Efeitos Visuais Aceternity UI
+
 - **D-02:** Background visual sofisticado com padrão sutil de feixes luminosos / grid escuro (`BackgroundBeams` / `GridPattern`), mantendo a sobriedade dark sem poluição visual.
 - **D-03:** Componentes de cards com efeito de borda luminosa dinâmica no hover (`GlowingCard` / `BentoGridItem`), reagindo ao ponteiro do mouse com brilho ciano suave (`#9be5ff`).
 - **D-04:** Botões de ação e filtros com acabamento `ShimmerButton` (efeito de brilho angular dinâmico) para CTAs de impacto ("Acessar WhatsApp", "Atualizar Dados", seletores de filtro).
 - **D-05:** Preservação estrita da paleta de cores oficial: `#070707` (fundo principal), `#0b0b0e` (cards do bento), bordas translúcidas `border-white/10` e acentos ciano neon `#9be5ff`.
 
 ### 3. Visualização de Dados e Migração para ApexCharts
+
 - **D-06:** Instalação e integração do `apexcharts` e `react-apexcharts`, devidamente encapsulado com SSR-safe dynamic import no TanStack Start / Vite para evitar erros de renderização no servidor (`window is not defined`).
 - **D-07:** Gráfico principal de Área com gradiente de alta definição (`ApexAreaChart`):
   - Eixo X com datas dinâmicas e seletor de período (7 dias, 30 dias, 90 dias).
@@ -36,12 +39,14 @@ Modernizar integralmente a interface do painel administrativo (`/admin`) impleme
   - Breakdown de modalidades (Estúdio Palhoça vs Atendimento VIP Floripa/São José).
 
 ### 4. Responsividade e Performance
+
 - **D-09:** O Bento Grid deve se rearranjar perfeitamente em 1 coluna no mobile e tablets, permitindo ao Karlos monitorar métricas e gerenciar leads confortavelmente pelo smartphone.
 - **D-10:** Garantia de 60fps mantendo CSS transforms acelerados por hardware e evitando rerenders desnecessários dos gráficos.
 
 </decisions>
 
 <canonical_refs>
+
 ## Canonical References
 
 - `.planning/REQUIREMENTS.md` — Requisitos R-01 a R-04 e NFR-01/NFR-02 do Milestone v2.0.

@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  createTimeBlock,
-  listTimeBlocks,
-  deleteTimeBlock,
-} from "../../lib/db";
+import { createTimeBlock, listTimeBlocks, deleteTimeBlock } from "../../lib/db";
 import { ISO_UTC_RE } from "../../lib/booking-utils";
 import { isAuthorized, unauthorizedResponse, jsonResponse, corsHeaders } from "./auth";
 
@@ -25,7 +21,10 @@ const createTimeBlockSchema = z
       }
       return ISO_UTC_RE.test(data.start_at);
     },
-    { message: "start_at deve ser formato ISO UTC estrito (ou YYYY-MM-DD se all_day=1)", path: ["start_at"] }
+    {
+      message: "start_at deve ser formato ISO UTC estrito (ou YYYY-MM-DD se all_day=1)",
+      path: ["start_at"],
+    },
   )
   .refine(
     (data) => {
@@ -35,7 +34,10 @@ const createTimeBlockSchema = z
       }
       return ISO_UTC_RE.test(data.end_at);
     },
-    { message: "end_at deve ser formato ISO UTC estrito (ou YYYY-MM-DD se all_day=1)", path: ["end_at"] }
+    {
+      message: "end_at deve ser formato ISO UTC estrito (ou YYYY-MM-DD se all_day=1)",
+      path: ["end_at"],
+    },
   );
 
 export async function handleTimeBlocksRequest(request: Request): Promise<Response> {
@@ -50,7 +52,10 @@ export async function handleTimeBlocksRequest(request: Request): Promise<Respons
   }
 
   const url = new URL(request.url);
-  const pathParts = url.pathname.replace(/^\/api\/time-blocks\/?/, "").split("/").filter(Boolean);
+  const pathParts = url.pathname
+    .replace(/^\/api\/time-blocks\/?/, "")
+    .split("/")
+    .filter(Boolean);
 
   // 1. GET /api/time-blocks
   if (method === "GET") {
@@ -81,7 +86,7 @@ export async function handleTimeBlocksRequest(request: Request): Promise<Respons
             details: parsed.error.format(),
             message: parsed.error.errors.map((e) => e.message).join("; "),
           },
-          422
+          422,
         );
       }
 
@@ -98,7 +103,7 @@ export async function handleTimeBlocksRequest(request: Request): Promise<Respons
             conflicts: result.conflicts || [],
             message: result.message,
           },
-          409
+          409,
         );
       }
 

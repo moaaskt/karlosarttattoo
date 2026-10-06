@@ -36,7 +36,7 @@ export function GlowingCard({
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
         "relative overflow-hidden bg-[#0b0b0e] border border-white/10 rounded-none transition-colors duration-300",
-        className
+        className,
       )}
       {...props}
     >
@@ -46,7 +46,7 @@ export function GlowingCard({
         style={{
           opacity: isHovered ? 1 : 0,
           background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, ${glowColor}${Math.round(
-            glowOpacity * 255
+            glowOpacity * 255,
           )
             .toString(16)
             .padStart(2, "0")}, transparent 80%)`,

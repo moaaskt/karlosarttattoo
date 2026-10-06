@@ -2,12 +2,14 @@
 
 **Status:** Completed  
 **Completed Date:** 2026-10-01  
-**Wave:** 2  
+**Wave:** 2
 
 ## Overview
+
 Redesign completo da interface administrativa `/admin` implementando a linguagem visual avançada da Aceternity UI com layout Bento Grid, abas modulares de navegação, atmosfera dark com BackgroundBeams e migração definitiva dos gráficos analíticos para ApexCharts.
 
 ## Key Deliverables
+
 - **BentoOverview (`src/components/admin/bento-overview.tsx`):**
   - Layout Bento Grid responsivo (1 a 3 colunas) com cards analíticos e de performance.
   - Gráfico Principal de Área Neon com ApexCharts (`ApexChartClient`), curvas suaves e seletor dinâmico de período (7D, 30D, 90D) para correlação entre sessões GA4 e leads recebidos.
@@ -20,6 +22,7 @@ Redesign completo da interface administrativa `/admin` implementando a linguagem
   - ShimmerButtons integrados tanto no login de acesso quanto nas ações de disparo para WhatsApp em `lead-table.tsx`.
 
 ## Verification
+
 - `npx vite build` executado e aprovado em 942ms (client) e 568ms (Nitro/SSR) sem erros.
 - ApexCharts renderiza perfeitamente no client com SSR-safe wrapper.
 - Navegação entre abas, alteração de status e botões de ação operacionais.

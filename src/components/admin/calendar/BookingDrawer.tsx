@@ -18,7 +18,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "./ConfirmDialog";
-import { apiFetch, centsToDisplay, displayToCents, formatWhatsAppPhone, getErrorMessage } from "../../../lib/api-client";
+import { Button } from "@/components/ui/button";
+import {
+  apiFetch,
+  centsToDisplay,
+  displayToCents,
+  formatWhatsAppPhone,
+  getErrorMessage,
+} from "../../../lib/api-client";
 import {
   STATUS_COLOR,
   DEPOSIT_BORDER,
@@ -61,33 +68,41 @@ export function BookingDrawer({
   const [showCancelConfirm, setShowCancelConfirm] = React.useState(false);
 
   // Busca agendamento completo com histórico
-  const fetchBooking = React.useCallback(async (id: string) => {
-    setIsLoading(true);
-    try {
-      const res = await apiFetch<{ success?: boolean; booking?: Booking & { events: BookingEvent[] } }>(
-        `/api/bookings/${id}`
-      );
-      if (res.ok && res.data?.booking) {
-        const b = res.data.booking;
-        setBooking(b);
-        setEditName(b.client_name);
-        setEditPhone(b.client_phone);
-        setEditEmail(b.client_email || "");
-        setEditLocation(b.location);
-        setEditSessionType(b.session_type);
-        setEditPriceDisplay(b.price_total_cents ? (b.price_total_cents / 100).toFixed(2).replace(".", ",") : "0,00");
-        setEditDepositDisplay(b.deposit_cents ? (b.deposit_cents / 100).toFixed(2).replace(".", ",") : "0,00");
-        setEditNotes(b.notes || "");
-      } else {
-        toast.error("Erro ao carregar dados do agendamento.");
-        onClose();
+  const fetchBooking = React.useCallback(
+    async (id: string) => {
+      setIsLoading(true);
+      try {
+        const res = await apiFetch<{
+          success?: boolean;
+          booking?: Booking & { events: BookingEvent[] };
+        }>(`/api/bookings/${id}`);
+        if (res.ok && res.data?.booking) {
+          const b = res.data.booking;
+          setBooking(b);
+          setEditName(b.client_name);
+          setEditPhone(b.client_phone);
+          setEditEmail(b.client_email || "");
+          setEditLocation(b.location);
+          setEditSessionType(b.session_type);
+          setEditPriceDisplay(
+            b.price_total_cents ? (b.price_total_cents / 100).toFixed(2).replace(".", ",") : "0,00",
+          );
+          setEditDepositDisplay(
+            b.deposit_cents ? (b.deposit_cents / 100).toFixed(2).replace(".", ",") : "0,00",
+          );
+          setEditNotes(b.notes || "");
+        } else {
+          toast.error("Erro ao carregar dados do agendamento.");
+          onClose();
+        }
+      } catch {
+        toast.error("Falha de conexão com a API.");
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      toast.error("Falha de conexão com a API.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [onClose]);
+    },
+    [onClose],
+  );
 
   React.useEffect(() => {
     if (bookingId) {
@@ -106,7 +121,10 @@ export function BookingDrawer({
   const localEnd = utcToLocal(booking.end_at, timezone);
 
   // 1. Mudança de status do agendamento
-  const handleStatusChange = async (newStatus: Booking["status"], depositAction?: "retido" | "devolvido") => {
+  const handleStatusChange = async (
+    newStatus: Booking["status"],
+    depositAction?: "retido" | "devolvido",
+  ) => {
     if (newStatus === "confirmado" && booking.deposit_status === "pendente") {
       toast.error(getErrorMessage("deposit_required"));
       return;
@@ -124,7 +142,7 @@ export function BookingDrawer({
         {
           method: "PATCH",
           body: JSON.stringify({ status: newStatus, depositAction }),
-        }
+        },
       );
 
       if (res.ok) {
@@ -142,7 +160,9 @@ export function BookingDrawer({
   // 2. Mudança no status do sinal
   const handleDepositStatusChange = async (newDepositStatus: Booking["deposit_status"]) => {
     if (booking.status === "confirmado" && newDepositStatus === "pendente") {
-      toast.warning("Agendamento confirmado exige sinal pago ou dispensado. Altere o status primeiro.");
+      toast.warning(
+        "Agendamento confirmado exige sinal pago ou dispensado. Altere o status primeiro.",
+      );
       return;
     }
 
@@ -153,7 +173,7 @@ export function BookingDrawer({
         {
           method: "PATCH",
           body: JSON.stringify({ deposit_status: newDepositStatus }),
-        }
+        },
       );
 
       if (res.ok) {
@@ -187,12 +207,14 @@ export function BookingDrawer({
     const patch: Record<string, any> = {};
     if (editName.trim() !== booking.client_name) patch.client_name = editName.trim();
     if (editPhone.trim() !== booking.client_phone) patch.client_phone = editPhone.trim();
-    if ((editEmail.trim() || null) !== (booking.client_email || null)) patch.client_email = editEmail.trim() || null;
+    if ((editEmail.trim() || null) !== (booking.client_email || null))
+      patch.client_email = editEmail.trim() || null;
     if (editLocation !== booking.location) patch.location = editLocation;
     if (editSessionType !== booking.session_type) patch.session_type = editSessionType;
     if (priceCents !== booking.price_total_cents) patch.price_total_cents = priceCents;
     if (depositCents !== booking.deposit_cents) patch.deposit_cents = depositCents;
-    if ((editNotes.trim() || null) !== (booking.notes || null)) patch.notes = editNotes.trim() || null;
+    if ((editNotes.trim() || null) !== (booking.notes || null))
+      patch.notes = editNotes.trim() || null;
 
     if (Object.keys(patch).length === 0) {
       toast.info("Nenhuma alteração detectada.");
@@ -206,7 +228,7 @@ export function BookingDrawer({
         {
           method: "PATCH",
           body: JSON.stringify(patch),
-        }
+        },
       );
 
       if (res.ok) {
@@ -222,9 +244,12 @@ export function BookingDrawer({
   };
 
   const allowedTransitions = VALID_TRANSITIONS[booking.status] ?? [];
-  const isTerminal = booking.status === "cancelado" || booking.status === "no_show" || booking.status === "concluido";
+  const isTerminal =
+    booking.status === "cancelado" ||
+    booking.status === "no_show" ||
+    booking.status === "concluido";
   const whatsappUrl = `https://wa.me/${formatWhatsAppPhone(booking.client_phone)}?text=${encodeURIComponent(
-    `Olá ${booking.client_name}, aqui é o Karlos do ateliê Karlos Art Tattoo sobre sua sessão no dia ${localStart.date}!`
+    `Olá ${booking.client_name}, aqui é o Karlos do ateliê Karlos Art Tattoo sobre sua sessão no dia ${localStart.date}!`,
   )}`;
 
   return (
@@ -249,12 +274,14 @@ export function BookingDrawer({
                 Agendamento #{booking.id.slice(-6)}
               </span>
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={onClose}
-              className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              className="text-neutral-400 hover:text-white transition-colors cursor-pointer rounded-none"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
 
           <div className="mt-4">
@@ -326,47 +353,50 @@ export function BookingDrawer({
             </label>
             {isTerminal ? (
               <p className="text-xs text-neutral-500 italic">
-                Status terminal alcançado ({booking.status}). Nenhuma outra transição de status é permitida.
+                Status terminal alcançado ({booking.status}). Nenhuma outra transição de status é
+                permitida.
               </p>
             ) : allowedTransitions.length === 0 ? (
               <p className="text-xs text-neutral-500">Sem transições disponíveis.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {allowedTransitions.includes("confirmado") && (
-                  <button
+                  <Button
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("confirmado")}
-                    className="flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-colors disabled:opacity-50 cursor-pointer"
+                    className="flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
                   >
                     Confirmar Sessão
-                  </button>
+                  </Button>
                 )}
                 {allowedTransitions.includes("concluido") && (
-                  <button
+                  <Button
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("concluido")}
-                    className="flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
                   >
                     Concluir Sessão
-                  </button>
+                  </Button>
                 )}
                 {allowedTransitions.includes("cancelado") && (
-                  <button
+                  <Button
+                    variant="outline"
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("cancelado")}
-                    className="px-3 py-2 text-xs font-bold uppercase tracking-wider bg-neutral-800 text-neutral-300 hover:bg-red-950/60 hover:text-red-400 border border-white/10 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-2 text-xs font-bold uppercase tracking-wider bg-neutral-800 text-neutral-300 hover:bg-red-950/60 hover:text-red-400 border-white/10 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
                   >
                     Cancelar
-                  </button>
+                  </Button>
                 )}
                 {allowedTransitions.includes("no_show") && (
-                  <button
+                  <Button
+                    variant="destructive"
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("no_show")}
-                    className="px-3 py-2 text-xs font-bold uppercase tracking-wider bg-red-950/40 text-red-400 border border-red-800/40 hover:bg-red-900/60 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-2 text-xs font-bold uppercase tracking-wider bg-red-950/40 text-red-400 border border-red-800/40 hover:bg-red-900/60 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
                   >
                     Falta (No-Show)
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -379,13 +409,16 @@ export function BookingDrawer({
                 Status do Sinal
               </label>
               <span className="text-xs font-mono text-[#9be5ff]">
-                {centsToDisplay(booking.deposit_cents)} / {centsToDisplay(booking.price_total_cents)}
+                {centsToDisplay(booking.deposit_cents)} /{" "}
+                {centsToDisplay(booking.price_total_cents)}
               </span>
             </div>
             <select
               value={booking.deposit_status}
               disabled={isSubmitting}
-              onChange={(e) => handleDepositStatusChange(e.target.value as Booking["deposit_status"])}
+              onChange={(e) =>
+                handleDepositStatusChange(e.target.value as Booking["deposit_status"])
+              }
               className="w-full bg-[#141416] border border-white/20 text-white text-xs px-3 py-2 rounded-none outline-none focus:border-[#9be5ff] cursor-pointer"
             >
               <option value="pendente">Pendente</option>
@@ -395,13 +428,19 @@ export function BookingDrawer({
                 value="retido"
                 disabled={booking.status !== "cancelado" && booking.status !== "no_show"}
               >
-                Retido {booking.status !== "cancelado" && booking.status !== "no_show" ? "(só após cancelamento)" : ""}
+                Retido{" "}
+                {booking.status !== "cancelado" && booking.status !== "no_show"
+                  ? "(só após cancelamento)"
+                  : ""}
               </option>
               <option
                 value="devolvido"
                 disabled={booking.status !== "cancelado" && booking.status !== "no_show"}
               >
-                Devolvido {booking.status !== "cancelado" && booking.status !== "no_show" ? "(só após cancelamento)" : ""}
+                Devolvido{" "}
+                {booking.status !== "cancelado" && booking.status !== "no_show"
+                  ? "(só após cancelamento)"
+                  : ""}
               </option>
             </select>
           </div>
@@ -469,7 +508,9 @@ export function BookingDrawer({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Tipo de Sessão</label>
+                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                  Tipo de Sessão
+                </label>
                 <select
                   value={editSessionType}
                   onChange={(e) => setEditSessionType(e.target.value as Booking["session_type"])}
@@ -486,7 +527,9 @@ export function BookingDrawer({
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Preço Total (R$)</label>
+                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                  Preço Total (R$)
+                </label>
                 <input
                   type="text"
                   value={editPriceDisplay}
@@ -497,11 +540,17 @@ export function BookingDrawer({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Sinal (R$)</label>
+                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                  Sinal (R$)
+                </label>
                 <input
                   type="text"
                   value={editDepositDisplay}
-                  disabled={booking.deposit_status === "pago" || booking.deposit_status === "retido" || booking.deposit_status === "devolvido"}
+                  disabled={
+                    booking.deposit_status === "pago" ||
+                    booking.deposit_status === "retido" ||
+                    booking.deposit_status === "devolvido"
+                  }
                   onChange={(e) => setEditDepositDisplay(e.target.value)}
                   className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] disabled:opacity-50 font-mono"
                   placeholder="0,00"
@@ -510,7 +559,9 @@ export function BookingDrawer({
             </div>
 
             <div className="space-y-1 text-xs">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">Notas / Ideia</label>
+              <label className="text-[10px] uppercase font-bold text-neutral-400">
+                Notas / Ideia
+              </label>
               <textarea
                 value={editNotes}
                 rows={2}
@@ -520,14 +571,14 @@ export function BookingDrawer({
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
             >
               <Save className="w-3.5 h-3.5" />
               {isSubmitting ? "Salvando..." : "Salvar Dados da Sessão"}
-            </button>
+            </Button>
           </form>
 
           {/* 4. HISTÓRICO DE AUDITORIA */}
@@ -541,11 +592,15 @@ export function BookingDrawer({
                 <p className="text-xs text-neutral-500">Nenhum evento registrado.</p>
               ) : (
                 booking.events.map((ev) => (
-                  <div key={ev.id} className="text-[11px] bg-black/40 border border-white/5 p-2 rounded">
+                  <div
+                    key={ev.id}
+                    className="text-[11px] bg-black/40 border border-white/5 p-2 rounded"
+                  >
                     <div className="flex items-center justify-between text-neutral-400">
                       <span className="font-bold uppercase text-[#9be5ff]">{ev.event_type}</span>
                       <span className="font-mono text-[9px]">
-                        {utcToLocal(ev.created_at, timezone).date} {utcToLocal(ev.created_at, timezone).time}
+                        {utcToLocal(ev.created_at, timezone).date}{" "}
+                        {utcToLocal(ev.created_at, timezone).time}
                       </span>
                     </div>
                     {ev.note && <p className="text-neutral-300 mt-0.5">{ev.note}</p>}
@@ -558,23 +613,29 @@ export function BookingDrawer({
 
         {/* Rodapé com Remarcar e Fechar */}
         <div className="p-4 border-t border-white/10 bg-[#070707] flex items-center justify-between gap-3">
-          <button
+          <Button
+            variant="outline"
             onClick={() => {
               onReschedule(booking);
               onClose();
             }}
-            disabled={booking.status === "cancelado" || booking.status === "concluido" || booking.status === "no_show"}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#9be5ff]/10 hover:bg-[#9be5ff]/20 text-[#9be5ff] border border-[#9be5ff]/30 text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-40 cursor-pointer"
+            disabled={
+              booking.status === "cancelado" ||
+              booking.status === "concluido" ||
+              booking.status === "no_show"
+            }
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#9be5ff]/10 hover:bg-[#9be5ff]/20 text-[#9be5ff] border-[#9be5ff]/30 text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-40 cursor-pointer rounded-none h-auto"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             Remarcar Horário ↗
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             onClick={onClose}
-            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border border-white/10 transition-colors cursor-pointer"
+            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border-white/10 transition-colors cursor-pointer rounded-none h-auto"
           >
             Fechar
-          </button>
+          </Button>
         </div>
       </aside>
 

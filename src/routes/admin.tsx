@@ -11,6 +11,8 @@ import {
   Users,
   Calendar as CalendarIcon,
   ExternalLink,
+  AlertCircle,
+  Info,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { LeadTable } from "@/components/admin/lead-table";
@@ -20,7 +22,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/aceternity/sidebar";
-import type { Lead } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { InfoBadge } from "@/components/ui/status-badge";
+import type { Lead, Booking } from "@/lib/db";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -40,6 +45,7 @@ function AdminPage() {
   const [leadToSchedule, setLeadToSchedule] = React.useState<Lead | null>(null);
 
   const [leads, setLeads] = React.useState<Lead[]>([]);
+  const [bookings, setBookings] = React.useState<Booking[]>([]);
   const [stats, setStats] = React.useState({
     total: 0,
     novos: 0,
@@ -49,7 +55,11 @@ function AdminPage() {
     conversionRate: "0.0%",
   });
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [feedbackMsg, setFeedbackMsg] = React.useState<string | null>(null);
+  const [panelAlert, setPanelAlert] = React.useState<{
+    variant: "default" | "destructive";
+    title?: string;
+    message: string;
+  } | null>(null);
   const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false);
 
   // Recupera token do sessionStorage se disponível
@@ -65,15 +75,23 @@ function AdminPage() {
     setIsLoading(true);
     setLoginError(null);
     try {
-      const response = await fetch("/api/leads", {
-        headers: {
-          Authorization: `Bearer ${tokenToUse}`,
-          Accept: "application/json",
-        },
-      });
+      const [leadsRes, bookingsRes] = await Promise.all([
+        fetch("/api/leads", {
+          headers: {
+            Authorization: `Bearer ${tokenToUse}`,
+            Accept: "application/json",
+          },
+        }),
+        fetch("/api/bookings", {
+          headers: {
+            Authorization: `Bearer ${tokenToUse}`,
+            Accept: "application/json",
+          },
+        }),
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (leadsRes.ok) {
+        const data = await leadsRes.json();
         setLeads(data.leads || []);
         if (data.stats) setStats(data.stats);
         setIsAuthenticated(true);
@@ -82,6 +100,11 @@ function AdminPage() {
         setIsAuthenticated(false);
         sessionStorage.removeItem("admin_auth_token");
         setLoginError("Chave de acesso inválida ou sessão expirada.");
+      }
+
+      if (bookingsRes.ok) {
+        const bData = await bookingsRes.json();
+        setBookings(bData.bookings || []);
       }
     } catch {
       setLoginError("Erro ao comunicar com o servidor da API.");
@@ -122,16 +145,26 @@ function AdminPage() {
 
       if (response.ok) {
         setLeads((prev) =>
-          prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead))
+          prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead)),
         );
         verifyAndFetch(authKey);
-        setFeedbackMsg("Status atualizado!");
-        setTimeout(() => setFeedbackMsg(null), 3000);
+        setPanelAlert({ variant: "default", message: "Status atualizado!" });
+        setTimeout(() => setPanelAlert(null), 3000);
       } else {
-        alert("Erro ao atualizar o status do lead.");
+        setPanelAlert({
+          variant: "destructive",
+          title: "Erro no lead",
+          message: "Erro ao atualizar o status do lead.",
+        });
+        setTimeout(() => setPanelAlert(null), 5000);
       }
     } catch {
-      alert("Falha de conexão ao atualizar status.");
+      setPanelAlert({
+        variant: "destructive",
+        title: "Falha de conexão",
+        message: "Falha de conexão ao atualizar status.",
+      });
+      setTimeout(() => setPanelAlert(null), 5000);
     }
   };
 
@@ -178,9 +211,11 @@ function AdminPage() {
             </div>
 
             {loginError && (
-              <div className="text-xs text-red-400 bg-red-950/40 border border-red-800/40 p-3 text-center tracking-wide">
-                {loginError}
-              </div>
+              <Alert variant="destructive" className="rounded-none">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Erro de autenticação</AlertTitle>
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
             )}
 
             <ShimmerButton
@@ -209,7 +244,7 @@ function AdminPage() {
 
   const sidebarNavLinks: SidebarLinkItem[] = [
     {
-      label: "Visão Bento",
+      label: "Dashboard",
       icon: <LayoutDashboard className="w-4 h-4 shrink-0" />,
       active: activeTab === "bento",
       onClick: () => setActiveTab("bento"),
@@ -262,7 +297,9 @@ function AdminPage() {
                 className="font-normal flex items-center gap-3 text-sm text-white relative z-20 group"
               >
                 <div className="h-8 w-8 bg-black/80 border border-[#9be5ff]/60 rounded flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(155,229,255,0.25)]">
-                  <span className="text-xs font-black text-[#9be5ff] font-mono tracking-tighter">KA</span>
+                  <span className="text-xs font-black text-[#9be5ff] font-mono tracking-tighter">
+                    KA
+                  </span>
                 </div>
                 <motion.div
                   animate={{
@@ -275,7 +312,7 @@ function AdminPage() {
                     Karlos Art
                   </span>
                   <span className="text-[9px] uppercase tracking-[0.25em] text-[#9be5ff] mt-1 font-bold">
-                    Ateliê & Dashboard
+                    PAINEL ADMINSTRATIVO
                   </span>
                 </motion.div>
               </Link>
@@ -351,61 +388,84 @@ function AdminPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#9be5ff] flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#9be5ff]" /> PAINEL ADMINISTRATIVO · ACETERNITY SIDEBAR
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#9be5ff]" /> PAINEL ADMINISTRATIVO ·
+                  ACETERNITY SIDEBAR
                 </span>
               </div>
               <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-[0.18em] text-white mt-0.5">
-                {activeTab === "bento" && "Visão Analítica Bento & Métricas"}
+                {activeTab === "bento" && "Visão Analítica & Métricas"}
                 {activeTab === "leads" && "Triagem & Gestão de Leads (Orçamentos)"}
                 {activeTab === "agenda" && "Agenda & Gestão de Sessões do Ateliê"}
               </h1>
             </div>
 
             <div className="flex items-center gap-3">
-              {feedbackMsg && (
-                <span className="text-xs text-[#9be5ff] bg-[#9be5ff]/10 border border-[#9be5ff]/30 px-3 py-1 animate-pulse">
-                  {feedbackMsg}
-                </span>
-              )}
-
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => verifyAndFetch(authKey)}
                 disabled={isLoading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-black/60 hover:bg-black border border-white/15 text-neutral-300 hover:text-white text-xs uppercase tracking-[0.15em] transition-all cursor-pointer"
+                className="bg-black/60 hover:bg-black border-white/15 text-neutral-300 hover:text-white text-xs uppercase tracking-[0.15em] transition-all cursor-pointer rounded-none h-8 gap-1.5"
                 title="Atualizar dados"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#9be5ff]" : ""}`} />
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#9be5ff]" : ""}`}
+                />
                 <span className="hidden sm:inline">Atualizar</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-950/20 hover:bg-red-950/40 border border-red-800/30 text-red-400 hover:text-red-300 text-xs uppercase tracking-[0.15em] transition-all cursor-pointer"
+                className="bg-red-950/20 hover:bg-red-950/40 border border-red-800/30 text-red-400 hover:text-red-300 text-xs uppercase tracking-[0.15em] transition-all cursor-pointer rounded-none h-8 gap-1.5"
                 title="Sair do Painel"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Sair</span>
-              </button>
+              </Button>
             </div>
           </div>
         </header>
 
         {/* Conteúdo Principal Renderizado Conforme Aba Ativa */}
         <main className="p-6 md:p-8 max-w-7xl w-full mx-auto flex-1">
+          {panelAlert && (
+            <Alert
+              variant={panelAlert.variant}
+              className={`mb-6 rounded-none ${
+                panelAlert.variant === "default"
+                  ? "border-[#9be5ff]/40 bg-[#9be5ff]/5 text-neutral-200"
+                  : ""
+              }`}
+            >
+              {panelAlert.variant === "destructive" ? (
+                <AlertCircle className="h-4 w-4" />
+              ) : (
+                <Info className="h-4 w-4 text-[#9be5ff]" />
+              )}
+              <AlertTitle>
+                {panelAlert.title ||
+                  (panelAlert.variant === "destructive" ? "Aviso de Erro" : "Notificação")}
+              </AlertTitle>
+              <AlertDescription>{panelAlert.message}</AlertDescription>
+            </Alert>
+          )}
+
           {activeTab === "bento" ? (
             <section className="space-y-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-2">
                 <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#9be5ff]" /> Visão Analítica do Estúdio & Métricas
+                  <Sparkles className="w-4 h-4 text-[#9be5ff]" /> Visão Analítica do Estúdio &
+                  Métricas
                 </h2>
-                <span className="text-[10px] uppercase tracking-wider text-neutral-500">
-                  Palhoça & Florianópolis
-                </span>
+                <InfoBadge type="location">Palhoça & Florianópolis</InfoBadge>
               </div>
 
               <BentoOverview
                 stats={stats}
                 leads={leads}
+                bookings={bookings}
                 onNavigateToLeads={() => setActiveTab("leads")}
               />
             </section>
@@ -451,4 +511,3 @@ function AdminPage() {
     </div>
   );
 }
-

@@ -37,7 +37,7 @@ function getCookieValue(cookieHeader: string, cookieName: string): string | null
 
 /**
  * Valida autorização administrativa via Header Bearer, Cookie admin_token ou Query token.
- * 
+ *
  * REGRA DE SEGURANÇA CRÍTICA:
  * Se ADMIN_PASSWORD não estiver configurado no ambiente, recusa categoricamente
  * qualquer acesso administrativo (sem senhas de fallback hardcoded).
@@ -78,13 +78,17 @@ export function isAuthorized(request: Request): boolean {
 export function unauthorizedResponse(): Response {
   return new Response(
     JSON.stringify({ error: "Acesso não autorizado. Chave de acesso requerida." }),
-    { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 }
 
-export function jsonResponse(data: unknown, status = 200): Response {
+export function jsonResponse(
+  data: unknown,
+  status = 200,
+  extraHeaders?: Record<string, string>,
+): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json", ...(extraHeaders || {}) },
   });
 }

@@ -67,7 +67,10 @@ export default {
       if (url.pathname === "/api/settings" || url.pathname.startsWith("/api/settings/")) {
         return await handleSettingsRequest(request);
       }
-      if (url.pathname === "/api/availability-rules" || url.pathname.startsWith("/api/availability-rules/")) {
+      if (
+        url.pathname === "/api/availability-rules" ||
+        url.pathname.startsWith("/api/availability-rules/")
+      ) {
         return await handleAvailabilityRulesRequest(request);
       }
 

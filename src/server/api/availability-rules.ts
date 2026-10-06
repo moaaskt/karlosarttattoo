@@ -8,16 +8,18 @@ import { isAuthorized, unauthorizedResponse, jsonResponse, corsHeaders } from ".
 
 const timeFormatRe = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-const ruleSchema = z.object({
-  id: z.string().optional(),
-  day_of_week: z.number().int().min(0, "Dia da semana deve ser entre 0 e 6").max(6),
-  window_start: z.string().regex(timeFormatRe, "Formato HH:mm esperado (ex: 09:00)"),
-  window_end: z.string().regex(timeFormatRe, "Formato HH:mm esperado (ex: 18:00)"),
-  is_active: z.number().int().min(0).max(1).optional().default(1),
-}).refine((data) => data.window_end > data.window_start, {
-  message: "window_end deve ser posterior a window_start",
-  path: ["window_end"],
-});
+const ruleSchema = z
+  .object({
+    id: z.string().optional(),
+    day_of_week: z.number().int().min(0, "Dia da semana deve ser entre 0 e 6").max(6),
+    window_start: z.string().regex(timeFormatRe, "Formato HH:mm esperado (ex: 09:00)"),
+    window_end: z.string().regex(timeFormatRe, "Formato HH:mm esperado (ex: 18:00)"),
+    is_active: z.number().int().min(0).max(1).optional().default(1),
+  })
+  .refine((data) => data.window_end > data.window_start, {
+    message: "window_end deve ser posterior a window_start",
+    path: ["window_end"],
+  });
 
 export async function handleAvailabilityRulesRequest(request: Request): Promise<Response> {
   const method = request.method.toUpperCase();
@@ -31,7 +33,10 @@ export async function handleAvailabilityRulesRequest(request: Request): Promise<
   }
 
   const url = new URL(request.url);
-  const pathParts = url.pathname.replace(/^\/api\/availability-rules\/?/, "").split("/").filter(Boolean);
+  const pathParts = url.pathname
+    .replace(/^\/api\/availability-rules\/?/, "")
+    .split("/")
+    .filter(Boolean);
 
   // 1. GET /api/availability-rules
   if (method === "GET") {
@@ -59,7 +64,7 @@ export async function handleAvailabilityRulesRequest(request: Request): Promise<
             error: "Dados de regra inválidos.",
             details: parsed.error.format(),
           },
-          422
+          422,
         );
       }
 

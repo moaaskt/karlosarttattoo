@@ -64,6 +64,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   deposit_required: "Sinal obrigatório para confirmar agendamento.",
   deposit_action_required: "Escolha o destino do sinal: reter ou devolver.",
   outside_hours: "Horário fora do expediente configurado.",
+  past_date: "Data ou horário informado está no passado.",
+  future_window: "Data ultrapassa o limite permitido de agendamento futuro.",
   not_found: "Agendamento não encontrado.",
   unknown: "Erro desconhecido. Tente novamente.",
 };
@@ -76,12 +78,10 @@ export function getErrorMessage(code?: string): string {
 /** Fetch autenticado — único ponto de acesso à API da agenda */
 export async function apiFetch<T = unknown>(
   path: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<{ ok: boolean; status: number; data: T }> {
   const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("admin_auth_token") ?? ""
-      : "";
+    typeof window !== "undefined" ? (sessionStorage.getItem("admin_auth_token") ?? "") : "";
   const res = await fetch(path, {
     ...options,
     headers: {

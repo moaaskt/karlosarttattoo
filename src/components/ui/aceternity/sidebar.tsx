@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 
 export interface Links {
   label: string;
@@ -19,9 +20,7 @@ interface SidebarContextProps {
   animate: boolean;
 }
 
-const SidebarContext = createContext<SidebarContextProps | undefined>(
-  undefined
-);
+const SidebarContext = createContext<SidebarContextProps | undefined>(undefined);
 
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
@@ -48,9 +47,7 @@ export const SidebarProvider = ({
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
   return (
-    <SidebarContext.Provider value={{ open, setOpen, animate }}>
-      {children}
-    </SidebarContext.Provider>
+    <SidebarContext.Provider value={{ open, setOpen, animate }}>{children}</SidebarContext.Provider>
   );
 };
 
@@ -92,7 +89,7 @@ export const DesktopSidebar = ({
       <motion.div
         className={cn(
           "h-full px-4 py-4 hidden md:flex md:flex-col bg-[#0b0b0e] border-r border-white/10 w-[280px] shrink-0 text-white z-40 transition-colors",
-          className
+          className,
         )}
         animate={{
           width: animate ? (open ? "280px" : "68px") : "280px",
@@ -107,17 +104,13 @@ export const DesktopSidebar = ({
   );
 };
 
-export const MobileSidebar = ({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) => {
+export const MobileSidebar = ({ className, children, ...props }: React.ComponentProps<"div">) => {
   const { open, setOpen } = useSidebar();
   return (
     <>
       <div
         className={cn(
-          "h-14 px-4 flex flex-row md:hidden items-center justify-between bg-[#0b0b0e] border-b border-white/10 w-full z-40"
+          "h-14 px-4 flex flex-row md:hidden items-center justify-between bg-[#0b0b0e] border-b border-white/10 w-full z-40",
         )}
         {...props}
       >
@@ -127,14 +120,16 @@ export const MobileSidebar = ({
           </span>
         </div>
         <div className="flex justify-end z-20">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             aria-label="Abrir menu"
-            className="p-1 text-neutral-300 hover:text-white cursor-pointer"
+            className="text-neutral-300 hover:text-white cursor-pointer rounded-none"
             onClick={() => setOpen(!open)}
           >
             <IconMenu2 className="w-5 h-5 text-neutral-200" />
-          </button>
+          </Button>
         </div>
         <AnimatePresence>
           {open && (
@@ -148,18 +143,20 @@ export const MobileSidebar = ({
               }}
               className={cn(
                 "fixed h-full w-full inset-0 bg-[#070707]/98 backdrop-blur-2xl p-6 z-[100] flex flex-col justify-between border-r border-white/10",
-                className
+                className,
               )}
             >
-              <div
-                className="absolute right-6 top-6 z-50 text-neutral-300 hover:text-white cursor-pointer p-1"
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Fechar menu"
+                className="absolute right-6 top-6 z-50 text-neutral-300 hover:text-white cursor-pointer rounded-none"
                 onClick={() => setOpen(!open)}
               >
                 <IconX className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col flex-1 overflow-y-auto">
-                {children}
-              </div>
+              </Button>
+              <div className="flex flex-col flex-1 overflow-y-auto">{children}</div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -192,7 +189,12 @@ export const SidebarLink = ({
 
   const content = (
     <>
-      <div className={cn("shrink-0 transition-transform duration-200 group-hover/sidebar:scale-110", link.active ? "text-[#9be5ff]" : "text-neutral-400 group-hover/sidebar:text-white")}>
+      <div
+        className={cn(
+          "shrink-0 transition-transform duration-200 group-hover/sidebar:scale-110",
+          link.active ? "text-[#9be5ff]" : "text-neutral-400 group-hover/sidebar:text-white",
+        )}
+      >
         {link.icon}
       </div>
 
@@ -206,7 +208,9 @@ export const SidebarLink = ({
         <span
           className={cn(
             "text-xs tracking-wider uppercase font-semibold transition duration-150 inline-block truncate",
-            link.active ? "text-[#9be5ff] font-bold" : "text-neutral-300 group-hover/sidebar:text-white"
+            link.active
+              ? "text-[#9be5ff] font-bold"
+              : "text-neutral-300 group-hover/sidebar:text-white",
           )}
         >
           {link.label}
@@ -225,16 +229,12 @@ export const SidebarLink = ({
     link.active
       ? "bg-white/[0.07] border-white/15 text-[#9be5ff] shadow-[0_0_15px_rgba(155,229,255,0.08)]"
       : "hover:bg-white/[0.04] text-neutral-300 hover:text-white",
-    className
+    className,
   );
 
   if (link.href && !link.onClick) {
     return (
-      <a
-        href={link.href}
-        className={containerClasses}
-        {...props}
-      >
+      <a href={link.href} className={containerClasses} {...props}>
         {content}
       </a>
     );

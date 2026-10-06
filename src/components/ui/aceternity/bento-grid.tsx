@@ -11,7 +11,7 @@ export function BentoGrid({ className, children }: BentoGridProps) {
     <div
       className={cn(
         "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto",
-        className
+        className,
       )}
     >
       {children}
@@ -42,7 +42,7 @@ export function BentoGridItem({
     <div
       className={cn(
         "row-span-1 rounded-none p-5 bg-[#0b0b0e] border border-white/10 flex flex-col justify-between space-y-4 hover:border-[#9be5ff]/40 transition duration-300 relative overflow-hidden group shadow-lg",
-        className
+        className,
       )}
     >
       {/* Luz sutil de destaque no topo do card */}

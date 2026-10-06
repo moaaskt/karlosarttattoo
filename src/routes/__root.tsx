@@ -8,6 +8,9 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 import appCss from "../styles.css?url";
 
@@ -21,10 +24,7 @@ function NotFoundComponent() {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
+          <Link to="/" className={buttonVariants({ variant: "default" })}>
             Go home
           </Link>
         </div>
@@ -46,22 +46,27 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+        <div className="mt-4 text-left">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro na aplicação</AlertTitle>
+            <AlertDescription>
+              {error.message || "Ocorreu um erro inesperado ao carregar a página."}
+            </AlertDescription>
+          </Alert>
+        </div>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
+          <Button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
+          </Button>
+          <Link to="/" className={buttonVariants({ variant: "outline" })}>
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -79,9 +84,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Karlitos Tattoo (Karlos Art Tattoo) — tatuador em Palhoça, Florianópolis e Grande Florianópolis. Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado e atendimento VIP a domicílio.",
       },
-      { name: "keywords", content: "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo" },
+      {
+        name: "keywords",
+        content:
+          "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo",
+      },
       { name: "author", content: "Karlos Art Tattoo" },
-      { property: "og:title", content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral" },
+      {
+        property: "og:title",
+        content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral",
+      },
       {
         property: "og:description",
         content:
@@ -147,21 +159,12 @@ function RootShell({ children }: { children: ReactNode }) {
                 { "@type": "City", name: "São José" },
                 { "@type": "AdministrativeArea", name: "Grande Florianópolis" },
               ],
-              hasMap:
-                "https://www.google.com/maps/place/Palho%C3%A7a,+SC/",
-              sameAs: [
-                "https://www.instagram.com/karlitostattooo/",
-              ],
+              hasMap: "https://www.google.com/maps/place/Palho%C3%A7a,+SC/",
+              sameAs: ["https://www.instagram.com/karlitostattooo/"],
               priceRange: "$$",
               openingHoursSpecification: {
                 "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                ],
+                dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                 opens: "09:00",
                 closes: "19:00",
               },

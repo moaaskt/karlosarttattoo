@@ -147,11 +147,21 @@
   }
 }
 
-html { scroll-behavior: smooth; }
-::selection { background: var(--primary); color: var(--primary-foreground); }
+html {
+  scroll-behavior: smooth;
+}
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
 
 @utility hero-overlay {
-  background: linear-gradient(to bottom, oklch(0.116 0 0 / 0.52), oklch(0.116 0 0 / 0.22) 45%, oklch(0.116 0 0 / 0.76));
+  background: linear-gradient(
+    to bottom,
+    oklch(0.116 0 0 / 0.52),
+    oklch(0.116 0 0 / 0.22) 45%,
+    oklch(0.116 0 0 / 0.76)
+  );
 }
 
 @utility section-index {
@@ -165,8 +175,16 @@ html { scroll-behavior: smooth; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @keyframes shimmer {
@@ -238,5 +256,3 @@ html { scroll-behavior: smooth; }
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
-
-

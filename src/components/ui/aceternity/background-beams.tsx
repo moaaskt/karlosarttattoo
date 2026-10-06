@@ -9,7 +9,7 @@ export function BackgroundBeams({ className }: BackgroundBeamsProps) {
     <div
       className={cn(
         "pointer-events-none absolute inset-0 overflow-hidden z-0 select-none",
-        className
+        className,
       )}
     >
       {/* Malha de grade sutil dark */}
@@ -48,7 +48,15 @@ export function BackgroundBeams({ className }: BackgroundBeamsProps) {
           </linearGradient>
         </defs>
         <line x1="10%" y1="0" x2="60%" y2="100%" stroke="url(#beamGradient)" strokeWidth="1" />
-        <line x1="80%" y1="0" x2="30%" y2="100%" stroke="url(#beamGradient)" strokeWidth="1" strokeDasharray="6 6" />
+        <line
+          x1="80%"
+          y1="0"
+          x2="30%"
+          y2="100%"
+          stroke="url(#beamGradient)"
+          strokeWidth="1"
+          strokeDasharray="6 6"
+        />
       </svg>
     </div>
   );

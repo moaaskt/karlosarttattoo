@@ -9,9 +9,7 @@ export const createLeadSchema = z.object({
   phone: z
     .string({ required_error: "WhatsApp/Telefone é obrigatório" })
     .min(8, "Telefone inválido"),
-  email: z
-    .string({ required_error: "E-mail é obrigatório" })
-    .email("E-mail com formato inválido"),
+  email: z.string({ required_error: "E-mail é obrigatório" }).email("E-mail com formato inválido"),
   service: z
     .string({ required_error: "Local/Tipo de atendimento é obrigatório" })
     .min(1, "Selecione o local de atendimento"),
@@ -58,12 +56,12 @@ async function triggerLeadNotification(lead: Lead) {
     // Log estruturado do lead no console do servidor
     console.log(
       `\n🔔 [NOVO LEAD RECEBIDO] Karlos Art Tattoo\n` +
-      `👤 Nome: ${lead.name}\n` +
-      `📱 WhatsApp: ${lead.phone}\n` +
-      `✉️ E-mail: ${lead.email}\n` +
-      `📍 Atendimento: ${lead.service}\n` +
-      `💬 Mensagem: ${lead.message}\n` +
-      `🕒 Data: ${lead.createdAt}\n`
+        `👤 Nome: ${lead.name}\n` +
+        `📱 WhatsApp: ${lead.phone}\n` +
+        `✉️ E-mail: ${lead.email}\n` +
+        `📍 Atendimento: ${lead.service}\n` +
+        `💬 Mensagem: ${lead.message}\n` +
+        `🕒 Data: ${lead.createdAt}\n`,
     );
   }
 }
@@ -93,10 +91,10 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
     try {
       const body = await request.json().catch(() => null);
       if (!body) {
-        return new Response(
-          JSON.stringify({ error: "Corpo da requisição inválido ou vazio." }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Corpo da requisição inválido ou vazio." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       const validation = createLeadSchema.safeParse(body);
@@ -104,7 +102,7 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
         const errorMessages = validation.error.errors.map((e) => e.message).join(", ");
         return new Response(
           JSON.stringify({ error: errorMessages, details: validation.error.format() }),
-          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
@@ -112,7 +110,7 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
 
       // Disparo assíncrono da notificação
       triggerLeadNotification(newLead).catch((err) =>
-        console.error("[Notification] Erro assíncrono:", err)
+        console.error("[Notification] Erro assíncrono:", err),
       );
 
       return new Response(
@@ -121,13 +119,13 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
           message: "Solicitação de agendamento registrada com sucesso!",
           leadId: newLead.id,
         }),
-        { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     } catch (err) {
       console.error("[Leads API] Erro ao processar POST:", err);
       return new Response(
         JSON.stringify({ error: "Erro interno no servidor ao registrar lead." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
   }
@@ -137,7 +135,7 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
     if (!isAuthorized(request)) {
       return new Response(
         JSON.stringify({ error: "Acesso não autorizado. Chave de acesso requerida." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -153,14 +151,14 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
           leads,
           stats,
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     } catch (err) {
       console.error("[Leads API] Erro ao listar leads:", err);
-      return new Response(
-        JSON.stringify({ error: "Erro interno ao consultar leads." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Erro interno ao consultar leads." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
   }
 
@@ -169,7 +167,7 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
     if (!isAuthorized(request)) {
       return new Response(
         JSON.stringify({ error: "Acesso não autorizado. Chave de acesso requerida." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -179,33 +177,33 @@ export async function handleLeadsRequest(request: Request): Promise<Response> {
       if (!validation.success) {
         return new Response(
           JSON.stringify({ error: validation.error.errors[0]?.message || "Dados inválidos." }),
-          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
       const updated = updateLeadStatus(validation.data.id, validation.data.status);
       if (!updated) {
-        return new Response(
-          JSON.stringify({ error: "Lead não encontrado." }),
-          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Lead não encontrado." }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       return new Response(
         JSON.stringify({ success: true, message: "Status do lead atualizado com sucesso." }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     } catch (err) {
       console.error("[Leads API] Erro ao atualizar status:", err);
-      return new Response(
-        JSON.stringify({ error: "Erro interno ao atualizar status do lead." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Erro interno ao atualizar status do lead." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
   }
 
-  return new Response(
-    JSON.stringify({ error: `Método ${method} não suportado.` }),
-    { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-  );
+  return new Response(JSON.stringify({ error: `Método ${method} não suportado.` }), {
+    status: 405,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }

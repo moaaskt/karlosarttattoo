@@ -26,14 +26,17 @@ const updateBookingDataSchema = z
     client_email: z.string().email("E-mail inválido").nullable().optional().or(z.literal("")),
     location: z.enum(["estudio", "domicilio", "evento"]).optional(),
     session_type: z.enum(["tatuagem", "flash", "retoque", "projeto", "outro"]).optional(),
-    price_total_cents: z.number().int().min(0, "price_total_cents não pode ser negativo").optional(),
+    price_total_cents: z
+      .number()
+      .int()
+      .min(0, "price_total_cents não pode ser negativo")
+      .optional(),
     deposit_cents: z.number().int().min(0, "deposit_cents não pode ser negativo").optional(),
     notes: z.string().nullable().optional(),
   })
-  .refine(
-    (data) => Object.keys(data).length > 0,
-    { message: "Ao menos um campo deve ser fornecido para atualização." }
-  )
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Ao menos um campo deve ser fornecido para atualização.",
+  })
   .refine(
     (data) => {
       if (
@@ -48,7 +51,7 @@ const updateBookingDataSchema = z
     {
       message: "deposit_cents não pode ser superior a price_total_cents",
       path: ["deposit_cents"],
-    }
+    },
   );
 
 const createBookingSchema = z
@@ -69,14 +72,30 @@ const createBookingSchema = z
     }),
     start_at: z
       .string()
-      .regex(ISO_UTC_RE, "start_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T13:00:00.000Z)"),
+      .regex(
+        ISO_UTC_RE,
+        "start_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T13:00:00.000Z)",
+      ),
     end_at: z
       .string()
-      .regex(ISO_UTC_RE, "end_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T15:00:00.000Z)"),
+      .regex(
+        ISO_UTC_RE,
+        "end_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T15:00:00.000Z)",
+      ),
     status: z.enum(["pendente", "confirmado"]).optional().default("pendente"),
-    deposit_cents: z.number().int("deposit_cents deve ser inteiro").min(0, "deposit_cents não pode ser negativo").optional().default(0),
+    deposit_cents: z
+      .number()
+      .int("deposit_cents deve ser inteiro")
+      .min(0, "deposit_cents não pode ser negativo")
+      .optional()
+      .default(0),
     deposit_status: z.enum(["pendente", "pago", "dispensado"]).optional().default("pendente"),
-    price_total_cents: z.number().int("price_total_cents deve ser inteiro").min(0, "price_total_cents não pode ser negativo").optional().default(0),
+    price_total_cents: z
+      .number()
+      .int("price_total_cents deve ser inteiro")
+      .min(0, "price_total_cents não pode ser negativo")
+      .optional()
+      .default(0),
     project_id: z.string().nullable().optional(),
     session_number: z.number().int().positive().nullable().optional(),
     notes: z.string().nullable().optional(),
@@ -86,13 +105,10 @@ const createBookingSchema = z
     message: "end_at deve ser estritamente posterior a start_at",
     path: ["end_at"],
   })
-  .refine(
-    (data) => data.price_total_cents === 0 || data.deposit_cents <= data.price_total_cents,
-    {
-      message: "deposit_cents não pode ser superior a price_total_cents",
-      path: ["deposit_cents"],
-    }
-  );
+  .refine((data) => data.price_total_cents === 0 || data.deposit_cents <= data.price_total_cents, {
+    message: "deposit_cents não pode ser superior a price_total_cents",
+    path: ["deposit_cents"],
+  });
 
 const updateStatusSchema = z.object({
   status: z.enum(["pendente", "confirmado", "concluido", "cancelado", "no_show"], {
@@ -114,10 +130,16 @@ const rescheduleSchema = z
   .object({
     start_at: z
       .string()
-      .regex(ISO_UTC_RE, "start_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T13:00:00.000Z)"),
+      .regex(
+        ISO_UTC_RE,
+        "start_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T13:00:00.000Z)",
+      ),
     end_at: z
       .string()
-      .regex(ISO_UTC_RE, "end_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T15:00:00.000Z)"),
+      .regex(
+        ISO_UTC_RE,
+        "end_at deve estar no formato ISO UTC estrito (ex: 2026-10-15T15:00:00.000Z)",
+      ),
     force: z.boolean().optional().default(false),
     note: z.string().optional(),
   })
@@ -142,7 +164,10 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
   }
 
   const url = new URL(request.url);
-  const pathParts = url.pathname.replace(/^\/api\/bookings\/?/, "").split("/").filter(Boolean);
+  const pathParts = url.pathname
+    .replace(/^\/api\/bookings\/?/, "")
+    .split("/")
+    .filter(Boolean);
 
   // -------------------------------------------------------------
   // 1. GET /api/bookings e GET /api/bookings/:id
@@ -197,7 +222,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
             details: parsed.error.format(),
             message: parsed.error.errors.map((e) => e.message).join("; "),
           },
-          422
+          422,
         );
       }
 
@@ -220,37 +245,42 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
           session_number: input.session_number,
           notes: input.notes,
         },
-        input.force
+        input.force,
       );
 
       if (result.error === "time_block_conflict" || result.error === "booking_conflict") {
         return jsonResponse(
           {
-            error: result.error,
+            success: false,
+            error: "Conflito de horário detectado",
+            conflict_type: result.error,
             conflicts: result.conflicts || [],
             message: result.message,
           },
-          409
+          409,
         );
       }
 
       if (result.error === "validation_error") {
         return jsonResponse(
           {
-            error: result.error,
+            success: false,
+            error: result.message || "Validação falhou ou regra violada",
             message: result.message,
           },
-          422
+          422,
         );
       }
 
-      if (result.warning === "outside_hours" && !result.booking) {
+      if (result.requires_force && result.warnings) {
         return jsonResponse(
           {
-            warning: "outside_hours",
+            success: false,
+            requires_force: true,
+            warnings: result.warnings,
             message: result.message,
           },
-          409
+          409,
         );
       }
 
@@ -258,9 +288,9 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
         {
           success: true,
           booking: result.booking,
-          warning: result.warning,
+          warnings: result.warnings,
         },
-        201
+        201,
       );
     } catch (err) {
       console.error("[Bookings API] Erro ao criar booking:", err);
@@ -286,7 +316,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
           details: parsed.error.format(),
           message: parsed.error.errors.map((e) => e.message).join("; "),
         },
-        422
+        422,
       );
     }
 
@@ -319,10 +349,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
     if (action === "status") {
       const parsed = updateStatusSchema.safeParse(body);
       if (!parsed.success) {
-        return jsonResponse(
-          { error: parsed.error.errors[0]?.message || "Dados inválidos." },
-          422
-        );
+        return jsonResponse({ error: parsed.error.errors[0]?.message || "Dados inválidos." }, 422);
       }
 
       const result = updateBookingStatus(id, parsed.data.status, {
@@ -348,17 +375,14 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
     if (action === "deposit") {
       const parsed = updateDepositSchema.safeParse(body);
       if (!parsed.success) {
-        return jsonResponse(
-          { error: parsed.error.errors[0]?.message || "Dados inválidos." },
-          422
-        );
+        return jsonResponse({ error: parsed.error.errors[0]?.message || "Dados inválidos." }, 422);
       }
 
       const result = updateDepositStatus(
         id,
         parsed.data.deposit_status,
         parsed.data.deposit_cents,
-        parsed.data.note
+        parsed.data.note,
       );
 
       if (result.error === "not_found") {
@@ -381,7 +405,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
             details: parsed.error.format(),
             message: parsed.error.errors.map((e) => e.message).join("; "),
           },
-          422
+          422,
         );
       }
 
@@ -390,39 +414,43 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
         parsed.data.start_at,
         parsed.data.end_at,
         parsed.data.force,
-        parsed.data.note
+        parsed.data.note,
       );
 
       if (result.error === "not_found") {
-        return jsonResponse({ error: result.message }, 404);
+        return jsonResponse({ success: false, error: result.message }, 404);
       }
       if (result.error === "validation_error" || result.error === "invalid_status") {
-        return jsonResponse({ error: result.error, message: result.message }, 422);
+        return jsonResponse({ success: false, error: result.error, message: result.message }, 422);
       }
       if (result.error === "time_block_conflict" || result.error === "booking_conflict") {
         return jsonResponse(
           {
-            error: result.error,
+            success: false,
+            error: "Conflito de horário detectado",
+            conflict_type: result.error,
             conflicts: result.conflicts || [],
             message: result.message,
           },
-          409
+          409,
         );
       }
-      if (result.warning === "outside_hours" && !result.booking) {
+      if (result.requires_force && result.warnings) {
         return jsonResponse(
           {
-            warning: "outside_hours",
+            success: false,
+            requires_force: true,
+            warnings: result.warnings,
             message: result.message,
           },
-          409
+          409,
         );
       }
 
       return jsonResponse({
         success: true,
         booking: result.booking,
-        warning: result.warning,
+        warnings: result.warnings,
       });
     }
 
@@ -430,16 +458,17 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
   }
 
   // -------------------------------------------------------------
-  // 4. Deleção física proibida (D-01)
+  // 4. Deleção física proibida (D-01 / TASK-14)
   // -------------------------------------------------------------
   if (method === "DELETE") {
     return jsonResponse(
       {
-        error: "forbidden_operation",
-        message:
-          "Deleção física de agendamento é proibida. Cancele o agendamento para manter o histórico e a auditoria.",
+        success: false,
+        error:
+          "Agendamentos não podem ser excluídos fisicamente. Utilize PATCH para atualizar o status para 'cancelado'.",
       },
-      405
+      405,
+      { Allow: "GET, PATCH" },
     );
   }
 
