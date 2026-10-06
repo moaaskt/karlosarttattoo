@@ -13,10 +13,25 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral | Karlos Art Tattoo" },
-      { name: "description", content: "Karlitos Tattoo (Karlos Art Tattoo) — tatuador em Palhoça, Florianópolis e Grande Florianópolis. Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado e atendimento VIP a domicílio." },
-      { name: "keywords", content: "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo" },
-      { property: "og:title", content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral" },
-      { property: "og:description", content: "Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado em Palhoça e atendimento VIP a domicílio em Florianópolis e Grande Florianópolis." },
+      {
+        name: "description",
+        content:
+          "Karlitos Tattoo (Karlos Art Tattoo) — tatuador em Palhoça, Florianópolis e Grande Florianópolis. Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado e atendimento VIP a domicílio.",
+      },
+      {
+        name: "keywords",
+        content:
+          "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo",
+      },
+      {
+        property: "og:title",
+        content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral",
+      },
+      {
+        property: "og:description",
+        content:
+          "Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado em Palhoça e atendimento VIP a domicílio em Florianópolis e Grande Florianópolis.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -26,8 +41,16 @@ export const Route = createFileRoute("/")({
 
 function Mark() {
   return (
-    <a href="#inicio" aria-label="KARLOS ART TATTOO — início" className="group flex items-center gap-3">
-      <img src="/logo-karlostattoo.png" alt="KARLOS ART TATTOO" className="h-9 w-auto object-contain" />
+    <a
+      href="#inicio"
+      aria-label="KARLOS ART TATTOO — início"
+      className="group flex items-center gap-3"
+    >
+      <img
+        src="/logo-karlostattoo.png"
+        alt="KARLOS ART TATTOO"
+        className="h-9 w-auto object-contain"
+      />
       <span className="hidden text-[13px] font-medium uppercase tracking-[0.25em] text-[#F5F5F7] sm:block">
         KARLOS ART TATTOO
       </span>
@@ -165,15 +188,35 @@ function Index() {
 
   return (
     <main ref={root} className="overflow-hidden bg-background text-foreground">
-      <header data-anim="header" className="fixed inset-x-0 top-0 z-50 flex h-24 items-center justify-between px-6 md:px-12">
+      <header
+        data-anim="header"
+        className="fixed inset-x-0 top-0 z-50 flex h-24 items-center justify-between px-6 md:px-12"
+      >
         <Mark />
         <nav aria-label="Contato" className="flex items-center gap-5">
-          <a href="https://www.instagram.com/karlitostattooo/" target="_blank" rel="noreferrer" aria-label="Instagram" className="text-foreground transition-colors hover:text-primary"><Instagram strokeWidth={1.25} /></a>
-          <a href="mailto:karlosmonsalve14@gmail.com" aria-label="E-mail" className="text-foreground transition-colors hover:text-primary"><Mail strokeWidth={1.25} /></a>
+          <a
+            href="https://www.instagram.com/karlitostattooo/"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Instagram"
+            className="text-foreground transition-colors hover:text-primary"
+          >
+            <Instagram strokeWidth={1.25} />
+          </a>
+          <a
+            href="mailto:karlosmonsalve14@gmail.com"
+            aria-label="E-mail"
+            className="text-foreground transition-colors hover:text-primary"
+          >
+            <Mail strokeWidth={1.25} />
+          </a>
         </nav>
       </header>
 
-      <section id="inicio" className="relative flex min-h-[100svh] items-center justify-center px-5 py-28">
+      <section
+        id="inicio"
+        className="relative flex min-h-[100svh] items-center justify-center px-5 py-28"
+      >
         <video
           autoPlay
           muted
@@ -187,10 +230,20 @@ function Index() {
         </video>
         <div className="absolute inset-0 bg-black/40 pointer-events-none z-[1]" />
         <div className="hero-overlay absolute inset-0 pointer-events-none z-[2]" />
-        <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.3em] text-neutral-600 md:block z-10">SANTA CATARINA — BRASIL</p>
+        <p className="absolute left-6 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] uppercase tracking-[0.3em] text-neutral-600 md:block z-10">
+          SANTA CATARINA — BRASIL
+        </p>
         <div className="relative z-10 flex w-full max-w-md flex-col gap-3">
-          <p data-anim="hero-item" className="mb-4 text-center text-[10px] font-medium uppercase tracking-[0.45em] text-[#9be5ff] opacity-90">Tatuagem autoral · 2026</p>
-          <h1 className="sr-only">Karlitos Tattoo — Karlos Art Tattoo | Tatuador em Palhoça, Florianópolis e Grande Florianópolis | Tatuagem Autoral Fine Line</h1>
+          <p
+            data-anim="hero-item"
+            className="mb-4 text-center text-[10px] font-medium uppercase tracking-[0.45em] text-[#9be5ff] opacity-90"
+          >
+            Tatuagem autoral · 2026
+          </p>
+          <h1 className="sr-only">
+            Karlitos Tattoo — Karlos Art Tattoo | Tatuador em Palhoça, Florianópolis e Grande
+            Florianópolis | Tatuagem Autoral Fine Line
+          </h1>
           <Button
             data-anim="hero-item"
             type="button"
@@ -219,7 +272,13 @@ function Index() {
             FLASH DAYS &amp; WORKSHOPS
           </Button>
         </div>
-        <a href="#locais" aria-label="Ver locais" className="absolute bottom-7 left-1/2 -translate-x-1/2 text-[#9be5ff] z-10"><ArrowDown className="h-5 w-5 animate-bounce" strokeWidth={1} /></a>
+        <a
+          href="#locais"
+          aria-label="Ver locais"
+          className="absolute bottom-7 left-1/2 -translate-x-1/2 text-[#9be5ff] z-10"
+        >
+          <ArrowDown className="h-5 w-5 animate-bounce" strokeWidth={1} />
+        </a>
       </section>
 
       <Manifesto />
@@ -227,30 +286,44 @@ function Index() {
       <section id="locais" className="border-y border-border px-6 py-24 md:px-12 md:py-36 bg-black">
         <div className="mx-auto max-w-6xl">
           <p className="section-index">01 / Locais</p>
-          <h2 data-anim="section-title" className="mb-20 text-center text-xl font-semibold uppercase tracking-[0.34em] text-white md:text-3xl">Onde me encontrar</h2>
+          <h2
+            data-anim="section-title"
+            className="mb-20 text-center text-xl font-semibold uppercase tracking-[0.34em] text-white md:text-3xl"
+          >
+            Onde me encontrar
+          </h2>
           <div className="grid gap-px bg-border md:grid-cols-3">
             <article data-anim="location" className="bg-black px-5 py-9 md:px-8">
               <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
-                <span className="text-[#9be5ff] text-base leading-none">◊</span> PALHOÇA (BASE / ESTÚDIO)
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> PALHOÇA (BASE /
+                ESTÚDIO)
               </h3>
               <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
-                — ATELIÊ PRIVADO<br />— ATENDIMENTO COM HORA MARCADA<br />— SESSÕES EXCLUSIVAS
+                — ATELIÊ PRIVADO
+                <br />— ATENDIMENTO COM HORA MARCADA
+                <br />— SESSÕES EXCLUSIVAS
               </p>
             </article>
             <article data-anim="location" className="bg-black px-5 py-9 md:px-8">
               <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
-                <span className="text-[#9be5ff] text-base leading-none">◊</span> FLORIANÓPOLIS &amp; SÃO JOSÉ
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> FLORIANÓPOLIS &amp;
+                SÃO JOSÉ
               </h3>
               <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
-                — ATENDIMENTO A DOMICÍLIO (VIP)<br />— GUEST SPOTS &amp; ESTÚDIOS PARCEIROS<br />— CONSULTE DISPONIBILIDADE
+                — ATENDIMENTO A DOMICÍLIO (VIP)
+                <br />— GUEST SPOTS &amp; ESTÚDIOS PARCEIROS
+                <br />— CONSULTE DISPONIBILIDADE
               </p>
             </article>
             <article data-anim="location" className="bg-black px-5 py-9 md:px-8">
               <h3 className="flex items-center gap-2 text-sm font-medium uppercase tracking-[0.2em] text-white">
-                <span className="text-[#9be5ff] text-base leading-none">◊</span> GRANDE FLORIANÓPOLIS
+                <span className="text-[#9be5ff] text-base leading-none">◊</span> GRANDE
+                FLORIANÓPOLIS
               </h3>
               <p className="mt-5 text-xs text-[#A1A1AA] tracking-wider uppercase leading-7">
-                — ATENDIMENTO ITINERANTE<br />— EVENTOS &amp; FLASH DAYS REGIONAIS<br />— SANTA CATARINA
+                — ATENDIMENTO ITINERANTE
+                <br />— EVENTOS &amp; FLASH DAYS REGIONAIS
+                <br />— SANTA CATARINA
               </p>
             </article>
           </div>
@@ -270,11 +343,14 @@ function Index() {
       <section id="portfolio" className="py-24 md:py-36 bg-background">
         <div className="mb-16 px-6 text-center md:px-12">
           <p className="section-index">02 / Trabalhos selecionados</p>
-          <h2 data-anim="section-title" className="text-xl font-semibold uppercase tracking-[0.34em] text-white md:text-3xl">
+          <h2
+            data-anim="section-title"
+            className="text-xl font-semibold uppercase tracking-[0.34em] text-white md:text-3xl"
+          >
             | Portfólio |
           </h2>
         </div>
-        
+
         {/* Continuous TiagoDot-style portfolio grid */}
         <div className="grid grid-cols-2 gap-[2px] bg-border md:grid-cols-3 max-w-7xl mx-auto px-1 sm:px-4">
           {displayedItems.map((item, index) => (
@@ -329,9 +405,22 @@ function Index() {
                     className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-md"
                   >
                     {/* Back card */}
-                    <path d="M7 4h10a2 2 0 0 1 2 2v10" stroke="currentColor" fill="none" opacity="0.8" />
+                    <path
+                      d="M7 4h10a2 2 0 0 1 2 2v10"
+                      stroke="currentColor"
+                      fill="none"
+                      opacity="0.8"
+                    />
                     {/* Front card */}
-                    <rect x="3" y="7" width="13" height="13" rx="2" stroke="currentColor" fill="none" />
+                    <rect
+                      x="3"
+                      y="7"
+                      width="13"
+                      height="13"
+                      rx="2"
+                      stroke="currentColor"
+                      fill="none"
+                    />
                   </svg>
                 </div>
               )}
@@ -343,7 +432,7 @@ function Index() {
                     0{index + 1} / Karlos.Art
                   </span>
                 </div>
-                
+
                 <div className="flex flex-col items-center justify-center gap-2 text-center my-auto">
                   <div className="h-9 w-9 rounded-full border border-[#9be5ff]/50 bg-black/70 flex items-center justify-center text-[#9be5ff] transition-transform duration-300 group-hover:scale-110">
                     <Instagram className="h-4 w-4" strokeWidth={1.5} />
@@ -374,15 +463,22 @@ function Index() {
             className="rounded-none px-0 text-[11px] font-medium uppercase tracking-[0.18em] text-[#F5F5F7] no-underline transition-colors duration-250 hover:text-[#9be5ff] hover:no-underline cursor-pointer"
           >
             {visibleCount < portfolioItems.length ? (
-              <>CARREGAR MAIS <span aria-hidden="true">＋</span></>
+              <>
+                CARREGAR MAIS <span aria-hidden="true">＋</span>
+              </>
             ) : (
-              <>VER FEED COMPLETO NO INSTAGRAM <span aria-hidden="true">↗</span></>
+              <>
+                VER FEED COMPLETO NO INSTAGRAM <span aria-hidden="true">↗</span>
+              </>
             )}
           </Button>
         </div>
       </section>
 
-      <footer className="flex flex-col gap-5 border-t border-border px-6 py-10 text-[9px] uppercase tracking-[0.22em] text-muted-foreground md:flex-row md:items-center md:justify-between md:px-12"><span>© 2026 KARLOS ART TATTOO. ALL RIGHTS RESERVED.</span><span>Arte permanente / Feita à mão</span></footer>
+      <footer className="flex flex-col gap-5 border-t border-border px-6 py-10 text-[9px] uppercase tracking-[0.22em] text-muted-foreground md:flex-row md:items-center md:justify-between md:px-12">
+        <span>© 2026 KARLOS ART TATTOO. ALL RIGHTS RESERVED.</span>
+        <span>Arte permanente / Feita à mão</span>
+      </footer>
 
       <BookingModal
         open={bookingOpen}

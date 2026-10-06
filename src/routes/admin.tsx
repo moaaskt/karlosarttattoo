@@ -137,7 +137,7 @@ function AdminPage() {
 
       if (response.ok) {
         setLeads((prev) =>
-          prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead))
+          prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead)),
         );
         verifyAndFetch(authKey);
         setFeedbackMsg("Status atualizado!");
@@ -277,7 +277,9 @@ function AdminPage() {
                 className="font-normal flex items-center gap-3 text-sm text-white relative z-20 group"
               >
                 <div className="h-8 w-8 bg-black/80 border border-[#9be5ff]/60 rounded flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(155,229,255,0.25)]">
-                  <span className="text-xs font-black text-[#9be5ff] font-mono tracking-tighter">KA</span>
+                  <span className="text-xs font-black text-[#9be5ff] font-mono tracking-tighter">
+                    KA
+                  </span>
                 </div>
                 <motion.div
                   animate={{
@@ -366,7 +368,8 @@ function AdminPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#9be5ff] flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#9be5ff]" /> PAINEL ADMINISTRATIVO · ACETERNITY SIDEBAR
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#9be5ff]" /> PAINEL ADMINISTRATIVO ·
+                  ACETERNITY SIDEBAR
                 </span>
               </div>
               <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-[0.18em] text-white mt-0.5">
@@ -391,7 +394,9 @@ function AdminPage() {
                 className="bg-black/60 hover:bg-black border-white/15 text-neutral-300 hover:text-white text-xs uppercase tracking-[0.15em] transition-all cursor-pointer rounded-none h-8 gap-1.5"
                 title="Atualizar dados"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#9be5ff]" : ""}`} />
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#9be5ff]" : ""}`}
+                />
                 <span className="hidden sm:inline">Atualizar</span>
               </Button>
 
@@ -415,7 +420,8 @@ function AdminPage() {
             <section className="space-y-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-2">
                 <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#9be5ff]" /> Visão Analítica do Estúdio & Métricas
+                  <Sparkles className="w-4 h-4 text-[#9be5ff]" /> Visão Analítica do Estúdio &
+                  Métricas
                 </h2>
                 <span className="text-[10px] uppercase tracking-wider text-neutral-500">
                   Palhoça & Florianópolis
@@ -471,4 +477,3 @@ function AdminPage() {
     </div>
   );
 }
-

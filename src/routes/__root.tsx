@@ -22,10 +22,7 @@ function NotFoundComponent() {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
-          <Link
-            to="/"
-            className={buttonVariants({ variant: "default" })}
-          >
+          <Link to="/" className={buttonVariants({ variant: "default" })}>
             Go home
           </Link>
         </div>
@@ -56,10 +53,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </Button>
-          <Link
-            to="/"
-            className={buttonVariants({ variant: "outline" })}
-          >
+          <Link to="/" className={buttonVariants({ variant: "outline" })}>
             Go home
           </Link>
         </div>
@@ -79,9 +73,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Karlitos Tattoo (Karlos Art Tattoo) — tatuador em Palhoça, Florianópolis e Grande Florianópolis. Tatuagem autoral fine line, microrrealismo e geometria. Ateliê privado e atendimento VIP a domicílio.",
       },
-      { name: "keywords", content: "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo" },
+      {
+        name: "keywords",
+        content:
+          "karlitostattoo, karlitos tattoo, tatuador em palhoça, tatuagem autoral grande florianópolis, fine line florianópolis, tatuador florianópolis, karlos art tattoo",
+      },
       { name: "author", content: "Karlos Art Tattoo" },
-      { property: "og:title", content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral" },
+      {
+        property: "og:title",
+        content: "Karlitos Tattoo | Tatuador em Palhoça — Fine Line & Autoral",
+      },
       {
         property: "og:description",
         content:
@@ -147,21 +148,12 @@ function RootShell({ children }: { children: ReactNode }) {
                 { "@type": "City", name: "São José" },
                 { "@type": "AdministrativeArea", name: "Grande Florianópolis" },
               ],
-              hasMap:
-                "https://www.google.com/maps/place/Palho%C3%A7a,+SC/",
-              sameAs: [
-                "https://www.instagram.com/karlitostattooo/",
-              ],
+              hasMap: "https://www.google.com/maps/place/Palho%C3%A7a,+SC/",
+              sameAs: ["https://www.instagram.com/karlitostattooo/"],
               priceRange: "$$",
               openingHoursSpecification: {
                 "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                ],
+                dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                 opens: "09:00",
                 closes: "19:00",
               },
