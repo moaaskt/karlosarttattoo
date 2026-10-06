@@ -2,12 +2,14 @@
 
 **Status:** Completed  
 **Completed Date:** 2026-10-01  
-**Wave:** 1  
+**Wave:** 1
 
 ## Overview
+
 Instalação das dependências de visualização analítica, criação do wrapper SSR-safe para ApexCharts e desenvolvimento da suíte de componentes primitivos da Aceternity UI adaptados ao Tailwind CSS v4 e à estética dark editorial do projeto (#070707 e #9be5ff).
 
 ## Key Deliverables
+
 - **Dependências Instaladas:** `apexcharts` e `react-apexcharts`.
 - **ApexChartClient SSR-Safe (`src/components/admin/apex-chart-client.tsx`):**
   - Carregamento dinâmico assíncrono para evitar erros de `window is not defined` no SSR do TanStack Start e Nitro.
@@ -21,4 +23,5 @@ Instalação das dependências de visualização analítica, criação do wrappe
   - Keyframe `@keyframes shimmer` adicionado ao `src/styles.css`.
 
 ## Verification
+
 - `npx vite build` executado e aprovado com sucesso em 1.8s sem nenhum erro de tipagem ou empacotamento Nitro/Vercel.

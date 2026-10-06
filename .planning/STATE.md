@@ -17,8 +17,8 @@ progress:
 
 ## Current Status
 
-- **Active Milestone**: v2.0 — *Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration*.
-- **Active Phase**: Phase 04 — *Agenda & Calendar Booking Engine* (Plan 04-01 e 04-02 concluídos; Plan 04-03 Onda 1 concluída).
+- **Active Milestone**: v2.0 — _Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration_.
+- **Active Phase**: Phase 04 — _Agenda & Calendar Booking Engine_ (Plan 04-01 e 04-02 concluídos; Plan 04-03 Onda 1 concluída).
 - **Recent Additions**: Correção do loop 04-02, migração warnings[], backups com VACUUM INTO, sincronização atômica Lead ↔ Booking, bloqueio 405 e KPIs contábeis no Bento.
 - **Next Immediate Action**: Checkpoint manual e execução da **Onda 2** do Plan 04-03 (Settings Screen, Time Blocks UI & Polish).
 
@@ -41,5 +41,4 @@ progress:
 
 **Last session:** 2026-10-06T20:05:00.000Z  
 **Active Phase:** Phase 04 (Agenda & Calendar Booking Engine)  
-**Next Plan:** .planning/phases/04-agenda-calendar-booking-engine/04-03-PLAN.md  
-
+**Next Plan:** .planning/phases/04-agenda-calendar-booking-engine/04-03-PLAN.md
