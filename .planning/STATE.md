@@ -1,16 +1,16 @@
 ---
 gsd_state_version: "1.0"
-status: phase_completed
+status: in_progress
 milestone: "v2.0"
-phase: "03"
-stopped_at: Phase 03 Completed (Aceternity UI Foundation & ApexCharts Migration)
-last_updated: "2026-10-02T01:56:00.000Z"
+phase: "04"
+stopped_at: "Phase 04 — Plan 04-02 Completed (FullCalendar, BookingDrawer & Modal), Plan 04-03 Ready"
+last_updated: "2026-10-06T20:05:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 50
+  current_phase_plans: 3
+  completed_phase_plans: 2
+  percent: 65
 ---
 
 # Project State: Milestone v2.0
@@ -18,23 +18,26 @@ progress:
 ## Current Status
 
 - **Active Milestone**: v2.0 — *Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration*.
-- **Completed Phases**: Phase 03 (Aceternity UI Foundation & ApexCharts Migration).
-- **Next Immediate Actions**: Initiate **Phase 04** (Agenda & Calendar Booking Engine) via `/gsd-plan-phase 4` or `/gsd-discuss-phase 4`.
+- **Active Phase**: Phase 04 — *Agenda & Calendar Booking Engine* (Plan 04-01 e Plan 04-02 concluídos; Plan 04-03 pronto para execução).
+- **Recent Additions**: Aceternity Sidebar lateral no `/admin` com módulos de Bento, Leads e Agenda integrados.
+- **Next Immediate Action**: Executar o **Plan 04-03** (Settings Screen, Time Blocks UI & Polish).
 
-## Phase 03 Deliverables Summary
+## Phase 04 Deliverables Status
 
-- [x] **Plan 03-01**: Aceternity UI Primitives (BentoGrid, GlowingCard, ShimmerButton, BackgroundBeams) & ApexChartClient SSR-safe wrapper.
-- [x] **Plan 03-02**: Bento Grid Dashboard Redesign, ApexCharts Area & Donut charts, modular tabbed navigation ("Visão Geral Bento" & "Gestão de Leads").
+- [x] **Plan 04-01**: SQLite WAL Migration (5 tabelas), anti-conflito, cálculo de buffer e APIs REST completas com 51 testes unitários aprovados.
+- [x] **Plan 04-02**: Interface FullCalendar com `@fullcalendar/luxon3`, BookingDrawer com máquina de estados, BookingModal e integração com leads.
+- [ ] **Plan 04-03**: Painel de Configurações da Agenda (`AgendaSettings.tsx`), UI de Bloqueios de Tempo (`TimeBlocksModal.tsx`) e polimento visual final.
 
 ## Milestone v2.0 Roadmap Progress
 
 1. **Phase 03**: Aceternity UI Foundation & ApexCharts Migration — ✅ COMPLETED
-2. **Phase 04**: Agenda & Calendar Booking Engine — 🟡 READY FOR PLANNING
+2. **Phase 04**: Agenda & Calendar Booking Engine — 🔄 IN PROGRESS (2/3 planos concluídos)
 3. **Phase 05**: Real GA4 Data API & Google Search Console Integration — ⚪ PLANNED
 4. **Phase 06**: Content Expansion & Authority — ⚪ FUTURE
 
 ## Session
 
-**Last session:** 2026-10-02T01:56:00.000Z  
-**Stopped at:** Phase 03 Completed  
-**Completed Summary:** .planning/phases/03-aceternity-ui-foundation-apexcharts-migration/03-02-SUMMARY.md  
+**Last session:** 2026-10-06T20:05:00.000Z  
+**Active Phase:** Phase 04 (Agenda & Calendar Booking Engine)  
+**Next Plan:** .planning/phases/04-agenda-calendar-booking-engine/04-03-PLAN.md  
+
