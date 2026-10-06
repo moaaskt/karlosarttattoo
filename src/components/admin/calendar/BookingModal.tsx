@@ -336,12 +336,12 @@ export function BookingModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl p-6 my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-2xl mx-auto p-4 sm:p-6 my-auto bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-cyan-400">
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-cyan-400 shrink-0">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
@@ -355,7 +355,7 @@ export function BookingModal({
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+            className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -363,19 +363,19 @@ export function BookingModal({
 
         {/* Lead Vinculado (se houver) */}
         {leadData && (
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-3 flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2.5 truncate mr-2">
+          <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-2.5 min-w-0 w-full sm:w-auto">
               <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
                 <User className="w-4 h-4 text-cyan-400" />
               </div>
-              <div className="truncate">
+              <div className="min-w-0 flex-1">
                 <span className="text-sm font-medium text-zinc-200 block truncate">
                   {leadData.name}
                 </span>
                 <span className="text-xs text-zinc-400 block truncate">{leadData.phone}</span>
               </div>
             </div>
-            <span className="bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs px-2.5 py-0.5 rounded-full shrink-0 font-medium">
+            <span className="bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs px-2.5 py-0.5 rounded-full shrink-0 font-medium self-start sm:self-auto">
               {leadData.service === "studio"
                 ? "Palhoça (Estúdio)"
                 : leadData.service === "home"
@@ -390,18 +390,18 @@ export function BookingModal({
         <form onSubmit={handleSubmit}>
           {/* Seção 1: Horário da Sessão */}
           <div className="mb-6">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
                 Horário da Sessão
               </h4>
               {/* Presets de início - Segmented Control */}
-              <div className="flex gap-1.5 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md">
+              <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md w-full sm:w-auto">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_manha")}
-                  className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
+                  className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
                 >
                   Manhã ({settings["preset_manha"] || "09:00"})
                 </Button>
@@ -410,7 +410,7 @@ export function BookingModal({
                   variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_tarde")}
-                  className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
+                  className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
                 >
                   Tarde ({settings["preset_tarde"] || "14:00"})
                 </Button>
@@ -419,14 +419,14 @@ export function BookingModal({
                   variant="ghost"
                   size="sm"
                   onClick={() => applyPresetTime("preset_noite")}
-                  className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
+                  className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2.5 rounded-sm"
                 >
                   Noite ({settings["preset_noite"] || "18:30"})
                 </Button>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label
                   htmlFor="booking-start-date"
@@ -440,14 +440,14 @@ export function BookingModal({
                     type="date"
                     value={startDate}
                     onChange={(e) => handleDateOrTimeChange(() => setStartDate(e.target.value))}
-                    className="flex-1 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
+                    className="flex-1 min-w-0 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md"
                     required
                   />
                   <Input
                     type="time"
                     value={startTime}
                     onChange={(e) => handleDateOrTimeChange(() => setStartTime(e.target.value))}
-                    className="w-28 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
+                    className="w-24 sm:w-28 bg-zinc-900/80 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 rounded-md font-mono"
                     required
                   />
                 </div>
@@ -470,7 +470,7 @@ export function BookingModal({
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <Input
                     id="booking-end-time"
                     type="time"
@@ -480,13 +480,13 @@ export function BookingModal({
                     required
                   />
                   {/* Atalhos de Duração - Segmented Control */}
-                  <div className="flex gap-1 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-zinc-900/50 p-1 border border-zinc-800 rounded-md">
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(2)}
-                      className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
+                      className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
                     >
                       +2h
                     </Button>
@@ -495,7 +495,7 @@ export function BookingModal({
                       variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(4)}
-                      className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
+                      className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
                     >
                       +4h
                     </Button>
@@ -504,7 +504,7 @@ export function BookingModal({
                       variant="ghost"
                       size="sm"
                       onClick={() => addHoursDuration(6)}
-                      className="text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
+                      className="flex-1 sm:flex-initial text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white h-7 px-2 font-mono rounded-sm"
                     >
                       +6h
                     </Button>
@@ -514,8 +514,8 @@ export function BookingModal({
             </div>
           </div>
 
-          {/* Seção 2: Grid de 2 Colunas */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Seção 2: Grid Responsiva */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label
                 htmlFor="client-name"
@@ -586,7 +586,7 @@ export function BookingModal({
               </Select>
             </div>
 
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">
                 Tipo de sessão
               </Label>
@@ -644,7 +644,7 @@ export function BookingModal({
                   />
                 </div>
 
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-2">
                   <Label className="text-xs font-medium text-zinc-300 mb-1.5 block">
                     Status do sinal
                   </Label>
@@ -666,7 +666,7 @@ export function BookingModal({
             )}
 
             {/* Observações / Ideia ocupando 2 colunas */}
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <Label
                 htmlFor="booking-notes"
                 className="text-xs font-medium text-zinc-300 mb-1.5 block"
@@ -702,12 +702,12 @@ export function BookingModal({
           )}
 
           {/* Rodapé do Modal */}
-          <div className="border-t border-zinc-800 pt-4 mt-6 flex justify-end gap-3">
+          <div className="border-t border-zinc-800 pt-4 mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              className="w-full sm:w-auto text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
             >
               Cancelar
             </Button>
@@ -715,7 +715,7 @@ export function BookingModal({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-5 ${
+              className={`w-full sm:w-auto bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-5 ${
                 forceConfirmed
                   ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]"
                   : ""
@@ -730,7 +730,7 @@ export function BookingModal({
                   "Criar mesmo assim"
                 )
               ) : (
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center justify-center gap-1.5">
                   <Check className="w-4 h-4" />
                   {mode === "reschedule" ? "Confirmar remarcação" : "Criar agendamento"}
                 </span>
