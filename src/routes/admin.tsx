@@ -11,6 +11,8 @@ import {
   Users,
   Calendar as CalendarIcon,
   ExternalLink,
+  AlertCircle,
+  Info,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { LeadTable } from "@/components/admin/lead-table";
@@ -21,6 +23,7 @@ import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/aceternity/sidebar";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { Lead, Booking } from "@/lib/db";
 
 export const Route = createFileRoute("/admin")({
@@ -51,7 +54,11 @@ function AdminPage() {
     conversionRate: "0.0%",
   });
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [feedbackMsg, setFeedbackMsg] = React.useState<string | null>(null);
+  const [panelAlert, setPanelAlert] = React.useState<{
+    variant: "default" | "destructive";
+    title?: string;
+    message: string;
+  } | null>(null);
   const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false);
 
   // Recupera token do sessionStorage se disponível
@@ -140,13 +147,23 @@ function AdminPage() {
           prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead)),
         );
         verifyAndFetch(authKey);
-        setFeedbackMsg("Status atualizado!");
-        setTimeout(() => setFeedbackMsg(null), 3000);
+        setPanelAlert({ variant: "default", message: "Status atualizado!" });
+        setTimeout(() => setPanelAlert(null), 3000);
       } else {
-        alert("Erro ao atualizar o status do lead.");
+        setPanelAlert({
+          variant: "destructive",
+          title: "Erro no lead",
+          message: "Erro ao atualizar o status do lead.",
+        });
+        setTimeout(() => setPanelAlert(null), 5000);
       }
     } catch {
-      alert("Falha de conexão ao atualizar status.");
+      setPanelAlert({
+        variant: "destructive",
+        title: "Falha de conexão",
+        message: "Falha de conexão ao atualizar status.",
+      });
+      setTimeout(() => setPanelAlert(null), 5000);
     }
   };
 
@@ -193,9 +210,11 @@ function AdminPage() {
             </div>
 
             {loginError && (
-              <div className="text-xs text-red-400 bg-red-950/40 border border-red-800/40 p-3 text-center tracking-wide">
-                {loginError}
-              </div>
+              <Alert variant="destructive" className="rounded-none">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Erro de autenticação</AlertTitle>
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
             )}
 
             <ShimmerButton
@@ -224,7 +243,7 @@ function AdminPage() {
 
   const sidebarNavLinks: SidebarLinkItem[] = [
     {
-      label: "Visão Bento",
+      label: "Dashboard",
       icon: <LayoutDashboard className="w-4 h-4 shrink-0" />,
       active: activeTab === "bento",
       onClick: () => setActiveTab("bento"),
@@ -292,7 +311,7 @@ function AdminPage() {
                     Karlos Art
                   </span>
                   <span className="text-[9px] uppercase tracking-[0.25em] text-[#9be5ff] mt-1 font-bold">
-                    Ateliê & Dashboard
+                    PAINEL ADMINSTRATIVO
                   </span>
                 </motion.div>
               </Link>
@@ -373,19 +392,13 @@ function AdminPage() {
                 </span>
               </div>
               <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-[0.18em] text-white mt-0.5">
-                {activeTab === "bento" && "Visão Analítica Bento & Métricas"}
+                {activeTab === "bento" && "Visão Analítica & Métricas"}
                 {activeTab === "leads" && "Triagem & Gestão de Leads (Orçamentos)"}
                 {activeTab === "agenda" && "Agenda & Gestão de Sessões do Ateliê"}
               </h1>
             </div>
 
             <div className="flex items-center gap-3">
-              {feedbackMsg && (
-                <span className="text-xs text-[#9be5ff] bg-[#9be5ff]/10 border border-[#9be5ff]/30 px-3 py-1 animate-pulse">
-                  {feedbackMsg}
-                </span>
-              )}
-
               <Button
                 variant="outline"
                 size="sm"
@@ -416,6 +429,28 @@ function AdminPage() {
 
         {/* Conteúdo Principal Renderizado Conforme Aba Ativa */}
         <main className="p-6 md:p-8 max-w-7xl w-full mx-auto flex-1">
+          {panelAlert && (
+            <Alert
+              variant={panelAlert.variant}
+              className={`mb-6 rounded-none ${
+                panelAlert.variant === "default"
+                  ? "border-[#9be5ff]/40 bg-[#9be5ff]/5 text-neutral-200"
+                  : ""
+              }`}
+            >
+              {panelAlert.variant === "destructive" ? (
+                <AlertCircle className="h-4 w-4" />
+              ) : (
+                <Info className="h-4 w-4 text-[#9be5ff]" />
+              )}
+              <AlertTitle>
+                {panelAlert.title ||
+                  (panelAlert.variant === "destructive" ? "Aviso de Erro" : "Notificação")}
+              </AlertTitle>
+              <AlertDescription>{panelAlert.message}</AlertDescription>
+            </Alert>
+          )}
+
           {activeTab === "bento" ? (
             <section className="space-y-6">
               <div className="flex items-center justify-between border-b border-white/10 pb-2">
