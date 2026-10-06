@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 import appCss from "../styles.css?url";
 
@@ -44,6 +46,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+        <div className="mt-4 text-left">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro na aplicação</AlertTitle>
+            <AlertDescription>
+              {error.message || "Ocorreu um erro inesperado ao carregar a página."}
+            </AlertDescription>
+          </Alert>
+        </div>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Button
             onClick={() => {
