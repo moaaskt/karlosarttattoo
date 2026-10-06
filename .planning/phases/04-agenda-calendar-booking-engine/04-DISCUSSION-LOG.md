@@ -1,7 +1,7 @@
 # Phase 4 Discussion Log: Agenda & Calendar Booking Engine
 
 **Date:** 2026-10-01  
-**Participants:** Developer & Assistant  
+**Participants:** Developer & Assistant
 
 ---
 

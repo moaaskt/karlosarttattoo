@@ -196,11 +196,12 @@ Buffer se aplica **apenas entre bookings**, nunca a `time_blocks`.
 // Backend: calcular janela expandida com buffer antes de entrar na transação
 const bufMs = bufferMinutes * 60 * 1000;
 const windowStart = serializeDate(new Date(new Date(new_start_at).getTime() - bufMs));
-const windowEnd   = serializeDate(new Date(new Date(new_end_at).getTime()   + bufMs));
+const windowEnd = serializeDate(new Date(new Date(new_end_at).getTime() + bufMs));
 // windowStart e windowEnd são passados como :window_start e :window_end na query
 ```
 
 **Fórmula lógica (simétrica):**
+
 ```
 -- Conflito com booking A existente (usando janela expandida):
 :window_start < A.end_at AND A.start_at < :window_end
@@ -215,9 +216,9 @@ const windowEnd   = serializeDate(new Date(new Date(new_end_at).getTime()   + bu
 
 ```ts
 // Pré-query (JS): calcular parâmetros
-const bufMs       = bufferMinutes * 60 * 1000;
+const bufMs = bufferMinutes * 60 * 1000;
 const windowStart = serializeDate(new Date(+new Date(new_start_at) - bufMs)); // new_start - buffer
-const windowEnd   = serializeDate(new Date(+new Date(new_end_at)   + bufMs)); // new_end   + buffer
+const windowEnd = serializeDate(new Date(+new Date(new_end_at) + bufMs)); // new_end   + buffer
 ```
 
 ```sql
@@ -292,18 +293,19 @@ confirmado → concluido (pode ser marcado antes do horário de término; é aç
 
 **Análise de opções:**
 
-| Critério | FullCalendar (`@fullcalendar/react`) | Custom com `@dnd-kit` |
-|---|---|---|
-| Views prontas (Mês, Semana, Dia) | ✅ Daygrid + Timegrid inclusos | ❌ Tudo do zero |
-| Drag & Drop nativo | ✅ Plugin `@fullcalendar/interaction` | ✅ mas requer integração manual |
-| Touch / mobile | ✅ Suportado nativamente | ⚠️ Necessita config adicional |
-| Eventos sobrepostos | ✅ Renderiza automaticamente | ❌ Lógica de layout manual |
-| Integração com React (TanStack Start) | ✅ Adapter oficial `@fullcalendar/react` | ✅ agnóstico |
-| Licença | MIT | MIT |
-| Esforço estimado | ~1 semana (config + estilo) | ~3–4 semanas |
-| Customização visual (Tailwind v4) | ⚠️ Requer override de CSS vars | ✅ total |
+| Critério                              | FullCalendar (`@fullcalendar/react`)     | Custom com `@dnd-kit`           |
+| ------------------------------------- | ---------------------------------------- | ------------------------------- |
+| Views prontas (Mês, Semana, Dia)      | ✅ Daygrid + Timegrid inclusos           | ❌ Tudo do zero                 |
+| Drag & Drop nativo                    | ✅ Plugin `@fullcalendar/interaction`    | ✅ mas requer integração manual |
+| Touch / mobile                        | ✅ Suportado nativamente                 | ⚠️ Necessita config adicional   |
+| Eventos sobrepostos                   | ✅ Renderiza automaticamente             | ❌ Lógica de layout manual      |
+| Integração com React (TanStack Start) | ✅ Adapter oficial `@fullcalendar/react` | ✅ agnóstico                    |
+| Licença                               | MIT                                      | MIT                             |
+| Esforço estimado                      | ~1 semana (config + estilo)              | ~3–4 semanas                    |
+| Customização visual (Tailwind v4)     | ⚠️ Requer override de CSS vars           | ✅ total                        |
 
 **Decisão: FullCalendar.** O custo de implementar time-grid com sobreposição de eventos e touch support do zero equivale a 3–4x o esforço do FullCalendar. O override visual com CSS custom properties do FullCalendar é viável e bem documentado. Usaremos:
+
 - `@fullcalendar/react`
 - `@fullcalendar/daygrid`
 - `@fullcalendar/timegrid`
@@ -361,6 +363,7 @@ confirmado → concluido (pode ser marcado antes do horário de término; é aç
 </decisions>
 
 <canonical_refs>
+
 ## Canonical References
 
 - `.planning/REQUIREMENTS.md` — Requisitos R-05, R-06, R-07, R-08.
