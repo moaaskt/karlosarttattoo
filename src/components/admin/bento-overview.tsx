@@ -16,6 +16,7 @@ import {
 import { BentoGrid, BentoGridItem } from "@/components/ui/aceternity/bento-grid";
 import { GlowingCard } from "@/components/ui/aceternity/glowing-card";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ApexChartClient } from "@/components/admin/apex-chart-client";
 import { centsToDisplay } from "@/lib/api-client";
 import type { Lead, Booking } from "@/lib/db";
@@ -506,17 +507,7 @@ export function BentoOverview({
                   <div className="text-[11px] text-neutral-400">{lead.service}</div>
                 </div>
                 <div className="text-right">
-                  <span
-                    className={`inline-block px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider ${
-                      lead.status === "novo"
-                        ? "bg-[#9be5ff]/10 text-[#9be5ff] border border-[#9be5ff]/30"
-                        : lead.status === "agendado"
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                          : "bg-white/5 text-neutral-400"
-                    }`}
-                  >
-                    {lead.status}
-                  </span>
+                  <StatusBadge status={lead.status} />
                   <div className="text-[10px] text-neutral-500 mt-1 flex items-center gap-1 justify-end">
                     <Calendar className="w-3 h-3" />
                     {new Date(lead.createdAt).toLocaleDateString("pt-BR")}
