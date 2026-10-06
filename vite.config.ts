@@ -54,20 +54,45 @@ export default defineConfig({
               });
 
               let webResponse: Response;
-              if (parsedUrl.pathname === "/api/leads" || parsedUrl.pathname.startsWith("/api/leads/")) {
-                const { handleLeadsRequest } = await server.ssrLoadModule("/src/server/api/leads.ts");
+              if (
+                parsedUrl.pathname === "/api/leads" ||
+                parsedUrl.pathname.startsWith("/api/leads/")
+              ) {
+                const { handleLeadsRequest } = await server.ssrLoadModule(
+                  "/src/server/api/leads.ts",
+                );
                 webResponse = await handleLeadsRequest(webRequest);
-              } else if (parsedUrl.pathname === "/api/bookings" || parsedUrl.pathname.startsWith("/api/bookings/")) {
-                const { handleBookingsRequest } = await server.ssrLoadModule("/src/server/api/bookings.ts");
+              } else if (
+                parsedUrl.pathname === "/api/bookings" ||
+                parsedUrl.pathname.startsWith("/api/bookings/")
+              ) {
+                const { handleBookingsRequest } = await server.ssrLoadModule(
+                  "/src/server/api/bookings.ts",
+                );
                 webResponse = await handleBookingsRequest(webRequest);
-              } else if (parsedUrl.pathname === "/api/time-blocks" || parsedUrl.pathname.startsWith("/api/time-blocks/")) {
-                const { handleTimeBlocksRequest } = await server.ssrLoadModule("/src/server/api/time-blocks.ts");
+              } else if (
+                parsedUrl.pathname === "/api/time-blocks" ||
+                parsedUrl.pathname.startsWith("/api/time-blocks/")
+              ) {
+                const { handleTimeBlocksRequest } = await server.ssrLoadModule(
+                  "/src/server/api/time-blocks.ts",
+                );
                 webResponse = await handleTimeBlocksRequest(webRequest);
-              } else if (parsedUrl.pathname === "/api/settings" || parsedUrl.pathname.startsWith("/api/settings/")) {
-                const { handleSettingsRequest } = await server.ssrLoadModule("/src/server/api/settings.ts");
+              } else if (
+                parsedUrl.pathname === "/api/settings" ||
+                parsedUrl.pathname.startsWith("/api/settings/")
+              ) {
+                const { handleSettingsRequest } = await server.ssrLoadModule(
+                  "/src/server/api/settings.ts",
+                );
                 webResponse = await handleSettingsRequest(webRequest);
-              } else if (parsedUrl.pathname === "/api/availability-rules" || parsedUrl.pathname.startsWith("/api/availability-rules/")) {
-                const { handleAvailabilityRulesRequest } = await server.ssrLoadModule("/src/server/api/availability-rules.ts");
+              } else if (
+                parsedUrl.pathname === "/api/availability-rules" ||
+                parsedUrl.pathname.startsWith("/api/availability-rules/")
+              ) {
+                const { handleAvailabilityRulesRequest } = await server.ssrLoadModule(
+                  "/src/server/api/availability-rules.ts",
+                );
                 webResponse = await handleAvailabilityRulesRequest(webRequest);
               } else {
                 return next();
