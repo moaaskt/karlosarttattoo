@@ -1,6 +1,6 @@
 /**
  * Utilitários de data, timezone e cálculo de buffer para o sistema de agendamento (Karlos Art Tattoo).
- * 
+ *
  * Todas as datas armazenadas no banco são strings UTC ISO 8601 com milissegundos e sufixo 'Z'
  * (ex: "2026-10-15T13:00:00.000Z"), permitindo comparações textuais seguras no SQLite.
  */
@@ -38,7 +38,7 @@ export function isValidISODate(s: string): boolean {
 export function expandWindow(
   startIso: string,
   endIso: string,
-  bufferMinutes: number
+  bufferMinutes: number,
 ): {
   windowStart: string;
   windowEnd: string;
@@ -93,7 +93,7 @@ function getTimezoneOffsetMs(date: Date, timeZone: string): number {
  */
 export function getLocalDateTimeParts(
   date: Date,
-  timeZone: string
+  timeZone: string,
 ): {
   ymd: string;
   year: number;
@@ -142,7 +142,7 @@ export function getLocalMidnightUtc(ymd: string, timeZone: string): Date {
  * Converte um bloqueio all_day para intervalo semiaberto [start_at, end_at) em UTC.
  * start_at = meia-noite local do 1º dia -> UTC
  * end_at   = meia-noite local do dia seguinte ao último -> UTC
- * 
+ *
  * Jamais usa '23:59:59'.
  *
  * @param startDateInput String YYYY-MM-DD ou data ISO do 1º dia
@@ -152,7 +152,7 @@ export function getLocalMidnightUtc(ymd: string, timeZone: string): Date {
 export function expandAllDay(
   startDateInput: string,
   timeZone: string,
-  endDateInput?: string
+  endDateInput?: string,
 ): {
   start: string;
   end: string;
@@ -186,7 +186,7 @@ export function expandAllDay(
 
 /**
  * Verifica se um agendamento está totalmente dentro de alguma janela de disponibilidade.
- * 
+ *
  * Regra:
  * - A sessão precisa iniciar e terminar no mesmo dia local.
  * - Deve existir ao menos uma janela ativa para aquele dia da semana em que:
@@ -196,7 +196,7 @@ export function isWithinWorkHours(
   startIso: string,
   endIso: string,
   rules: AvailabilityRuleShape[],
-  timeZone: string
+  timeZone: string,
 ): boolean {
   if (!isValidISODate(startIso) || !isValidISODate(endIso)) return false;
 
@@ -212,19 +212,14 @@ export function isWithinWorkHours(
     return false;
   }
 
-  const dayRules = rules.filter(
-    (r) => r.is_active === 1 && r.day_of_week === startParts.dayOfWeek
-  );
+  const dayRules = rules.filter((r) => r.is_active === 1 && r.day_of_week === startParts.dayOfWeek);
   if (dayRules.length === 0) {
     return false;
   }
 
   // Verifica se a sessão cabe completamente dentro de uma das janelas disponíveis
   return dayRules.some((rule) => {
-    return (
-      rule.window_start <= startParts.time &&
-      endParts.time <= rule.window_end
-    );
+    return rule.window_start <= startParts.time && endParts.time <= rule.window_end;
   });
 }
 

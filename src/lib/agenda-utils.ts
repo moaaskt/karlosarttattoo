@@ -42,7 +42,7 @@ export const VALID_TRANSITIONS: Record<Booking["status"], Booking["status"][]> =
 export function bookingToEvent(
   b: Booking,
   showCancelled: boolean,
-  interactive: boolean = false
+  interactive: boolean = false,
 ): EventInput | null {
   if (!showCancelled && (b.status === "cancelado" || b.status === "no_show")) {
     return null;
@@ -94,7 +94,7 @@ export function deriveSlotMinTime(rules: AvailabilityRule[]): string {
   if (active.length === 0) return "07:00:00";
   const minStart = active.reduce(
     (min, r) => (r.window_start < min ? r.window_start : min),
-    active[0].window_start
+    active[0].window_start,
   );
   const [h, m] = minStart.split(":").map(Number);
   const minH = Math.max(0, h - 1);
@@ -107,7 +107,7 @@ export function deriveSlotMaxTime(rules: AvailabilityRule[]): string {
   if (active.length === 0) return "23:00:00";
   const maxEnd = active.reduce(
     (max, r) => (r.window_end > max ? r.window_end : max),
-    active[0].window_end
+    active[0].window_end,
   );
   const [h, m] = maxEnd.split(":").map(Number);
   const maxH = Math.min(24, h + 1);
@@ -176,14 +176,17 @@ export function isPastDateTime(
   dateStr: string,
   timeStr: string,
   timezone: string,
-  now?: Date | string
+  now?: Date | string,
 ): boolean {
   const dt = DateTime.fromISO(`${dateStr}T${timeStr}:00`, { zone: timezone });
   if (!dt.isValid) {
     throw new Error(`Data/hora inválida: ${dateStr} ${timeStr}`);
   }
   const ref = now
-    ? (typeof now === "string" ? DateTime.fromISO(now, { zone: "utc" }) : DateTime.fromJSDate(now)).setZone(timezone)
+    ? (typeof now === "string"
+        ? DateTime.fromISO(now, { zone: "utc" })
+        : DateTime.fromJSDate(now)
+      ).setZone(timezone)
     : DateTime.now().setZone(timezone);
 
   return dt < ref;
@@ -196,7 +199,7 @@ export function isFutureWindowExceeded(
   dateStr: string,
   timezone: string,
   maxDays: number,
-  now?: Date | string
+  now?: Date | string,
 ): boolean {
   if (!maxDays || maxDays <= 0) return false;
   const dt = DateTime.fromISO(dateStr, { zone: timezone }).startOf("day");
@@ -204,10 +207,11 @@ export function isFutureWindowExceeded(
     throw new Error(`Data inválida: ${dateStr}`);
   }
   const ref = now
-    ? (typeof now === "string" ? DateTime.fromISO(now, { zone: "utc" }) : DateTime.fromJSDate(now)).setZone(timezone).startOf("day")
+    ? (typeof now === "string" ? DateTime.fromISO(now, { zone: "utc" }) : DateTime.fromJSDate(now))
+        .setZone(timezone)
+        .startOf("day")
     : DateTime.now().setZone(timezone).startOf("day");
 
   const diffDays = Math.round(dt.diff(ref, "days").days);
   return diffDays > maxDays;
 }
-

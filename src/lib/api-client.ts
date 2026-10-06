@@ -78,12 +78,10 @@ export function getErrorMessage(code?: string): string {
 /** Fetch autenticado — único ponto de acesso à API da agenda */
 export async function apiFetch<T = unknown>(
   path: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<{ ok: boolean; status: number; data: T }> {
   const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("admin_auth_token") ?? ""
-      : "";
+    typeof window !== "undefined" ? (sessionStorage.getItem("admin_auth_token") ?? "") : "";
   const res = await fetch(path, {
     ...options,
     headers: {

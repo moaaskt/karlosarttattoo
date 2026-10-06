@@ -10,11 +10,7 @@ import {
   generateId,
   type AvailabilityRuleShape,
 } from "./booking-utils";
-import {
-  utcToLocal,
-  isPastDateTime,
-  isFutureWindowExceeded,
-} from "./agenda-utils";
+import { utcToLocal, isPastDateTime, isFutureWindowExceeded } from "./agenda-utils";
 
 export interface BookingWarning {
   code: "outside_hours" | "past_date" | "future_window";
@@ -288,9 +284,7 @@ export function getDatabase(customPath?: string): DatabaseSync {
       }
     }
 
-    const dbPath = fs.existsSync(dbDir)
-      ? path.join(dbDir, "leads.db")
-      : ":memory:";
+    const dbPath = fs.existsSync(dbDir) ? path.join(dbDir, "leads.db") : ":memory:";
 
     dbInstance = new DatabaseSync(dbPath);
     applyPragmasAndSchema(dbInstance);
@@ -311,7 +305,7 @@ export function getDatabase(customPath?: string): DatabaseSync {
         "Estúdio Privado (Palhoça)",
         "Quero uma composição geométrica floral no antebraço, traços ultrafinos (fine line).",
         "novo",
-        new Date(Date.now() - 3600000 * 2).toISOString()
+        new Date(Date.now() - 3600000 * 2).toISOString(),
       );
       seedStmt.run(
         "lead_seed_02",
@@ -321,7 +315,7 @@ export function getDatabase(customPath?: string): DatabaseSync {
         "Atendimento a Domicílio (Florianópolis / São José / Região)",
         "Tatuagem autoral nas costas, estilo microrrealismo e projeção anatômica.",
         "contatado",
-        new Date(Date.now() - 3600000 * 24).toISOString()
+        new Date(Date.now() - 3600000 * 24).toISOString(),
       );
       seedStmt.run(
         "lead_seed_03",
@@ -331,7 +325,7 @@ export function getDatabase(customPath?: string): DatabaseSync {
         "Estúdio Privado (Palhoça)",
         "Lettering delicado na costela e símbolo minimalista.",
         "agendado",
-        new Date(Date.now() - 3600000 * 48).toISOString()
+        new Date(Date.now() - 3600000 * 48).toISOString(),
       );
     }
 
@@ -437,7 +431,10 @@ export function getLeadStats() {
 
 export function getSettings(): SettingsMap {
   const db = getDatabase();
-  const rows = db.prepare("SELECT key, value FROM settings").all() as { key: string; value: string }[];
+  const rows = db.prepare("SELECT key, value FROM settings").all() as {
+    key: string;
+    value: string;
+  }[];
   const map: SettingsMap = {};
   for (const row of rows) {
     map[row.key] = row.value;
@@ -517,7 +514,7 @@ export function deleteAvailabilityRule(id: string): boolean {
 
 export function createTimeBlock(
   data: CreateTimeBlockInput,
-  force = false
+  force = false,
 ): {
   timeBlock?: TimeBlock;
   error?: "validation_error" | "booking_conflict";
@@ -570,7 +567,8 @@ export function createTimeBlock(
       return {
         error: "booking_conflict",
         conflicts: activeConflicts,
-        message: "Existem agendamentos ativos no período selecionado. Confirme com force para prosseguir.",
+        message:
+          "Existem agendamentos ativos no período selecionado. Confirme com force para prosseguir.",
       };
     }
   }
@@ -623,11 +621,7 @@ export function deleteTimeBlock(id: string): boolean {
 // Módulo de Bookings & Anti-Conflito (D-01, D-08, D-09, D-10, D-11)
 // ==========================================
 
-export function listBookings(
-  from?: string,
-  to?: string,
-  statusFilter?: string
-): Booking[] {
+export function listBookings(from?: string, to?: string, statusFilter?: string): Booking[] {
   const db = getDatabase();
 
   let query = "SELECT * FROM bookings";
@@ -654,16 +648,14 @@ export function listBookings(
   return stmt.all(...params) as unknown as Booking[];
 }
 
-export function getBookingById(
-  id: string
-): (Booking & { events: BookingEvent[] }) | null {
+export function getBookingById(id: string): (Booking & { events: BookingEvent[] }) | null {
   const db = getDatabase();
   const bookingStmt = db.prepare("SELECT * FROM bookings WHERE id = ?");
   const booking = bookingStmt.get(id) as unknown as Booking | undefined;
   if (!booking) return null;
 
   const eventsStmt = db.prepare(
-    "SELECT * FROM booking_events WHERE booking_id = ? ORDER BY created_at ASC"
+    "SELECT * FROM booking_events WHERE booking_id = ? ORDER BY created_at ASC",
   );
   const events = eventsStmt.all(id) as unknown as BookingEvent[];
 
@@ -677,7 +669,7 @@ export function calculateBookingWarnings(
   startAt: string,
   endAt: string,
   settings: Record<string, string>,
-  now?: Date | string
+  now?: Date | string,
 ): BookingWarning[] {
   const timezone = settings["timezone"] || "America/Sao_Paulo";
   const rules = listAvailabilityRules();
@@ -716,13 +708,19 @@ export function calculateBookingWarnings(
 export function createBooking(
   data: CreateBookingInput,
   force = false,
-  options?: { now?: Date | string }
+  options?: { now?: Date | string },
 ): {
   booking?: Booking;
   error?: "time_block_conflict" | "booking_conflict" | "validation_error";
   requires_force?: boolean;
   warnings?: BookingWarning[];
-  conflicts?: Array<{ id: string; client_name?: string; start_at: string; end_at: string; reason_tag?: string }>;
+  conflicts?: Array<{
+    id: string;
+    client_name?: string;
+    start_at: string;
+    end_at: string;
+    reason_tag?: string;
+  }>;
   message?: string;
 } {
   const db = getDatabase();
@@ -731,7 +729,8 @@ export function createBooking(
   if (!isValidISODate(data.start_at) || !isValidISODate(data.end_at)) {
     return {
       error: "validation_error",
-      message: "start_at e end_at devem ser strings ISO UTC válidas (ex: 2026-10-15T13:00:00.000Z).",
+      message:
+        "start_at e end_at devem ser strings ISO UTC válidas (ex: 2026-10-15T13:00:00.000Z).",
     };
   }
   if (data.end_at <= data.start_at) {
@@ -748,7 +747,8 @@ export function createBooking(
   if (priceTotalCents > 0 && depositCents > priceTotalCents) {
     return {
       error: "validation_error",
-      message: "O valor do sinal (deposit_cents) não pode ser superior ao valor total (price_total_cents).",
+      message:
+        "O valor do sinal (deposit_cents) não pode ser superior ao valor total (price_total_cents).",
     };
   }
 
@@ -763,8 +763,7 @@ export function createBooking(
     // 2. Validação e avanço do lead_id (TASK-15)
     if (data.lead_id) {
       const lead = db.prepare("SELECT id, status FROM leads WHERE id = ?").get(data.lead_id) as
-        | { id: string; status: Lead["status"] }
-        | undefined;
+        { id: string; status: Lead["status"] } | undefined;
 
       if (!lead) {
         db.exec("ROLLBACK");
@@ -798,7 +797,8 @@ export function createBooking(
       return {
         error: "time_block_conflict",
         conflicts: tbConflicts,
-        message: "Conflito com bloqueio de tempo (folga/viagem) existente no período. Bloqueio absoluto.",
+        message:
+          "Conflito com bloqueio de tempo (folga/viagem) existente no período. Bloqueio absoluto.",
       };
     }
 
@@ -878,7 +878,7 @@ export function createBooking(
       data.session_number || null,
       data.notes || null,
       now,
-      now
+      now,
     );
 
     // Eventos de auditoria em booking_events
@@ -895,7 +895,7 @@ export function createBooking(
         null,
         JSON.stringify({ lead_id: data.lead_id }),
         "Lead associado ao agendamento",
-        now
+        now,
       );
     }
 
@@ -932,7 +932,7 @@ export function createBooking(
       null,
       JSON.stringify(newBookingData),
       createNote,
-      now
+      now,
     );
 
     db.exec("COMMIT");
@@ -960,7 +960,7 @@ export function updateBookingStatus(
   options?: {
     depositAction?: "retido" | "devolvido";
     note?: string;
-  }
+  },
 ): {
   booking?: Booking;
   error?: "not_found" | "invalid_transition" | "deposit_required" | "deposit_action_required";
@@ -970,14 +970,19 @@ export function updateBookingStatus(
   db.exec("BEGIN IMMEDIATE");
 
   try {
-    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as Booking | undefined;
+    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as
+      Booking | undefined;
     if (!current) {
       db.exec("ROLLBACK");
       return { error: "not_found", message: "Agendamento não encontrado." };
     }
 
     // INVARIANTE: Estados terminais ('cancelado', 'no_show', 'concluido') não podem ter seu status alterado
-    if (current.status === "cancelado" || current.status === "no_show" || current.status === "concluido") {
+    if (
+      current.status === "cancelado" ||
+      current.status === "no_show" ||
+      current.status === "concluido"
+    ) {
       db.exec("ROLLBACK");
       return {
         error: "invalid_transition",
@@ -1004,11 +1009,15 @@ export function updateBookingStatus(
     } else if (newStatus === "cancelado" || newStatus === "no_show") {
       // Regra de sinal: se deposit_status for 'pago', exige escolher retido ou devolvido
       if (current.deposit_status === "pago") {
-        if (!options?.depositAction || (options.depositAction !== "retido" && options.depositAction !== "devolvido")) {
+        if (
+          !options?.depositAction ||
+          (options.depositAction !== "retido" && options.depositAction !== "devolvido")
+        ) {
           db.exec("ROLLBACK");
           return {
             error: "deposit_action_required",
-            message: "Para cancelar ou registrar falta com sinal pago, é obrigatório definir o destino do sinal ('retido' ou 'devolvido').",
+            message:
+              "Para cancelar ou registrar falta com sinal pago, é obrigatório definir o destino do sinal ('retido' ou 'devolvido').",
           };
         }
       }
@@ -1033,7 +1042,11 @@ export function updateBookingStatus(
 
     const now = serializeDate(new Date());
     let nextDepositStatus = current.deposit_status;
-    if ((newStatus === "cancelado" || newStatus === "no_show") && current.deposit_status === "pago" && options?.depositAction) {
+    if (
+      (newStatus === "cancelado" || newStatus === "no_show") &&
+      current.deposit_status === "pago" &&
+      options?.depositAction
+    ) {
       nextDepositStatus = options.depositAction;
     }
 
@@ -1054,50 +1067,60 @@ export function updateBookingStatus(
     };
 
     const eventId = generateId("bke");
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO booking_events (id, booking_id, event_type, old_value, new_value, note, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `,
+    ).run(
       eventId,
       id,
       eventTypeMap[newStatus],
       JSON.stringify({ status: current.status, deposit_status: current.deposit_status }),
       JSON.stringify({ status: newStatus, deposit_status: nextDepositStatus }),
       options?.note || `Status alterado de ${current.status} para ${newStatus}`,
-      now
+      now,
     );
 
     // Se houve mudança no status do sinal junto ao cancelamento/falta, grava evento específico
     if (nextDepositStatus !== current.deposit_status) {
       const depositEventId = generateId("bke");
       const depEventType = nextDepositStatus === "retido" ? "deposit_retained" : "deposit_refunded";
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO booking_events (id, booking_id, event_type, old_value, new_value, note, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(
+      `,
+      ).run(
         depositEventId,
         id,
         depEventType,
         current.deposit_status,
         nextDepositStatus,
         `Sinal ${nextDepositStatus} devido ao encerramento como ${newStatus}`,
-        now
+        now,
       );
     }
 
     // Se o agendamento foi cancelado ou registrado no-show e possuía lead_id vinculado (TASK-15)
     if (current.lead_id && (newStatus === "cancelado" || newStatus === "no_show")) {
-      const activeLeadsBookings = db.prepare(`
+      const activeLeadsBookings = db
+        .prepare(
+          `
         SELECT COUNT(*) as c FROM bookings
         WHERE lead_id = ? AND id != ? AND status NOT IN ('cancelado', 'no_show')
-      `).get(current.lead_id, id) as { c: number };
+      `,
+        )
+        .get(current.lead_id, id) as { c: number };
 
       if (activeLeadsBookings.c === 0) {
-        db.prepare(`
+        db.prepare(
+          `
           UPDATE leads
           SET status = 'contatado'
           WHERE id = ? AND status = 'agendado'
-        `).run(current.lead_id);
+        `,
+        ).run(current.lead_id);
       }
     }
 
@@ -1125,10 +1148,15 @@ export function rescheduleBooking(
   newEndAt: string,
   force = false,
   note?: string,
-  options?: { now?: Date | string }
+  options?: { now?: Date | string },
 ): {
   booking?: Booking;
-  error?: "not_found" | "validation_error" | "invalid_status" | "time_block_conflict" | "booking_conflict";
+  error?:
+    | "not_found"
+    | "validation_error"
+    | "invalid_status"
+    | "time_block_conflict"
+    | "booking_conflict";
   requires_force?: boolean;
   warnings?: BookingWarning[];
   conflicts?: Array<{ id: string; client_name?: string; start_at: string; end_at: string }>;
@@ -1156,7 +1184,8 @@ export function rescheduleBooking(
   db.exec("BEGIN IMMEDIATE");
 
   try {
-    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as Booking | undefined;
+    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as
+      Booking | undefined;
     if (!current) {
       db.exec("ROLLBACK");
       return { error: "not_found", message: "Agendamento não encontrado." };
@@ -1231,11 +1260,13 @@ export function rescheduleBooking(
     const now = serializeDate(new Date());
 
     // Atualiza horários mantendo o status atual
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE bookings
       SET start_at = ?, end_at = ?, updated_at = ?
       WHERE id = ?
-    `).run(newStartAt, newEndAt, now, id);
+    `,
+    ).run(newStartAt, newEndAt, now, id);
 
     // Grava evento de remarcação com auditoria de force se aplicável
     const finalNote =
@@ -1244,17 +1275,19 @@ export function rescheduleBooking(
         : note || "Sessão remarcada";
 
     const eventId = generateId("bke");
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO booking_events (id, booking_id, event_type, old_value, new_value, note, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `,
+    ).run(
       eventId,
       id,
       "rescheduled",
       JSON.stringify({ start_at: current.start_at, end_at: current.end_at }),
       JSON.stringify({ start_at: newStartAt, end_at: newEndAt }),
       finalNote,
-      now
+      now,
     );
 
     db.exec("COMMIT");
@@ -1284,7 +1317,7 @@ export function updateDepositStatus(
   id: string,
   depositStatus: Booking["deposit_status"],
   depositCents?: number,
-  note?: string
+  note?: string,
 ): {
   booking?: Booking;
   error?: "not_found" | "invalid_deposit_status";
@@ -1294,7 +1327,8 @@ export function updateDepositStatus(
   db.exec("BEGIN IMMEDIATE");
 
   try {
-    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as Booking | undefined;
+    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as
+      Booking | undefined;
     if (!current) {
       db.exec("ROLLBACK");
       return { error: "not_found", message: "Agendamento não encontrado." };
@@ -1305,7 +1339,8 @@ export function updateDepositStatus(
       db.exec("ROLLBACK");
       return {
         error: "invalid_deposit_status",
-        message: "Agendamento com status 'confirmado' exige sinal pago ou dispensado. Não é permitido retornar o sinal para 'pendente'.",
+        message:
+          "Agendamento com status 'confirmado' exige sinal pago ou dispensado. Não é permitido retornar o sinal para 'pendente'.",
       };
     }
 
@@ -1315,7 +1350,8 @@ export function updateDepositStatus(
         db.exec("ROLLBACK");
         return {
           error: "invalid_deposit_status",
-          message: "O sinal só pode ser 'retido' ou 'devolvido' após o cancelamento ou no-show da sessão.",
+          message:
+            "O sinal só pode ser 'retido' ou 'devolvido' após o cancelamento ou no-show da sessão.",
         };
       }
     }
@@ -1333,11 +1369,13 @@ export function updateDepositStatus(
 
     const now = serializeDate(new Date());
 
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE bookings
       SET deposit_status = ?, deposit_cents = ?, updated_at = ?
       WHERE id = ?
-    `).run(depositStatus, nextCents, now, id);
+    `,
+    ).run(depositStatus, nextCents, now, id);
 
     let eventType: BookingEvent["event_type"] = "note_updated";
     if (depositStatus === "pago") eventType = "deposit_paid";
@@ -1346,17 +1384,22 @@ export function updateDepositStatus(
     else if (depositStatus === "devolvido") eventType = "deposit_refunded";
 
     const eventId = generateId("bke");
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO booking_events (id, booking_id, event_type, old_value, new_value, note, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `,
+    ).run(
       eventId,
       id,
       eventType,
-      JSON.stringify({ deposit_status: current.deposit_status, deposit_cents: current.deposit_cents }),
+      JSON.stringify({
+        deposit_status: current.deposit_status,
+        deposit_cents: current.deposit_cents,
+      }),
       JSON.stringify({ deposit_status: depositStatus, deposit_cents: nextCents }),
       note || `Status do sinal alterado para ${depositStatus}`,
-      now
+      now,
     );
 
     db.exec("COMMIT");
@@ -1395,7 +1438,7 @@ export interface UpdateBookingDataPatch {
  */
 export function updateBookingData(
   id: string,
-  patch: UpdateBookingDataPatch
+  patch: UpdateBookingDataPatch,
 ): {
   booking?: Booking;
   error?: "not_found" | "invalid_transition" | "invalid_deposit" | "validation_error";
@@ -1405,7 +1448,8 @@ export function updateBookingData(
   db.exec("BEGIN IMMEDIATE");
 
   try {
-    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as Booking | undefined;
+    const current = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id) as unknown as
+      Booking | undefined;
     if (!current) {
       db.exec("ROLLBACK");
       return { error: "not_found", message: "Agendamento não encontrado." };
@@ -1428,7 +1472,10 @@ export function updateBookingData(
     if (patch.session_type !== undefined && patch.session_type !== current.session_type) {
       changedFields.session_type = patch.session_type;
     }
-    if (patch.price_total_cents !== undefined && patch.price_total_cents !== current.price_total_cents) {
+    if (
+      patch.price_total_cents !== undefined &&
+      patch.price_total_cents !== current.price_total_cents
+    ) {
       changedFields.price_total_cents = patch.price_total_cents;
     }
     if (patch.deposit_cents !== undefined && patch.deposit_cents !== current.deposit_cents) {
@@ -1454,14 +1501,17 @@ export function updateBookingData(
         db.exec("ROLLBACK");
         return {
           error: "invalid_transition",
-          message: "Não é permitido alterar dados de contato de agendamento cancelado ou marcado como falta.",
+          message:
+            "Não é permitido alterar dados de contato de agendamento cancelado ou marcado como falta.",
         };
       }
     }
 
     // Validação de sinal mesclado
     const nextDeposit =
-      changedFields.deposit_cents !== undefined ? changedFields.deposit_cents : current.deposit_cents;
+      changedFields.deposit_cents !== undefined
+        ? changedFields.deposit_cents
+        : current.deposit_cents;
     const nextPrice =
       changedFields.price_total_cents !== undefined
         ? changedFields.price_total_cents
@@ -1536,17 +1586,19 @@ export function updateBookingData(
     // Se notas foram alteradas, grava evento note_updated em booking_events
     if (changedFields.notes !== undefined) {
       const eventId = generateId("bke");
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO booking_events (id, booking_id, event_type, old_value, new_value, note, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(
+      `,
+      ).run(
         eventId,
         id,
         "note_updated",
         current.notes || null,
         changedFields.notes || null,
         "Observações do agendamento atualizadas",
-        now
+        now,
       );
     }
 
@@ -1563,4 +1615,3 @@ export function updateBookingData(
     throw err;
   }
 }
-

@@ -34,7 +34,7 @@ export function createDatabaseBackup(customBackupDir?: string): BackupResult {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   const ts = `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())}_${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}`;
-  
+
   let destPath = path.join(backupDir, `leads_backup_${ts}.db`);
   let counter = 1;
   while (fs.existsSync(destPath)) {
