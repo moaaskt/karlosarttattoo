@@ -14,7 +14,11 @@
     "start": "node .output/server/index.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "tsx --test src/test/**/*.test.ts"
+    "test": "tsx --test src/test/**/*.test.ts",
+    "backup": "tsx scripts/backup-db.ts"
+  },
+  "engines": {
+    "node": ">=22.13.0"
   },
   "overrides": {
     "rolldown": "1.2.1"

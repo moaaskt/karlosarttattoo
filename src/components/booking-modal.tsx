@@ -7,6 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export type BookingServiceType =
   | "studio"
@@ -158,13 +159,13 @@ export function BookingModal({
             <p className="text-xs text-neutral-400 leading-relaxed max-w-sm mx-auto">
               Obrigado! Recebemos sua ideia. O Karlos analisará a proposta e entrará em contato via WhatsApp/E-mail para alinhar disponibilidade e orçamento.
             </p>
-            <button
+            <Button
               type="button"
-              className="w-full mt-6 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer"
+              className="w-full mt-6 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer h-auto"
               onClick={handleClose}
             >
               FECHAR
-            </button>
+            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 pt-1">
@@ -228,15 +229,16 @@ export function BookingModal({
                 {locationOptions.map((opt) => {
                   const isSelected = service === opt.id;
                   return (
-                    <button
+                    <Button
                       key={opt.id}
                       type="button"
+                      variant={isSelected ? "outline" : "ghost"}
                       disabled={loading}
                       onClick={() => setService(opt.id)}
-                      className={`py-2 px-2 text-center transition-all rounded-none cursor-pointer flex flex-col items-center justify-center ${
+                      className={`h-auto py-2 px-2 text-center transition-all rounded-none cursor-pointer flex flex-col items-center justify-center ${
                         isSelected
-                          ? "bg-[#9be5ff]/10 border border-[#9be5ff] text-[#9be5ff] font-medium"
-                          : "bg-black/40 border border-white/10 text-neutral-400 hover:border-white/30"
+                          ? "bg-[#9be5ff]/10 border-[#9be5ff] text-[#9be5ff] font-medium hover:bg-[#9be5ff]/15 hover:text-[#9be5ff]"
+                          : "bg-black/40 border border-white/10 text-neutral-400 hover:border-white/30 hover:text-white"
                       }`}
                     >
                       <span className="text-xs tracking-wider uppercase font-semibold">
@@ -245,7 +247,7 @@ export function BookingModal({
                       <span className={`text-[10px] tracking-wide mt-0.5 ${isSelected ? "text-[#9be5ff]/80" : "text-neutral-500"}`}>
                         {opt.sub}
                       </span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -278,15 +280,15 @@ export function BookingModal({
             )}
 
             <div className="pt-2 pb-1">
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                className={`w-full mt-2 sm:mt-4 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer ${
+                className={`w-full mt-2 sm:mt-4 py-3.5 bg-[#9be5ff] hover:bg-[#82d9f7] text-[#070707] font-bold text-xs uppercase tracking-[0.25em] transition-all rounded-none shadow-[0_0_20px_rgba(155,229,255,0.25)] active:scale-[0.99] cursor-pointer h-auto ${
                   loading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >
                 {loading ? "ENVIANDO..." : "CONFIRMAR SOLICITAÇÃO"}
-              </button>
+              </Button>
             </div>
           </form>
         )}

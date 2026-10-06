@@ -496,7 +496,9 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
         },
         false // sem force
       );
-      assert.equal(bSunday.warning, "outside_hours");
+      assert.ok(bSunday.requires_force, "Deve exigir force");
+      assert.ok(bSunday.warnings, "Deve conter array de warnings");
+      assert.ok(bSunday.warnings.some((w) => w.code === "outside_hours"));
       assert.equal(bSunday.booking, undefined);
     });
 
@@ -513,7 +515,8 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
         true // com force
       );
       assert.ok(bSundayForce.booking);
-      assert.equal(bSundayForce.warning, "outside_hours");
+      assert.ok(bSundayForce.warnings);
+      assert.ok(bSundayForce.warnings.some((w) => w.code === "outside_hours"));
     });
   });
 

@@ -226,7 +226,9 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
       if (result.error === "time_block_conflict" || result.error === "booking_conflict") {
         return jsonResponse(
           {
-            error: result.error,
+            success: false,
+            error: "Conflito de horário detectado",
+            conflict_type: result.error,
             conflicts: result.conflicts || [],
             message: result.message,
           },
@@ -237,17 +239,20 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
       if (result.error === "validation_error") {
         return jsonResponse(
           {
-            error: result.error,
+            success: false,
+            error: result.message || "Validação falhou ou regra violada",
             message: result.message,
           },
           422
         );
       }
 
-      if (result.warning === "outside_hours" && !result.booking) {
+      if (result.requires_force && result.warnings) {
         return jsonResponse(
           {
-            warning: "outside_hours",
+            success: false,
+            requires_force: true,
+            warnings: result.warnings,
             message: result.message,
           },
           409
@@ -258,7 +263,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
         {
           success: true,
           booking: result.booking,
-          warning: result.warning,
+          warnings: result.warnings,
         },
         201
       );
@@ -394,25 +399,29 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
       );
 
       if (result.error === "not_found") {
-        return jsonResponse({ error: result.message }, 404);
+        return jsonResponse({ success: false, error: result.message }, 404);
       }
       if (result.error === "validation_error" || result.error === "invalid_status") {
-        return jsonResponse({ error: result.error, message: result.message }, 422);
+        return jsonResponse({ success: false, error: result.error, message: result.message }, 422);
       }
       if (result.error === "time_block_conflict" || result.error === "booking_conflict") {
         return jsonResponse(
           {
-            error: result.error,
+            success: false,
+            error: "Conflito de horário detectado",
+            conflict_type: result.error,
             conflicts: result.conflicts || [],
             message: result.message,
           },
           409
         );
       }
-      if (result.warning === "outside_hours" && !result.booking) {
+      if (result.requires_force && result.warnings) {
         return jsonResponse(
           {
-            warning: "outside_hours",
+            success: false,
+            requires_force: true,
+            warnings: result.warnings,
             message: result.message,
           },
           409
@@ -422,7 +431,7 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
       return jsonResponse({
         success: true,
         booking: result.booking,
-        warning: result.warning,
+        warnings: result.warnings,
       });
     }
 
@@ -430,16 +439,17 @@ export async function handleBookingsRequest(request: Request): Promise<Response>
   }
 
   // -------------------------------------------------------------
-  // 4. Deleção física proibida (D-01)
+  // 4. Deleção física proibida (D-01 / TASK-14)
   // -------------------------------------------------------------
   if (method === "DELETE") {
     return jsonResponse(
       {
-        error: "forbidden_operation",
-        message:
-          "Deleção física de agendamento é proibida. Cancele o agendamento para manter o histórico e a auditoria.",
+        success: false,
+        error:
+          "Agendamentos não podem ser excluídos fisicamente. Utilize PATCH para atualizar o status para 'cancelado'.",
       },
-      405
+      405,
+      { Allow: "GET, PATCH" }
     );
   }
 

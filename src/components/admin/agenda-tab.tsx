@@ -107,6 +107,8 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     id: string;
     newStart: string;
     newEnd: string;
+    warnings?: Array<{ code: string; message: string }>;
+    revertFn?: () => void;
   } | null>(null);
   const [showRescheduleConfirm, setShowRescheduleConfirm] = React.useState<boolean>(false);
 
@@ -148,14 +150,6 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     const currentRequestId = ++requestIdRef.current;
     setIsLoading(true);
 
-    // Instrumentação de depuração acessível no console/DevTools
-    if (typeof window !== "undefined") {
-      (window as any).__agendaFetchCount = ((window as any).__agendaFetchCount || 0) + 1;
-      if (process.env.NODE_ENV !== "production") {
-        console.log(`[AgendaTab] API Fetch (#${(window as any).__agendaFetchCount}): ${from} -> ${to}`);
-      }
-    }
-
     try {
       const [bookingsRes, timeBlocksRes] = await Promise.all([
         apiFetch<{ success?: boolean; bookings?: Booking[] }>(
@@ -177,6 +171,11 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         const next = timeBlocksRes.data.timeBlocks;
         setTimeBlocks((prev) => (areTimeBlocksEqual(prev, next) ? prev : next));
       }
+
+      // Só marca a faixa como já buscada após a resposta chegar com sucesso
+      if (bookingsRes.ok && timeBlocksRes.ok) {
+        currentRangeRef.current = { from, to };
+      }
     } catch (err) {
       console.error("[AgendaTab] Erro ao buscar agendamentos do intervalo:", err);
     } finally {
@@ -186,9 +185,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     }
   }, []);
 
-  // Força atualização manual mesmo no mesmo range
+  // Força atualização manual mesmo no mesmo range (ignora a trava)
   const handleRefresh = React.useCallback(() => {
     if (visibleRangeRef.current) {
+      currentRangeRef.current = null;
       fetchEventsForRange(visibleRangeRef.current.from, visibleRangeRef.current.to);
     }
   }, [fetchEventsForRange]);
@@ -199,7 +199,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       const from = toUTCString(info.start);
       const to = toUTCString(info.end);
 
-      // BLINDAGEM CRÍTICA: ignora chamadas com a mesma faixa já buscada
+      // BLINDAGEM CRÍTICA: ignora chamadas com a mesma faixa já buscada com sucesso
       if (
         currentRangeRef.current &&
         currentRangeRef.current.from === from &&
@@ -208,7 +208,6 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         return;
       }
 
-      currentRangeRef.current = { from, to };
       visibleRangeRef.current = { from, to };
       setCurrentView(info.view.type);
       fetchEventsForRange(from, to);
@@ -327,7 +326,8 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       const res = await apiFetch<{
         success?: boolean;
         error?: string;
-        warning?: string;
+        requires_force?: boolean;
+        warnings?: Array<{ code: string; message: string }>;
         message?: string;
         conflicts?: Array<{ client_name: string }>;
       }>(`/api/bookings/${id}/reschedule`, {
@@ -336,12 +336,21 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       });
 
       if (!res.ok) {
-        info.revert();
-        if (res.data?.warning === "outside_hours") {
-          setRescheduleConfirmState({ id, newStart, newEnd });
+        if (res.data?.requires_force && res.data?.warnings && res.data.warnings.length > 0) {
+          // Mantém a posição visual provisória e aguarda confirmação no diálogo de avisos
+          setRescheduleConfirmState({
+            id,
+            newStart,
+            newEnd,
+            warnings: res.data.warnings,
+            revertFn: () => info.revert(),
+          });
           setShowRescheduleConfirm(true);
           return;
         }
+
+        // Conflitos duros ou erros de validação: reverte imediatamente
+        info.revert();
         const conflicts = res.data?.conflicts;
         if (conflicts && conflicts.length > 0) {
           toast.error(
@@ -361,7 +370,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
 
   const handleConfirmRescheduleForce = React.useCallback(async () => {
     if (!rescheduleConfirmState) return;
-    const { id, newStart, newEnd } = rescheduleConfirmState;
+    const { id, newStart, newEnd, revertFn } = rescheduleConfirmState;
 
     const res = await apiFetch<{
       success?: boolean;
@@ -376,9 +385,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     setRescheduleConfirmState(null);
 
     if (res.ok) {
-      toast.success("Agendamento remarcado fora do expediente com confirmação.");
+      toast.success("Agendamento remarcado com confirmação de avisos.");
       handleRefresh();
     } else {
+      revertFn?.();
       toast.error(res.data?.message || getErrorMessage(res.data?.error));
     }
   }, [rescheduleConfirmState, handleRefresh]);
@@ -587,16 +597,27 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         onSuccess={handleRefresh}
       />
 
-      {/* Confirmação de fora de expediente ao arrastar ou redimensionar */}
+      {/* Confirmação de avisos (fora de expediente, passado, etc.) ao arrastar ou redimensionar */}
       <ConfirmDialog
         open={showRescheduleConfirm}
-        onOpenChange={setShowRescheduleConfirm}
-        title="Remarcar Fora do Expediente"
-        description="O novo horário selecionado está fora do horário regular de atendimento configurado no ateliê. Deseja confirmar a remarcação mesmo assim?"
+        onOpenChange={(open) => {
+          if (!open) {
+            rescheduleConfirmState?.revertFn?.();
+            setRescheduleConfirmState(null);
+          }
+          setShowRescheduleConfirm(open);
+        }}
+        title="Avisos de Remarcação"
+        description={
+          rescheduleConfirmState?.warnings && rescheduleConfirmState.warnings.length > 0
+            ? `Avisos detectados: ${rescheduleConfirmState.warnings.map((w) => w.message || getErrorMessage(w.code)).join(" • ")}. Deseja confirmar a remarcação mesmo assim?`
+            : "O novo horário selecionado possui avisos operacionais. Deseja confirmar a remarcação mesmo assim?"
+        }
         confirmLabel="Confirmar mesmo assim"
         cancelLabel="Voltar ao horário anterior"
         onConfirm={handleConfirmRescheduleForce}
         onCancel={() => {
+          rescheduleConfirmState?.revertFn?.();
           setShowRescheduleConfirm(false);
           setRescheduleConfirmState(null);
         }}

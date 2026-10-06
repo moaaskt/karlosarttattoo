@@ -145,3 +145,69 @@ export function utcToLocal(iso: string, tz: string): { date: string; time: strin
     time: dt.toFormat("HH:mm"),
   };
 }
+
+/**
+ * Adiciona minutos a um horário "HH:mm" local, tratando viradas de 24h.
+ * Ex: addMinutesToLocalTime("23:30", 150) → "02:00"
+ */
+export function addMinutesToLocalTime(timeStr: string, minutes: number): string {
+  const [h, m] = timeStr.split(":").map(Number);
+  if (isNaN(h) || isNaN(m)) {
+    throw new Error(`Horário inválido: ${timeStr}`);
+  }
+  const totalMinutes = (h * 60 + m + minutes) % (24 * 60);
+  const positiveMinutes = (totalMinutes + 24 * 60) % (24 * 60);
+  const newH = Math.floor(positiveMinutes / 60);
+  const newM = positiveMinutes % 60;
+  return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+}
+
+/**
+ * Combina dateStr ("YYYY-MM-DD") e timeStr ("HH:mm") no timezone informado para ISO UTC padronizado.
+ */
+export function combineDateTimeToUTC(dateStr: string, timeStr: string, timezone: string): string {
+  return localToUTC(dateStr, timeStr, timezone);
+}
+
+/**
+ * Verifica se uma data/hora no timezone é estritamente anterior a `now` (relógio injetável).
+ */
+export function isPastDateTime(
+  dateStr: string,
+  timeStr: string,
+  timezone: string,
+  now?: Date | string
+): boolean {
+  const dt = DateTime.fromISO(`${dateStr}T${timeStr}:00`, { zone: timezone });
+  if (!dt.isValid) {
+    throw new Error(`Data/hora inválida: ${dateStr} ${timeStr}`);
+  }
+  const ref = now
+    ? (typeof now === "string" ? DateTime.fromISO(now, { zone: "utc" }) : DateTime.fromJSDate(now)).setZone(timezone)
+    : DateTime.now().setZone(timezone);
+
+  return dt < ref;
+}
+
+/**
+ * Verifica se a data excede a janela máxima de dias futuros a partir de `now` (relógio injetável).
+ */
+export function isFutureWindowExceeded(
+  dateStr: string,
+  timezone: string,
+  maxDays: number,
+  now?: Date | string
+): boolean {
+  if (!maxDays || maxDays <= 0) return false;
+  const dt = DateTime.fromISO(dateStr, { zone: timezone }).startOf("day");
+  if (!dt.isValid) {
+    throw new Error(`Data inválida: ${dateStr}`);
+  }
+  const ref = now
+    ? (typeof now === "string" ? DateTime.fromISO(now, { zone: "utc" }) : DateTime.fromJSDate(now)).setZone(timezone).startOf("day")
+    : DateTime.now().setZone(timezone).startOf("day");
+
+  const diffDays = Math.round(dt.diff(ref, "days").days);
+  return diffDays > maxDays;
+}
+

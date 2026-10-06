@@ -20,7 +20,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/aceternity/sidebar";
-import type { Lead } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import type { Lead, Booking } from "@/lib/db";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -40,6 +41,7 @@ function AdminPage() {
   const [leadToSchedule, setLeadToSchedule] = React.useState<Lead | null>(null);
 
   const [leads, setLeads] = React.useState<Lead[]>([]);
+  const [bookings, setBookings] = React.useState<Booking[]>([]);
   const [stats, setStats] = React.useState({
     total: 0,
     novos: 0,
@@ -65,15 +67,23 @@ function AdminPage() {
     setIsLoading(true);
     setLoginError(null);
     try {
-      const response = await fetch("/api/leads", {
-        headers: {
-          Authorization: `Bearer ${tokenToUse}`,
-          Accept: "application/json",
-        },
-      });
+      const [leadsRes, bookingsRes] = await Promise.all([
+        fetch("/api/leads", {
+          headers: {
+            Authorization: `Bearer ${tokenToUse}`,
+            Accept: "application/json",
+          },
+        }),
+        fetch("/api/bookings", {
+          headers: {
+            Authorization: `Bearer ${tokenToUse}`,
+            Accept: "application/json",
+          },
+        }),
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (leadsRes.ok) {
+        const data = await leadsRes.json();
         setLeads(data.leads || []);
         if (data.stats) setStats(data.stats);
         setIsAuthenticated(true);
@@ -82,6 +92,11 @@ function AdminPage() {
         setIsAuthenticated(false);
         sessionStorage.removeItem("admin_auth_token");
         setLoginError("Chave de acesso inválida ou sessão expirada.");
+      }
+
+      if (bookingsRes.ok) {
+        const bData = await bookingsRes.json();
+        setBookings(bData.bookings || []);
       }
     } catch {
       setLoginError("Erro ao comunicar com o servidor da API.");
@@ -368,24 +383,28 @@ function AdminPage() {
                 </span>
               )}
 
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => verifyAndFetch(authKey)}
                 disabled={isLoading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-black/60 hover:bg-black border border-white/15 text-neutral-300 hover:text-white text-xs uppercase tracking-[0.15em] transition-all cursor-pointer"
+                className="bg-black/60 hover:bg-black border-white/15 text-neutral-300 hover:text-white text-xs uppercase tracking-[0.15em] transition-all cursor-pointer rounded-none h-8 gap-1.5"
                 title="Atualizar dados"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#9be5ff]" : ""}`} />
                 <span className="hidden sm:inline">Atualizar</span>
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-950/20 hover:bg-red-950/40 border border-red-800/30 text-red-400 hover:text-red-300 text-xs uppercase tracking-[0.15em] transition-all cursor-pointer"
+                className="bg-red-950/20 hover:bg-red-950/40 border border-red-800/30 text-red-400 hover:text-red-300 text-xs uppercase tracking-[0.15em] transition-all cursor-pointer rounded-none h-8 gap-1.5"
                 title="Sair do Painel"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Sair</span>
-              </button>
+              </Button>
             </div>
           </div>
         </header>
@@ -406,6 +425,7 @@ function AdminPage() {
               <BentoOverview
                 stats={stats}
                 leads={leads}
+                bookings={bookings}
                 onNavigateToLeads={() => setActiveTab("leads")}
               />
             </section>

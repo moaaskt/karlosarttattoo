@@ -1,10 +1,12 @@
 import * as React from "react";
 import type { ApexOptions } from "apexcharts";
-import { Users, Target, Activity, TrendingUp, Sparkles, MapPin, Calendar, ArrowUpRight } from "lucide-react";
+import { DateTime } from "luxon";
+import { Users, Target, Activity, TrendingUp, Sparkles, MapPin, Calendar, ArrowUpRight, DollarSign, Wallet } from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/aceternity/bento-grid";
 import { GlowingCard } from "@/components/ui/aceternity/glowing-card";
 import { ApexChartClient } from "@/components/admin/apex-chart-client";
-import type { Lead } from "@/lib/db";
+import { centsToDisplay } from "@/lib/api-client";
+import type { Lead, Booking } from "@/lib/db";
 
 interface BentoOverviewProps {
   stats: {
@@ -16,11 +18,50 @@ interface BentoOverviewProps {
     conversionRate: string;
   };
   leads: Lead[];
+  bookings?: Booking[];
+  timezone?: string;
   onNavigateToLeads?: () => void;
 }
 
-export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverviewProps) {
+export function BentoOverview({
+  stats,
+  leads,
+  bookings = [],
+  timezone = "America/Sao_Paulo",
+  onNavigateToLeads,
+}: BentoOverviewProps) {
   const [period, setPeriod] = React.useState<"7d" | "30d" | "90d">("7d");
+
+  // Fronteiras temporais semiabertas a partir da meia-noite local (TASK-15)
+  const { startUtc, endUtc } = React.useMemo(() => {
+    const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
+    const nowLocal = DateTime.now().setZone(timezone);
+    const startLocal = nowLocal.minus({ days }).startOf("day");
+    const endLocal = nowLocal.plus({ days: 1 }).startOf("day");
+    return {
+      startUtc: startLocal.toUTC().toISO() || "",
+      endUtc: endLocal.toUTC().toISO() || "",
+    };
+  }, [period, timezone]);
+
+  const filteredBookings = React.useMemo(() => {
+    if (!startUtc || !endUtc) return bookings;
+    return bookings.filter((b) => b.start_at >= startUtc && b.start_at < endUtc);
+  }, [bookings, startUtc, endUtc]);
+
+  // Sinais recebidos = soma deposit_cents com status 'pago' ou 'retido'
+  const sinaisRecebidosCents = React.useMemo(() => {
+    return filteredBookings
+      .filter((b) => b.deposit_status === "pago" || b.deposit_status === "retido")
+      .reduce((sum, b) => sum + (b.deposit_cents || 0), 0);
+  }, [filteredBookings]);
+
+  // Receita prevista = soma price_total_cents dos agendamentos ativos
+  const receitaPrevistaCents = React.useMemo(() => {
+    return filteredBookings
+      .filter((b) => b.status !== "cancelado" && b.status !== "no_show")
+      .reduce((sum, b) => sum + (b.price_total_cents || 0), 0);
+  }, [filteredBookings]);
 
   // Dados dinâmicos para o Gráfico de Área conforme período
   const areaData = React.useMemo(() => {
@@ -234,38 +275,41 @@ export function BentoOverview({ stats, leads, onNavigateToLeads }: BentoOverview
           </div>
         </GlowingCard>
 
-        {/* Sessões GA4 */}
+        {/* Sinais em Caixa (Pagos ou Retidos) */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Sessões GA4 (7D)</span>
-            <Activity className="w-4 h-4 text-amber-400" />
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Sinais em Caixa ({period.toUpperCase()})</span>
+            <Wallet className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight">1.335</div>
+            <div className="text-3xl font-extrabold text-white tracking-tight">
+              {centsToDisplay(sinaisRecebidosCents)}
+            </div>
             <p className="text-[11px] text-neutral-400 mt-1 flex items-center gap-1">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-400 font-semibold">+18.4%</span> tráfego Palhoça/Floripa
+              <span className="text-emerald-400 font-semibold">{filteredBookings.filter(b => b.deposit_status === "pago" || b.deposit_status === "retido").length} depósitos</span> pagos ou retidos
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
-            <div className="h-full bg-amber-400 w-3/4" />
+            <div className="h-full bg-emerald-400 w-3/4" />
           </div>
         </GlowingCard>
 
-        {/* Atendimentos VIP Domicílio */}
+        {/* Receita Prevista (Sessões Ativas) */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Demanda VIP / Floripa</span>
-            <MapPin className="w-4 h-4 text-[#9be5ff]" />
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Receita Prevista ({period.toUpperCase()})</span>
+            <DollarSign className="w-4 h-4 text-[#9be5ff]" />
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold text-[#9be5ff] tracking-tight">{vipPercent}%</div>
+            <div className="text-3xl font-extrabold text-[#9be5ff] tracking-tight">
+              {centsToDisplay(receitaPrevistaCents)}
+            </div>
             <p className="text-[11px] text-neutral-400 mt-1">
-              Atendimento exclusivo a domicílio
+              {filteredBookings.filter(b => b.status !== "cancelado" && b.status !== "no_show").length} sessões ativas no período
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
-            <div className="h-full bg-[#9be5ff]" style={{ width: `${vipPercent}%` }} />
+            <div className="h-full bg-[#9be5ff]" style={{ width: "100%" }} />
           </div>
         </GlowingCard>
       </div>

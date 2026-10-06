@@ -174,7 +174,8 @@ export function BookingModal({
         const res = await apiFetch<{
           success?: boolean;
           error?: string;
-          warning?: string;
+          requires_force?: boolean;
+          warnings?: Array<{ code: string; message: string }>;
           message?: string;
           conflicts?: Array<{ client_name: string }>;
         }>(`/api/bookings/${bookingToReschedule.id}/reschedule`, {
@@ -187,8 +188,9 @@ export function BookingModal({
         });
 
         if (!res.ok) {
-          if (res.data?.warning === "outside_hours" && !forceConfirmed) {
-            toast.warning(getErrorMessage("outside_hours") + " Clique em 'Remarcar mesmo assim' para confirmar.");
+          if (res.data?.requires_force && res.data?.warnings && res.data.warnings.length > 0 && !forceConfirmed) {
+            const warningMsgs = res.data.warnings.map((w) => w.message || getErrorMessage(w.code)).join(" • ");
+            toast.warning(`${warningMsgs}. Clique em 'Remarcar mesmo assim' para confirmar.`);
             setForceConfirmed(true);
             return;
           }
@@ -221,7 +223,8 @@ export function BookingModal({
         const res = await apiFetch<{
           success?: boolean;
           error?: string;
-          warning?: string;
+          requires_force?: boolean;
+          warnings?: Array<{ code: string; message: string }>;
           message?: string;
           conflicts?: Array<{ client_name: string }>;
         }>("/api/bookings", {
@@ -244,8 +247,9 @@ export function BookingModal({
         });
 
         if (!res.ok) {
-          if (res.data?.warning === "outside_hours" && !forceConfirmed) {
-            toast.warning(getErrorMessage("outside_hours") + " Clique em 'Criar mesmo assim' para confirmar.");
+          if (res.data?.requires_force && res.data?.warnings && res.data.warnings.length > 0 && !forceConfirmed) {
+            const warningMsgs = res.data.warnings.map((w) => w.message || getErrorMessage(w.code)).join(" • ");
+            toast.warning(`${warningMsgs}. Clique em 'Criar mesmo assim' para confirmar.`);
             setForceConfirmed(true);
             return;
           }

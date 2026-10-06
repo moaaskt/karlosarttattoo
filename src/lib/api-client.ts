@@ -64,6 +64,8 @@ export const ERROR_MESSAGES: Record<string, string> = {
   deposit_required: "Sinal obrigatório para confirmar agendamento.",
   deposit_action_required: "Escolha o destino do sinal: reter ou devolver.",
   outside_hours: "Horário fora do expediente configurado.",
+  past_date: "Data ou horário informado está no passado.",
+  future_window: "Data ultrapassa o limite permitido de agendamento futuro.",
   not_found: "Agendamento não encontrado.",
   unknown: "Erro desconhecido. Tente novamente.",
 };

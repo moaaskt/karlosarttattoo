@@ -18,15 +18,17 @@ progress:
 ## Current Status
 
 - **Active Milestone**: v2.0 — *Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration*.
-- **Active Phase**: Phase 04 — *Agenda & Calendar Booking Engine* (Plan 04-01 e Plan 04-02 concluídos; Plan 04-03 pronto para execução).
-- **Recent Additions**: Aceternity Sidebar lateral no `/admin` com módulos de Bento, Leads e Agenda integrados.
-- **Next Immediate Action**: Executar o **Plan 04-03** (Settings Screen, Time Blocks UI & Polish).
+- **Active Phase**: Phase 04 — *Agenda & Calendar Booking Engine* (Plan 04-01 e 04-02 concluídos; Plan 04-03 Onda 1 concluída).
+- **Recent Additions**: Correção do loop 04-02, migração warnings[], backups com VACUUM INTO, sincronização atômica Lead ↔ Booking, bloqueio 405 e KPIs contábeis no Bento.
+- **Next Immediate Action**: Checkpoint manual e execução da **Onda 2** do Plan 04-03 (Settings Screen, Time Blocks UI & Polish).
 
 ## Phase 04 Deliverables Status
 
 - [x] **Plan 04-01**: SQLite WAL Migration (5 tabelas), anti-conflito, cálculo de buffer e APIs REST completas com 51 testes unitários aprovados.
-- [x] **Plan 04-02**: Interface FullCalendar com `@fullcalendar/luxon3`, BookingDrawer com máquina de estados, BookingModal e integração com leads.
-- [ ] **Plan 04-03**: Painel de Configurações da Agenda (`AgendaSettings.tsx`), UI de Bloqueios de Tempo (`TimeBlocksModal.tsx`) e polimento visual final.
+- [x] **Plan 04-02**: Interface FullCalendar com `@fullcalendar/luxon3`, BookingDrawer com máquina de estados, BookingModal, blindagem anti-loop de requests.
+- [🔄] **Plan 04-03**:
+  - [x] **Onda 1**: Core de Negócio, Integridade Transacional, Backup & APIs (TASK-12, 13a, 14, 15, 17) — 74 testes passando.
+  - [ ] **Onda 2**: Painel de Configurações (`AgendaSettings.tsx`), UI de Bloqueios (`TimeBlocksModal.tsx`) e polimento visual final (TASK-16, 18, 19).
 
 ## Milestone v2.0 Roadmap Progress
 
