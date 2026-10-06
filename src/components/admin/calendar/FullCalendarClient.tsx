@@ -3,18 +3,25 @@ import type { CalendarOptions } from "@fullcalendar/core";
 
 type FCPlugins = any[];
 let cachedPlugins: FCPlugins | null = null;
+let cachedFullCalendarComponent: React.ComponentType<any> | null = null;
 
 export interface FullCalendarClientProps extends CalendarOptions {
   [key: string]: any;
 }
 
-export const FullCalendarClient = React.forwardRef<any, FullCalendarClientProps>(
-  (props, ref) => {
-    const [FullCalendarComponent, setFullCalendarComponent] = React.useState<React.ComponentType<any> | null>(null);
-    const [isMounted, setIsMounted] = React.useState(false);
+export const FullCalendarClient = React.memo(
+  React.forwardRef<any, FullCalendarClientProps>((props, ref) => {
+    const [FullCalendarComponent, setFullCalendarComponent] = React.useState<React.ComponentType<any> | null>(
+      () => cachedFullCalendarComponent
+    );
+    const [isMounted, setIsMounted] = React.useState(Boolean(cachedFullCalendarComponent));
 
     React.useEffect(() => {
       setIsMounted(true);
+      if (cachedFullCalendarComponent && cachedPlugins) {
+        return;
+      }
+
       let cancelled = false;
 
       Promise.all([
@@ -33,6 +40,7 @@ export const FullCalendarClient = React.forwardRef<any, FullCalendarClientProps>
             luxon3.default,
           ];
         }
+        cachedFullCalendarComponent = reactMod.default;
         setFullCalendarComponent(() => reactMod.default);
       });
 
@@ -57,7 +65,7 @@ export const FullCalendarClient = React.forwardRef<any, FullCalendarClientProps>
         <FullCalendarComponent ref={ref} {...props} plugins={cachedPlugins!} />
       </div>
     );
-  }
+  })
 );
 
 FullCalendarClient.displayName = "FullCalendarClient";
