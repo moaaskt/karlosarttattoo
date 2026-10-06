@@ -406,20 +406,20 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
   return (
     <div className="space-y-6">
       {/* Barra Superior de Controles e Legenda */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0a0a0a] border border-white/10 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#31363F] border border-[#31363F] p-4">
         {/* Lado Esquerdo: Identificação e Fuso */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#9be5ff]/10 border border-[#9be5ff]/30 flex items-center justify-center text-[#9be5ff]">
+          <div className="w-8 h-8 rounded bg-[#76ABAE]/15 border border-[#76ABAE]/30 flex items-center justify-center text-[#76ABAE]">
             <CalendarIcon className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-white flex items-center gap-2">
-              Agenda do Ateliê
-              <span className="text-[9px] font-mono px-2 py-0.5 bg-white/5 border border-white/10 text-neutral-400">
+            <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-[#EEEEEE] flex items-center gap-2">
+              Agenda
+              {/* <span className="text-[9px] font-mono px-2 py-0.5 bg-white/5 border border-white/10 text-[#9DA5B4]">
                 {timezone}
-              </span>
+              </span> */}
             </h2>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p className="text-xs text-[#9DA5B4] mt-0.5">
               Grade horária com detecção de expediente, intervalos e proteção de sobreposição
             </p>
           </div>
@@ -431,14 +431,14 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           <Button
             size="sm"
             onClick={() => setModalState({ open: true, mode: "create" })}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-all cursor-pointer shadow-[0_0_12px_rgba(155,229,255,0.2)] rounded-none h-8"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-[#76ABAE] text-[#222831] hover:bg-[#76ABAE]/90 transition-all cursor-pointer shadow-[0_0_12px_rgba(118,171,174,0.25)] rounded-none h-8"
           >
             <Plus className="w-3.5 h-3.5" />
             Novo Agendamento
           </Button>
 
           {/* Seletor de visualizações rápidas */}
-          <div className="flex items-center border border-white/10 bg-black/40 text-xs font-bold">
+          <div className="flex items-center border border-[#31363F] bg-[#222831] text-xs font-bold">
             <Button
               variant={currentView === "timeGridDay" ? "default" : "ghost"}
               size="sm"
@@ -448,8 +448,8 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
               }}
               className={`px-3 py-1.5 uppercase tracking-wider transition-colors rounded-none h-8 ${
                 currentView === "timeGridDay"
-                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#76ABAE] text-[#222831] font-semibold hover:bg-[#76ABAE]"
+                  : "text-[#9DA5B4] hover:text-[#EEEEEE]"
               }`}
             >
               Dia
@@ -461,10 +461,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
                 const api = calendarRef.current?.getApi?.() || calendarRef.current;
                 api?.changeView?.("timeGridWeek");
               }}
-              className={`px-3 py-1.5 uppercase tracking-wider transition-colors border-x border-white/10 rounded-none h-8 ${
+              className={`px-3 py-1.5 uppercase tracking-wider transition-colors border-x border-[#31363F] rounded-none h-8 ${
                 currentView === "timeGridWeek"
-                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#76ABAE] text-[#222831] font-semibold hover:bg-[#76ABAE]"
+                  : "text-[#9DA5B4] hover:text-[#EEEEEE]"
               }`}
             >
               Semana
@@ -478,8 +478,8 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
               }}
               className={`px-3 py-1.5 uppercase tracking-wider transition-colors rounded-none h-8 ${
                 currentView === "dayGridMonth"
-                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#76ABAE] text-[#222831] font-semibold hover:bg-[#76ABAE]"
+                  : "text-[#9DA5B4] hover:text-[#EEEEEE]"
               }`}
             >
               Mês
@@ -491,14 +491,14 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
             variant="outline"
             size="sm"
             onClick={() => setShowCancelled((prev) => !prev)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border transition-colors rounded-none h-8 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border transition-colors rounded-none h-8 ${
               showCancelled
-                ? "bg-neutral-800 text-white border-white/30 hover:bg-neutral-700"
-                : "bg-black/40 text-neutral-400 border-white/10 hover:text-white hover:border-white/30"
+                ? "bg-[#222831] text-[#EEEEEE] border-[#76ABAE]/50 hover:bg-[#222831]/80"
+                : "bg-[#222831] text-[#9DA5B4] border-[#31363F] hover:text-[#EEEEEE] hover:border-[#76ABAE]/40"
             }`}
             title="Exibir agendamentos cancelados e faltas"
           >
-            {showCancelled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {showCancelled ? <Eye className="w-3.5 h-3.5 text-[#76ABAE]" /> : <EyeOff className="w-3.5 h-3.5" />}
             {showCancelled ? "Cancelados ON" : "Cancelados OFF"}
           </Button>
 
@@ -508,18 +508,18 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
             size="sm"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-8"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border border-[#31363F] bg-[#222831] text-[#EEEEEE] hover:text-[#76ABAE] hover:border-[#76ABAE]/40 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-8"
             title="Recarregar agendamentos"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#76ABAE]" : ""}`} />
             Atualizar
           </Button>
         </div>
       </div>
 
       {/* Legenda de Status e Categorias */}
-      <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-black/30 border border-white/5 text-[11px] text-neutral-400">
-        <span className="font-extrabold uppercase tracking-wider text-neutral-500 mr-1">
+      <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-[#31363F] border border-[#31363F] text-[11px] text-[#EEEEEE]">
+        <span className="font-extrabold uppercase tracking-wider text-[#9DA5B4] mr-1">
           Legenda:
         </span>
         <div className="flex items-center gap-1.5">
@@ -527,44 +527,44 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
             className="w-2.5 h-2.5 rounded-sm"
             style={{ backgroundColor: STATUS_COLOR.pendente }}
           />
-          <span>Pendente</span>
+          <span className="text-[#EEEEEE]">Pendente</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span
             className="w-2.5 h-2.5 rounded-sm"
             style={{ backgroundColor: STATUS_COLOR.confirmado }}
           />
-          <span>Confirmado</span>
+          <span className="text-[#EEEEEE]">Confirmado</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span
             className="w-2.5 h-2.5 rounded-sm"
             style={{ backgroundColor: STATUS_COLOR.concluido }}
           />
-          <span>Concluído</span>
+          <span className="text-[#EEEEEE]">Concluído</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span
             className="w-2.5 h-2.5 rounded-sm"
             style={{ backgroundColor: STATUS_COLOR.cancelado }}
           />
-          <span>Cancelado</span>
+          <span className="text-[#EEEEEE]">Cancelado</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span
             className="w-2.5 h-2.5 rounded-sm"
             style={{ backgroundColor: STATUS_COLOR.no_show }}
           />
-          <span>Falta (No-Show)</span>
+          <span className="text-[#EEEEEE]">Falta (No-Show)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-sm bg-red-500/25 border border-red-500/50" />
-          <span>Bloqueio / Folga</span>
+          <span className="text-[#EEEEEE]">Bloqueio / Folga</span>
         </div>
       </div>
 
       {/* Calendário FullCalendar — Onda B (Interativo com props estritamente estáveis) */}
-      <div className="bg-[#070707] border border-white/10 p-4 min-h-[650px]">
+      <div className="bg-[#31363F] border border-[#31363F] p-4 min-h-[650px]">
         <FullCalendarClient
           ref={calendarRef}
           initialView="timeGridDay"

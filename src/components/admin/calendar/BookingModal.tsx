@@ -13,11 +13,24 @@ import {
   Sparkles,
   AlertCircle,
   Info,
+  Link2,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch, displayToCents, getErrorMessage } from "../../../lib/api-client";
 import { localToUTC, utcToLocal } from "../../../lib/agenda-utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { Booking, Lead } from "../../../lib/db";
 
@@ -323,157 +336,175 @@ export function BookingModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-[#0c0c0e] border border-white/10 shadow-2xl p-6 my-8 space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-2xl mx-auto p-4 sm:p-6 my-auto bg-[#31363f] border border-white/10 rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-[#9be5ff]/10 border border-[#9be5ff]/30 flex items-center justify-center text-[#9be5ff]">
+        <div className="flex items-center justify-between pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#222831] border border-white/10 flex items-center justify-center text-[#76abae] shrink-0">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.15em] text-white">
+              <h2 className="text-base font-semibold text-[#eeeeee]">
                 {mode === "reschedule" ? "Remarcar Sessão" : "Novo Agendamento"}
               </h2>
-              <span className="text-[10px] text-neutral-400 font-mono">
-                Horário Local: {timezone}
-              </span>
+              <span className="text-xs text-[#9da5b4] font-mono">Horário local: {timezone}</span>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
-            className="text-neutral-500 hover:text-white transition-colors cursor-pointer rounded-none"
+            className="text-[#9da5b4] hover:text-[#eeeeee] hover:bg-[#222831] rounded-md transition-colors cursor-pointer shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Lead Vinculado (se houver) */}
         {leadData && (
-          <div className="bg-[#9be5ff]/10 border border-[#9be5ff]/30 p-3 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2 text-[#9be5ff]">
-              <Sparkles className="w-4 h-4" />
-              <span className="font-bold uppercase tracking-wider">Lead Vinculado:</span>
-              <span className="text-white font-medium">
-                {leadData.name} ({leadData.phone})
-              </span>
+          <div className="bg-[#222831]/80 border border-white/10 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-2.5 min-w-0 w-full sm:w-auto">
+              <div className="w-7 h-7 rounded-full bg-[#31363f] flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-[#76abae]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-sm font-medium text-[#eeeeee] block truncate">
+                  {leadData.name}
+                </span>
+                <span className="text-xs text-[#9da5b4] block truncate">{leadData.phone}</span>
+              </div>
             </div>
-            <span className="text-[10px] font-mono uppercase bg-black/40 px-2 py-0.5 text-neutral-400">
-              {leadData.service}
+            <span className="bg-[#31363f] text-[#eeeeee] border border-white/10 text-xs px-2.5 py-0.5 rounded-full shrink-0 font-medium self-start sm:self-auto">
+              {leadData.service === "studio"
+                ? "Palhoça (Estúdio)"
+                : leadData.service === "home"
+                  ? "VIP (Domicílio)"
+                  : leadData.service === "flash"
+                    ? "Outra Cidade / Eventos"
+                    : leadData.service || "Palhoça (Estúdio)"}
             </span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Seletor de Data e Horário com Presets */}
-          <div className="bg-black/40 border border-white/5 p-3 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">
+        <form onSubmit={handleSubmit}>
+          {/* Seção 1: Horário da Sessão */}
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <h4 className="text-xs font-semibold text-[#9da5b4] uppercase tracking-wider">
                 Horário da Sessão
-              </span>
-              {/* Presets de início */}
-              <div className="flex items-center gap-1.5 text-[10px]">
-                <span className="text-neutral-500">Presets:</span>
+              </h4>
+              {/* Presets de início - Segmented Control */}
+              <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-[#222831] p-1 border border-white/10 rounded-md w-full sm:w-auto">
                 <Button
                   type="button"
-                  variant="outline"
-                  size="xs"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => applyPresetTime("preset_manha")}
-                  className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 uppercase font-bold tracking-wider cursor-pointer rounded-none"
+                  className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2.5 rounded-sm"
                 >
                   Manhã ({settings["preset_manha"] || "09:00"})
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
-                  size="xs"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => applyPresetTime("preset_tarde")}
-                  className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 uppercase font-bold tracking-wider cursor-pointer rounded-none"
+                  className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2.5 rounded-sm"
                 >
                   Tarde ({settings["preset_tarde"] || "14:00"})
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
-                  size="xs"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => applyPresetTime("preset_noite")}
-                  className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 uppercase font-bold tracking-wider cursor-pointer rounded-none"
+                  className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2.5 rounded-sm"
                 >
                   Noite ({settings["preset_noite"] || "18:30"})
                 </Button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">
-                  Início (Data & Hora)
-                </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <Label
+                  htmlFor="booking-start-date"
+                  className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
+                >
+                  Início da sessão
+                </Label>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
+                    id="booking-start-date"
                     type="date"
                     value={startDate}
                     onChange={(e) => handleDateOrTimeChange(() => setStartDate(e.target.value))}
-                    className="flex-1 bg-[#141416] border border-white/20 px-2.5 py-1.5 text-white outline-none focus:border-[#9be5ff]"
+                    className="flex-1 min-w-0 bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md"
                     required
                   />
-                  <input
+                  <Input
                     type="time"
                     value={startTime}
                     onChange={(e) => handleDateOrTimeChange(() => setStartTime(e.target.value))}
-                    className="w-24 bg-[#141416] border border-white/20 px-2.5 py-1.5 text-white outline-none focus:border-[#9be5ff] font-mono"
+                    className="w-24 sm:w-28 bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] uppercase font-bold text-neutral-400">
-                    Término (Hora)
-                  </label>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <Label
+                    htmlFor="booking-end-time"
+                    className="text-xs font-medium text-[#9da5b4] block"
+                  >
+                    Término da sessão
+                  </Label>
                   {isNextDay && (
-                    <span className="text-[9px] uppercase font-bold tracking-wider text-amber-400 bg-amber-500/10 px-1.5 py-0.2 border border-amber-500/20">
-                      Termina no dia seguinte ({endDate})
-                    </span>
+                    <Badge
+                      variant="default"
+                      className="bg-amber-600 text-white text-[10px] font-semibold px-1.5 py-0.5 border-none"
+                    >
+                      Dia seguinte ({endDate})
+                    </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <Input
+                    id="booking-end-time"
                     type="time"
                     value={endTime}
                     onChange={(e) => handleDateOrTimeChange(() => setEndTime(e.target.value))}
-                    className="flex-1 bg-[#141416] border border-white/20 px-2.5 py-1.5 text-white outline-none focus:border-[#9be5ff] font-mono"
+                    className="flex-1 bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                     required
                   />
-                  {/* Atalhos de Duração */}
-                  <div className="flex items-center gap-1 text-[10px]">
+                  {/* Atalhos de Duração - Segmented Control */}
+                  <div className="flex flex-wrap sm:flex-nowrap gap-1.5 bg-[#222831] p-1 border border-white/10 rounded-md">
                     <Button
                       type="button"
-                      variant="outline"
-                      size="xs"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => addHoursDuration(2)}
-                      className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 font-bold font-mono cursor-pointer rounded-none"
+                      className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2 font-mono rounded-sm"
                     >
                       +2h
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
-                      size="xs"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => addHoursDuration(4)}
-                      className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 font-bold font-mono cursor-pointer rounded-none"
+                      className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2 font-mono rounded-sm"
                     >
                       +4h
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
-                      size="xs"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => addHoursDuration(6)}
-                      className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 font-bold font-mono cursor-pointer rounded-none"
+                      className="flex-1 sm:flex-initial text-xs text-[#9da5b4] hover:bg-[#31363f] hover:text-[#eeeeee] h-7 px-2 font-mono rounded-sm"
                     >
                       +6h
                     </Button>
@@ -483,141 +514,180 @@ export function BookingModal({
             </div>
           </div>
 
-          {/* Dados Cadastrais (somente no create ou edição) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">
-                Nome do Cliente
-              </label>
-              <input
+          {/* Seção 2: Grid Responsiva */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <Label
+                htmlFor="client-name"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
+              >
+                Nome do cliente
+              </Label>
+              <Input
+                id="client-name"
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
+                placeholder="Nome do cliente"
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md"
                 required
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">
+            <div>
+              <Label
+                htmlFor="client-phone"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
+              >
                 WhatsApp / Telefone
-              </label>
-              <input
+              </Label>
+              <Input
+                id="client-phone"
                 type="text"
                 value={clientPhone}
                 onChange={(e) => setClientPhone(e.target.value)}
-                className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] font-mono"
+                placeholder="(48) 99999-9999"
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
                 required
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">E-mail</label>
-              <input
+            <div>
+              <Label
+                htmlFor="client-email"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
+              >
+                E-mail
+              </Label>
+              <Input
+                id="client-email"
                 type="email"
                 value={clientEmail}
                 onChange={(e) => setClientEmail(e.target.value)}
-                className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
+                placeholder="cliente@email.com"
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">Local</label>
-              <select
+            <div>
+              <Label className="text-xs font-medium text-[#9da5b4] mb-1.5 block">Local</Label>
+              <Select
                 value={location}
-                onChange={(e) => setLocation(e.target.value as Booking["location"])}
-                className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
+                onValueChange={(val) => setLocation(val as Booking["location"])}
               >
-                <option value="estudio">Estúdio</option>
-                <option value="domicilio">Domicílio</option>
-                <option value="evento">Evento</option>
-              </select>
+                <SelectTrigger className="bg-[#222831] border-white/10 text-[#eeeeee] focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md">
+                  <SelectValue placeholder="Selecione o local" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#31363f] border-white/10 text-[#eeeeee]">
+                  <SelectItem value="estudio">Estúdio</SelectItem>
+                  <SelectItem value="domicilio">Domicílio</SelectItem>
+                  <SelectItem value="evento">Evento</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">
-                Tipo de Sessão
-              </label>
-              <select
+            <div className="col-span-1 sm:col-span-2">
+              <Label className="text-xs font-medium text-[#9da5b4] mb-1.5 block">
+                Tipo de sessão
+              </Label>
+              <Select
                 value={sessionType}
-                onChange={(e) => setSessionType(e.target.value as Booking["session_type"])}
-                className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
+                onValueChange={(val) => setSessionType(val as Booking["session_type"])}
               >
-                <option value="tatuagem">Tatuagem</option>
-                <option value="flash">Flash</option>
-                <option value="retoque">Retoque</option>
-                <option value="projeto">Projeto</option>
-                <option value="outro">Outro</option>
-              </select>
+                <SelectTrigger className="bg-[#222831] border-white/10 text-[#eeeeee] focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md">
+                  <SelectValue placeholder="Tipo de sessão" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#31363f] border-white/10 text-[#eeeeee]">
+                  <SelectItem value="tatuagem">Tatuagem</SelectItem>
+                  <SelectItem value="flash">Flash</SelectItem>
+                  <SelectItem value="retoque">Retoque</SelectItem>
+                  <SelectItem value="projeto">Projeto</SelectItem>
+                  <SelectItem value="outro">Outro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </div>
 
-          {/* Valores Financeiros (se modo Create) */}
-          {mode === "create" && (
-            <div className="grid grid-cols-3 gap-3 text-xs border-t border-white/10 pt-3">
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">
-                  Valor Total (R$)
-                </label>
-                <input
-                  type="text"
-                  value={priceDisplay}
-                  onChange={(e) => setPriceDisplay(e.target.value)}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] font-mono"
-                  placeholder="0,00"
-                />
-              </div>
+            {/* Valores Financeiros (se modo Create) */}
+            {mode === "create" && (
+              <>
+                <div>
+                  <Label
+                    htmlFor="booking-price"
+                    className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
+                  >
+                    Valor total (R$)
+                  </Label>
+                  <Input
+                    id="booking-price"
+                    type="text"
+                    value={priceDisplay}
+                    onChange={(e) => setPriceDisplay(e.target.value)}
+                    className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
+                    placeholder="0,00"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">
-                  Sinal (R$)
-                </label>
-                <input
-                  type="text"
-                  value={depositDisplay}
-                  onChange={(e) => setDepositDisplay(e.target.value)}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] font-mono"
-                  placeholder="0,00"
-                />
-              </div>
+                <div>
+                  <Label
+                    htmlFor="booking-deposit"
+                    className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
+                  >
+                    Sinal (R$)
+                  </Label>
+                  <Input
+                    id="booking-deposit"
+                    type="text"
+                    value={depositDisplay}
+                    onChange={(e) => setDepositDisplay(e.target.value)}
+                    className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md font-mono"
+                    placeholder="0,00"
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">
-                  Status do Sinal
-                </label>
-                <select
-                  value={depositStatus}
-                  onChange={(e) => setDepositStatus(e.target.value as Booking["deposit_status"])}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
-                >
-                  <option value="pendente">Pendente</option>
-                  <option value="pago">Pago</option>
-                  <option value="dispensado">Dispensado</option>
-                </select>
-              </div>
+                <div className="col-span-1 sm:col-span-2">
+                  <Label className="text-xs font-medium text-[#9da5b4] mb-1.5 block">
+                    Status do sinal
+                  </Label>
+                  <Select
+                    value={depositStatus}
+                    onValueChange={(val) => setDepositStatus(val as Booking["deposit_status"])}
+                  >
+                    <SelectTrigger className="bg-[#222831] border-white/10 text-[#eeeeee] focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md">
+                      <SelectValue placeholder="Status do sinal" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#31363f] border-white/10 text-[#eeeeee]">
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="pago">Pago</SelectItem>
+                      <SelectItem value="dispensado">Dispensado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            {/* Observações / Ideia ocupando 2 colunas */}
+            <div className="col-span-1 sm:col-span-2">
+              <Label
+                htmlFor="booking-notes"
+                className="text-xs font-medium text-[#9da5b4] mb-1.5 block"
+              >
+                Observações / Ideia
+              </Label>
+              <Textarea
+                id="booking-notes"
+                value={notes}
+                rows={2}
+                onChange={(e) => setNotes(e.target.value)}
+                className="bg-[#222831] border-white/10 text-[#eeeeee] placeholder:text-[#9da5b4]/50 focus:border-[#76abae] focus:ring-1 focus:ring-[#76abae] rounded-md resize-none min-h-[64px]"
+                placeholder="Detalhes da arte, local do corpo, referências..."
+              />
             </div>
-          )}
-
-          {/* Observações */}
-          <div className="space-y-1 text-xs">
-            <label className="text-[10px] uppercase font-bold text-neutral-400">
-              Observações / Ideia
-            </label>
-            <textarea
-              value={notes}
-              rows={2}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
-              placeholder="Detalhes da arte, local do corpo, referências..."
-            />
           </div>
 
           {forceConfirmed && (
             <Alert
               variant="default"
-              className="rounded-none border-amber-500/50 bg-amber-950/20 text-neutral-200"
+              className="mt-4 border-amber-500/50 bg-amber-950/20 text-neutral-200"
             >
               <Info className="h-4 w-4 text-amber-400" />
               <AlertTitle className="text-amber-300 font-semibold uppercase tracking-wider text-xs">
@@ -631,13 +701,13 @@ export function BookingModal({
             </Alert>
           )}
 
-          {/* Botões de Ação */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+          {/* Rodapé do Modal */}
+          <div className="border-t border-white/10 pt-4 mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 sm:gap-3">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border-white/10 transition-colors cursor-pointer rounded-none h-auto"
+              className="w-full sm:w-auto text-[#9da5b4] hover:text-[#eeeeee] hover:bg-[#222831]"
             >
               Cancelar
             </Button>
@@ -645,21 +715,26 @@ export function BookingModal({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className={`px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-none h-auto ${
+              className={`w-full sm:w-auto bg-[#76abae] hover:bg-[#76abae]/90 text-[#222831] font-bold px-5 ${
                 forceConfirmed
-                  ? "bg-amber-400 hover:bg-amber-300 text-black border-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.4)]"
-                  : "bg-[#9be5ff] hover:bg-[#b0ecff] text-[#070707] border-[#9be5ff] shadow-[0_0_15px_rgba(155,229,255,0.2)]"
+                  ? "bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]"
+                  : ""
               } disabled:opacity-50`}
             >
-              {isSubmitting
-                ? "Processando..."
-                : forceConfirmed
-                  ? mode === "reschedule"
-                    ? "Remarcar mesmo assim"
-                    : "Criar mesmo assim"
-                  : mode === "reschedule"
-                    ? "Confirmar Remarcação"
-                    : "Criar Agendamento"}
+              {isSubmitting ? (
+                "Processando..."
+              ) : forceConfirmed ? (
+                mode === "reschedule" ? (
+                  "Remarcar mesmo assim"
+                ) : (
+                  "Criar mesmo assim"
+                )
+              ) : (
+                <span className="inline-flex items-center justify-center gap-1.5">
+                  <Check className="w-4 h-4" />
+                  {mode === "reschedule" ? "Confirmar remarcação" : "Criar agendamento"}
+                </span>
+              )}
             </Button>
           </div>
         </form>

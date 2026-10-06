@@ -41,25 +41,25 @@ export function BentoGridItem({
   return (
     <div
       className={cn(
-        "row-span-1 rounded-none p-5 bg-[#0b0b0e] border border-white/10 flex flex-col justify-between space-y-4 hover:border-[#9be5ff]/40 transition duration-300 relative overflow-hidden group shadow-lg",
+        "row-span-1 rounded-none p-5 bg-[#31363f] border border-white/10 flex flex-col justify-between space-y-4 hover:border-[#76abae]/40 transition duration-300 relative overflow-hidden group shadow-lg",
         className,
       )}
     >
       {/* Luz sutil de destaque no topo do card */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#9be5ff]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#76abae]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       {header}
 
       <div className="flex-1 flex flex-col justify-between">
         {(icon || badge) && (
           <div className="flex items-center justify-between gap-2 mb-2">
-            {icon && <div className="text-[#9be5ff]">{icon}</div>}
+            {icon && <div className="text-[#76abae]">{icon}</div>}
             {badge && <div>{badge}</div>}
           </div>
         )}
 
         {title && (
-          <div className="font-extrabold text-sm sm:text-base uppercase tracking-[0.16em] text-white">
+          <div className="font-extrabold text-sm sm:text-base uppercase tracking-[0.16em] text-[#eeeeee]">
             {title}
           </div>
         )}

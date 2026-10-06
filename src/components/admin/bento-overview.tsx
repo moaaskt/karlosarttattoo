@@ -261,29 +261,29 @@ export function BentoOverview({
       {/* 4 Cards Superiores com Efeito GlowingCard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total de Leads */}
-        <GlowingCard className="p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-neutral-400">
+        <GlowingCard className="p-5 flex flex-col justify-between bg-[#31363f] border-white/10">
+          <div className="flex items-center justify-between text-[#9da5b4]">
             <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Total de Leads</span>
-            <Users className="w-4 h-4 text-[#9be5ff]" />
+            <Users className="w-4 h-4 text-[#76abae]" />
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight">{stats.total}</div>
-            <p className="text-[11px] text-neutral-400 mt-1">
-              <span className="text-[#9be5ff] font-semibold">{stats.novos} novos</span> aguardando
+            <div className="text-3xl font-extrabold text-[#eeeeee] tracking-tight">{stats.total}</div>
+            <p className="text-[11px] text-[#9da5b4] mt-1">
+              <span className="text-[#76abae] font-semibold">{stats.novos} novos</span> aguardando
               contato
             </p>
           </div>
-          <div className="h-1 w-full bg-white/10 overflow-hidden">
+          <div className="h-1 w-full bg-[#222831] overflow-hidden">
             <div
-              className="h-full bg-[#9be5ff] transition-all duration-500"
+              className="h-full bg-[#76abae] transition-all duration-500"
               style={{ width: `${Math.min(stats.total * 20, 100)}%` }}
             />
           </div>
         </GlowingCard>
 
         {/* Taxa de Conversão */}
-        <GlowingCard className="p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-neutral-400">
+        <GlowingCard className="p-5 flex flex-col justify-between bg-[#31363f] border-white/10">
+          <div className="flex items-center justify-between text-[#9da5b4]">
             <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
               Taxa de Conversão
             </span>
@@ -293,12 +293,12 @@ export function BentoOverview({
             <div className="text-3xl font-extrabold text-emerald-400 tracking-tight">
               {stats.conversionRate}
             </div>
-            <p className="text-[11px] text-neutral-400 mt-1">
+            <p className="text-[11px] text-[#9da5b4] mt-1">
               <span className="text-emerald-400 font-semibold">{stats.agendados} confirmados</span>{" "}
               na agenda
             </p>
           </div>
-          <div className="h-1 w-full bg-white/10 overflow-hidden">
+          <div className="h-1 w-full bg-[#222831] overflow-hidden">
             <div
               className="h-full bg-emerald-400 transition-all duration-500"
               style={{ width: `${Math.min(parseFloat(stats.conversionRate) || 25, 100)}%` }}
@@ -307,18 +307,18 @@ export function BentoOverview({
         </GlowingCard>
 
         {/* Sinais em Caixa (Pagos ou Retidos) */}
-        <GlowingCard className="p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-neutral-400">
+        <GlowingCard className="p-5 flex flex-col justify-between bg-[#31363f] border-white/10">
+          <div className="flex items-center justify-between text-[#9da5b4]">
             <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
               Sinais em Caixa ({period.toUpperCase()})
             </span>
             <Wallet className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-3xl font-extrabold text-[#eeeeee] tracking-tight">
               {centsToDisplay(sinaisRecebidosCents)}
             </div>
-            <p className="text-[11px] text-neutral-400 mt-1 flex items-center gap-1">
+            <p className="text-[11px] text-[#9da5b4] mt-1 flex items-center gap-1">
               <span className="text-emerald-400 font-semibold">
                 {
                   filteredBookings.filter(
@@ -330,24 +330,24 @@ export function BentoOverview({
               pagos ou retidos
             </p>
           </div>
-          <div className="h-1 w-full bg-white/10 overflow-hidden">
+          <div className="h-1 w-full bg-[#222831] overflow-hidden">
             <div className="h-full bg-emerald-400 w-3/4" />
           </div>
         </GlowingCard>
 
         {/* Receita Prevista (Sessões Ativas) */}
-        <GlowingCard className="p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-neutral-400">
+        <GlowingCard className="p-5 flex flex-col justify-between bg-[#31363f] border-white/10">
+          <div className="flex items-center justify-between text-[#9da5b4]">
             <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
               Receita Prevista ({period.toUpperCase()})
             </span>
-            <DollarSign className="w-4 h-4 text-[#9be5ff]" />
+            <DollarSign className="w-4 h-4 text-[#76abae]" />
           </div>
           <div className="my-3">
-            <div className="text-3xl font-extrabold text-[#9be5ff] tracking-tight">
+            <div className="text-3xl font-extrabold text-[#76abae] tracking-tight">
               {centsToDisplay(receitaPrevistaCents)}
             </div>
-            <p className="text-[11px] text-neutral-400 mt-1">
+            <p className="text-[11px] text-[#9da5b4] mt-1">
               {
                 filteredBookings.filter((b) => b.status !== "cancelado" && b.status !== "no_show")
                   .length
@@ -355,8 +355,8 @@ export function BentoOverview({
               sessões ativas no período
             </p>
           </div>
-          <div className="h-1 w-full bg-white/10 overflow-hidden">
-            <div className="h-full bg-[#9be5ff]" style={{ width: "100%" }} />
+          <div className="h-1 w-full bg-[#222831] overflow-hidden">
+            <div className="h-full bg-[#76abae]" style={{ width: "100%" }} />
           </div>
         </GlowingCard>
       </div>
@@ -369,17 +369,17 @@ export function BentoOverview({
           header={
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3 mb-2">
               <div>
-                <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-white flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#9be5ff]" /> Tráfego Orgânico vs Conversão
+                <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-[#eeeeee] flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#76abae]" /> Tráfego Orgânico vs Conversão
                   de Leads
                 </h3>
-                <p className="text-[11px] text-neutral-400 mt-0.5">
+                <p className="text-[11px] text-[#9da5b4] mt-0.5">
                   Correlação dinâmica entre sessões do site e agendamentos solicitados
                 </p>
               </div>
 
               {/* Seletor de Período 7D / 30D / 90D */}
-              <div className="flex items-center gap-1 bg-black/60 p-1 border border-white/10 self-start sm:self-auto">
+              <div className="flex items-center gap-1 bg-[#222831] p-1 border border-white/10 self-start sm:self-auto">
                 {(["7d", "30d", "90d"] as const).map((p) => (
                   <Button
                     key={p}
@@ -388,8 +388,8 @@ export function BentoOverview({
                     onClick={() => setPeriod(p)}
                     className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer rounded-none h-auto ${
                       period === p
-                        ? "bg-[#9be5ff] text-black hover:bg-[#82d9f7]"
-                        : "text-neutral-400 hover:text-white"
+                        ? "bg-[#76abae] text-[#222831] hover:bg-[#76abae]/90 font-bold"
+                        : "text-[#9da5b4] hover:text-[#eeeeee]"
                     }`}
                   >
                     {p.toUpperCase()}
@@ -414,10 +414,10 @@ export function BentoOverview({
           className="lg:col-span-1 min-h-[380px]"
           header={
             <div className="border-b border-white/10 pb-3 mb-2">
-              <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-white">
+              <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-[#eeeeee]">
                 Funil de Conversão
               </h3>
-              <p className="text-[11px] text-neutral-400 mt-0.5">
+              <p className="text-[11px] text-[#9da5b4] mt-0.5">
                 Status das solicitações recebidas
               </p>
             </div>
@@ -438,10 +438,10 @@ export function BentoOverview({
           className="lg:col-span-1"
           header={
             <div className="border-b border-white/10 pb-3 mb-2">
-              <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-white">
+              <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-[#eeeeee]">
                 Distribuição de Locais
               </h3>
-              <p className="text-[11px] text-neutral-400 mt-0.5">
+              <p className="text-[11px] text-[#9da5b4] mt-0.5">
                 Preferência geográfica dos clientes
               </p>
             </div>
@@ -450,20 +450,20 @@ export function BentoOverview({
           <div className="space-y-4 pt-2">
             <div>
               <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-white font-medium">Estúdio Privado (Palhoça)</span>
-                <span className="text-[#9be5ff] font-mono">{studioPercent}%</span>
+                <span className="text-[#eeeeee] font-medium">Estúdio Privado (Palhoça)</span>
+                <span className="text-[#76abae] font-mono">{studioPercent}%</span>
               </div>
-              <div className="h-2 bg-black border border-white/10 overflow-hidden">
-                <div className="h-full bg-[#9be5ff]" style={{ width: `${studioPercent}%` }} />
+              <div className="h-2 bg-[#222831] border border-white/10 overflow-hidden">
+                <div className="h-full bg-[#76abae]" style={{ width: `${studioPercent}%` }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-white font-medium">VIP Domicílio (Florianópolis / SJ)</span>
+                <span className="text-[#eeeeee] font-medium">VIP Domicílio (Florianópolis / SJ)</span>
                 <span className="text-amber-400 font-mono">{vipPercent}%</span>
               </div>
-              <div className="h-2 bg-black border border-white/10 overflow-hidden">
+              <div className="h-2 bg-[#222831] border border-white/10 overflow-hidden">
                 <div className="h-full bg-amber-400" style={{ width: `${vipPercent}%` }} />
               </div>
             </div>
@@ -476,10 +476,10 @@ export function BentoOverview({
           header={
             <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-2">
               <div>
-                <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-white">
+                <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-[#eeeeee]">
                   Últimos Orçamentos Recebidos
                 </h3>
-                <p className="text-[11px] text-neutral-400 mt-0.5">
+                <p className="text-[11px] text-[#9da5b4] mt-0.5">
                   Leads aguardando contato inicial
                 </p>
               </div>
@@ -488,7 +488,7 @@ export function BentoOverview({
                   variant="link"
                   size="sm"
                   onClick={onNavigateToLeads}
-                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-[#9be5ff] hover:underline cursor-pointer p-0 h-auto"
+                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-[#76abae] hover:underline cursor-pointer p-0 h-auto"
                 >
                   Ver Todos <ArrowUpRight className="w-3.5 h-3.5" />
                 </Button>
@@ -500,15 +500,15 @@ export function BentoOverview({
             {leads.slice(0, 3).map((lead) => (
               <div
                 key={lead.id}
-                className="bg-black/40 border border-white/5 p-3 flex items-center justify-between gap-3 text-xs hover:border-[#9be5ff]/30 transition-colors"
+                className="bg-[#222831] border border-white/5 p-3 flex items-center justify-between gap-3 text-xs hover:border-[#76abae]/40 transition-colors"
               >
                 <div>
-                  <div className="font-bold text-white uppercase tracking-wider">{lead.name}</div>
-                  <div className="text-[11px] text-neutral-400">{lead.service}</div>
+                  <div className="font-bold text-[#eeeeee] uppercase tracking-wider">{lead.name}</div>
+                  <div className="text-[11px] text-[#9da5b4]">{lead.service}</div>
                 </div>
                 <div className="text-right">
                   <StatusBadge status={lead.status} />
-                  <div className="text-[10px] text-neutral-500 mt-1 flex items-center gap-1 justify-end">
+                  <div className="text-[10px] text-[#9da5b4] mt-1 flex items-center gap-1 justify-end">
                     <Calendar className="w-3 h-3" />
                     {new Date(lead.createdAt).toLocaleDateString("pt-BR")}
                   </div>

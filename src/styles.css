@@ -133,6 +133,36 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* Escopo Exclusivo do Painel Admin */
+.admin-theme {
+  --background: #222831;
+  --foreground: #eeeeee;
+  --card: #31363f;
+  --card-foreground: #eeeeee;
+  --popover: #31363f;
+  --popover-foreground: #eeeeee;
+  --primary: #76abae;
+  --primary-foreground: #222831;
+  --secondary: #31363f;
+  --secondary-foreground: #eeeeee;
+  --muted: #31363f;
+  --muted-foreground: #9da5b4;
+  --accent: #76abae;
+  --accent-foreground: #222831;
+  --border: #31363f;
+  --input: #31363f;
+  --ring: #76abae;
+  --chart-1: #76abae;
+  --sidebar: #31363f;
+  --sidebar-foreground: #eeeeee;
+  --sidebar-primary: #76abae;
+  --sidebar-primary-foreground: #222831;
+  --sidebar-accent: rgba(118, 171, 174, 0.15);
+  --sidebar-accent-foreground: #eeeeee;
+  --sidebar-border: #31363f;
+  --sidebar-ring: #76abae;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -196,24 +226,36 @@ html {
   }
 }
 
-/* FullCalendar Dark Theme — Ateliê Karlos Art Tattoo */
+/* FullCalendar Dark Theme — Ateliê Karlos Art Tattoo (Paleta Grafite/Chumbo/Teal) */
 .karlos-fullcalendar-container {
-  --fc-border-color: rgba(255, 255, 255, 0.08);
-  --fc-button-bg-color: #0d0d0d;
-  --fc-button-border-color: rgba(155, 229, 255, 0.2);
-  --fc-button-text-color: #9be5ff;
-  --fc-button-hover-bg-color: rgba(155, 229, 255, 0.1);
-  --fc-button-hover-border-color: rgba(155, 229, 255, 0.5);
-  --fc-button-active-bg-color: rgba(155, 229, 255, 0.2);
-  --fc-today-bg-color: rgba(155, 229, 255, 0.04);
-  --fc-page-bg-color: transparent;
-  --fc-neutral-bg-color: #070707;
-  --fc-event-text-color: #070707;
-  --fc-list-event-hover-bg-color: rgba(155, 229, 255, 0.05);
+  background-color: #31363F;
+  border-color: #31363F;
+  --fc-border-color: rgba(255, 255, 255, 0.06);
+  --fc-button-bg-color: #222831;
+  --fc-button-border-color: #31363F;
+  --fc-button-text-color: #EEEEEE;
+  --fc-button-hover-bg-color: #31363F;
+  --fc-button-hover-border-color: #76ABAE;
+  --fc-button-active-bg-color: #76ABAE;
+  --fc-today-bg-color: rgba(118, 171, 174, 0.08);
+  --fc-page-bg-color: #222831;
+  --fc-neutral-bg-color: #2a2f38;
+  --fc-event-text-color: #222831;
+  --fc-list-event-hover-bg-color: rgba(118, 171, 174, 0.08);
+  --fc-now-indicator-color: #76ABAE;
 }
 
 .karlos-fullcalendar-container .fc {
   font-family: inherit;
+  background-color: #31363F;
+}
+
+/* Container da Grade e Toolbar de Navegação */
+.karlos-fullcalendar-container .fc-header-toolbar {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #31363F;
+  border-radius: 4px;
 }
 
 .karlos-fullcalendar-container .fc-toolbar-title {
@@ -221,11 +263,21 @@ html {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: #ffffff;
+  color: #EEEEEE;
+}
+
+/* Cabeçalho dos Dias (Dom, Seg, Ter...) */
+.karlos-fullcalendar-container .fc-col-header {
+  background-color: #31363F;
+}
+
+.karlos-fullcalendar-container .fc-col-header-cell {
+  background-color: #31363F;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .karlos-fullcalendar-container .fc-col-header-cell-cushion {
-  color: #a3a3a3;
+  color: #EEEEEE;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -233,9 +285,40 @@ html {
   padding: 0.5rem 0;
 }
 
+/* Células e Horários da Grade */
+.karlos-fullcalendar-container .fc-timegrid-slot,
+.karlos-fullcalendar-container .fc-daygrid-day {
+  background-color: #222831;
+}
+
+/* Horário de folga / fora de expediente */
+.karlos-fullcalendar-container .fc-non-business {
+  background-color: #2a2f38 !important;
+}
+
+/* Linha do Horário Atual (Now Indicator) */
+.karlos-fullcalendar-container .fc-timegrid-now-indicator-line {
+  border-color: #76ABAE !important;
+  border-width: 2px 0 0 0;
+  z-index: 10;
+}
+
+.karlos-fullcalendar-container .fc-timegrid-now-indicator-arrow {
+  border-color: #76ABAE transparent transparent transparent !important;
+  border-width: 5px 4px 0 4px;
+  z-index: 10;
+}
+
+/* Bordas Internas da Grade */
+.karlos-fullcalendar-container .fc-theme-standard td,
+.karlos-fullcalendar-container .fc-theme-standard th,
+.karlos-fullcalendar-container .fc-scrollgrid {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
 .karlos-fullcalendar-container .fc-timegrid-slot-label-cushion,
 .karlos-fullcalendar-container .fc-timegrid-axis-cushion {
-  color: #737373;
+  color: #9DA5B4;
   font-family: monospace;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -249,6 +332,14 @@ html {
   letter-spacing: 0.1em;
   border-radius: 0;
   transition: all 0.2s ease;
+}
+
+.karlos-fullcalendar-container .fc-button-primary:not(:disabled).fc-button-active,
+.karlos-fullcalendar-container .fc-button-primary:not(:disabled):active {
+  background-color: #76ABAE;
+  border-color: #76ABAE;
+  color: #222831;
+  font-weight: 700;
 }
 
 .karlos-fullcalendar-container .fc-event {

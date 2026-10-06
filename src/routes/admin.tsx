@@ -171,18 +171,18 @@ function AdminPage() {
   // 1. Tela de Login Dark Editorial com BackgroundBeams e ShimmerButton
   if (!isAuthenticated) {
     return (
-      <div className="relative min-h-screen bg-[#070707] text-white flex flex-col items-center justify-center p-6 selection:bg-[#9be5ff] selection:text-black overflow-hidden">
+      <div className="admin-theme relative min-h-screen bg-[#222831] text-[#eeeeee] flex flex-col items-center justify-center p-6 selection:bg-[#76abae] selection:text-[#222831] overflow-hidden">
         <BackgroundBeams />
 
-        <div className="relative z-10 w-full max-w-md bg-[#0b0b0e]/90 backdrop-blur-xl border border-white/10 p-8 space-y-6 shadow-2xl">
+        <div className="relative z-10 w-full max-w-md bg-[#31363f]/95 backdrop-blur-xl border border-white/10 p-8 space-y-6 shadow-2xl">
           <div className="text-center space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#9be5ff]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#76abae]">
               KARLOS ART TATTOO
             </p>
-            <h1 className="text-xl font-extrabold uppercase tracking-[0.2em] text-white">
+            <h1 className="text-xl font-extrabold uppercase tracking-[0.2em] text-[#eeeeee]">
               PAINEL DO ATELIÊ
             </h1>
-            <p className="text-xs text-neutral-400 tracking-wider">
+            <p className="text-xs text-[#9da5b4] tracking-wider">
               Área restrita de gestão de agenda, métricas e orçamentos.
             </p>
           </div>
@@ -191,7 +191,7 @@ function AdminPage() {
             <div>
               <label
                 htmlFor="admin-key"
-                className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400 block mb-2"
+                className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9da5b4] block mb-2"
               >
                 Chave de Acesso Administrativo
               </label>
@@ -204,9 +204,9 @@ function AdminPage() {
                   placeholder="Insira sua chave de acesso"
                   disabled={isLoading}
                   autoFocus
-                  className="w-full bg-black/60 border border-white/20 focus:border-[#9be5ff] text-white text-sm px-4 py-3 outline-none transition-all rounded-none placeholder:text-neutral-600"
+                  className="w-full bg-[#222831] border border-white/15 focus:border-[#76abae] text-[#eeeeee] text-sm px-4 py-3 outline-none transition-all rounded-none placeholder:text-[#9da5b4]/60"
                 />
-                <Lock className="w-4 h-4 text-neutral-500 absolute right-3.5 top-3.5" />
+                <Lock className="w-4 h-4 text-[#9da5b4] absolute right-3.5 top-3.5" />
               </div>
             </div>
 
@@ -221,9 +221,9 @@ function AdminPage() {
             <ShimmerButton
               type="submit"
               disabled={isLoading || !authKey.trim()}
-              shimmerColor="#9be5ff"
-              background="#0b0b0e"
-              className="w-full !py-3.5 border-white/20 hover:border-[#9be5ff]"
+              shimmerColor="#76abae"
+              background="#222831"
+              className="w-full !py-3.5 border-white/20 hover:border-[#76abae] text-[#eeeeee]"
             >
               {isLoading ? "VERIFICANDO..." : "ACESSAR PAINEL"}
             </ShimmerButton>
@@ -232,7 +232,7 @@ function AdminPage() {
           <div className="text-center pt-2">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-neutral-500 hover:text-[#9be5ff] transition-colors"
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[#9da5b4] hover:text-[#76abae] transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Voltar à página principal
             </Link>
@@ -283,21 +283,21 @@ function AdminPage() {
 
   // 2. Painel Administrativo Autenticado com Sidebar Aceternity
   return (
-    <div className="relative h-screen w-full bg-[#070707] text-white selection:bg-[#9be5ff] selection:text-black flex flex-col md:flex-row overflow-hidden">
-      <BackgroundBeams className="opacity-30 pointer-events-none" />
+    <div className="admin-theme relative h-screen w-full bg-[#222831] text-[#eeeeee] selection:bg-[#76abae] selection:text-[#222831] flex flex-col md:flex-row overflow-hidden">
+      <BackgroundBeams className="opacity-20 pointer-events-none" />
 
       {/* Sidebar Lateral Aceternity */}
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} animate={true}>
-        <SidebarBody className="justify-between gap-6 bg-[#0a0a0d] border-r border-white/10 z-40">
+        <SidebarBody className="justify-between gap-6 bg-[#31363f] border-r border-[#31363f] z-40">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             {/* Header / Logo da Sidebar */}
             <div className="pb-4 pt-1 border-b border-white/10">
               <Link
                 to="/"
-                className="font-normal flex items-center gap-3 text-sm text-white relative z-20 group"
+                className="font-normal flex items-center gap-3 text-sm text-[#eeeeee] relative z-20 group"
               >
-                <div className="h-8 w-8 bg-black/80 border border-[#9be5ff]/60 rounded flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(155,229,255,0.25)]">
-                  <span className="text-xs font-black text-[#9be5ff] font-mono tracking-tighter">
+                <div className="h-8 w-8 bg-[#222831] border border-[#76abae]/60 rounded flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(118,171,174,0.25)]">
+                  <span className="text-xs font-black text-[#76abae] font-mono tracking-tighter">
                     KA
                   </span>
                 </div>
@@ -308,11 +308,11 @@ function AdminPage() {
                   }}
                   className="flex-col whitespace-pre overflow-hidden"
                 >
-                  <span className="font-extrabold uppercase tracking-[0.22em] text-white text-xs leading-none">
+                  <span className="font-extrabold uppercase tracking-[0.22em] text-[#eeeeee] text-xs leading-none">
                     Karlos Art
                   </span>
-                  <span className="text-[9px] uppercase tracking-[0.25em] text-[#9be5ff] mt-1 font-bold">
-                    PAINEL ADMINSTRATIVO
+                  <span className="text-[9px] uppercase tracking-[0.25em] text-[#76abae] mt-1 font-bold">
+                    PAINEL ADMINISTRATIVO
                   </span>
                 </motion.div>
               </Link>
@@ -320,7 +320,7 @@ function AdminPage() {
 
             {/* Links Principais de Navegação */}
             <div className="mt-5 flex flex-col gap-1.5">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-neutral-500 font-semibold px-2 mb-1 hidden md:block">
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[#9da5b4] font-semibold px-2 mb-1 hidden md:block">
                 {sidebarOpen ? "Módulos do Painel" : "···"}
               </span>
               {sidebarNavLinks.map((link, idx) => (
@@ -330,7 +330,7 @@ function AdminPage() {
 
             {/* Divisor & Ações do Sistema */}
             <div className="mt-6 pt-4 border-t border-white/10 flex flex-col gap-1.5">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-neutral-500 font-semibold px-2 mb-1 hidden md:block">
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[#9da5b4] font-semibold px-2 mb-1 hidden md:block">
                 {sidebarOpen ? "Ações Rápidas" : "···"}
               </span>
               {sidebarActionLinks.map((link, idx) => (
@@ -343,7 +343,7 @@ function AdminPage() {
           <div className="border-t border-white/10 pt-3">
             <div className="flex items-center justify-between gap-2 px-1">
               <div className="flex items-center gap-2.5 overflow-hidden">
-                <div className="w-8 h-8 rounded bg-gradient-to-br from-[#9be5ff]/20 to-black border border-[#9be5ff]/40 flex items-center justify-center shrink-0 text-[10px] font-bold text-[#9be5ff]">
+                <div className="w-8 h-8 rounded bg-gradient-to-br from-[#76abae]/20 to-[#222831] border border-[#76abae]/40 flex items-center justify-center shrink-0 text-[10px] font-bold text-[#76abae]">
                   KA
                 </div>
                 <motion.div
@@ -353,11 +353,11 @@ function AdminPage() {
                   }}
                   className="overflow-hidden whitespace-nowrap"
                 >
-                  <p className="text-xs font-bold text-white truncate uppercase tracking-wider">
+                  <p className="text-xs font-bold text-[#eeeeee] truncate uppercase tracking-wider">
                     Karlos Art
                   </p>
-                  <p className="text-[9px] text-[#9be5ff] uppercase tracking-wider flex items-center gap-1 font-mono">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#9be5ff] inline-block animate-pulse" />
+                  <p className="text-[9px] text-[#76abae] uppercase tracking-wider flex items-center gap-1 font-mono">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#76abae] inline-block animate-pulse" />
                     Master Admin
                   </p>
                 </motion.div>
@@ -370,7 +370,7 @@ function AdminPage() {
                 }}
                 onClick={handleLogout}
                 type="button"
-                className="p-1.5 text-neutral-400 hover:text-red-400 hover:bg-red-950/30 rounded border border-transparent hover:border-red-800/40 transition-colors cursor-pointer"
+                className="p-1.5 text-[#9da5b4] hover:text-red-400 hover:bg-red-950/30 rounded border border-transparent hover:border-red-800/40 transition-colors cursor-pointer"
                 title="Encerrar Sessão"
               >
                 <LogOut className="w-4 h-4" />
@@ -381,21 +381,20 @@ function AdminPage() {
       </Sidebar>
 
       {/* Área de Conteúdo Principal (Direita) */}
-      <div className="flex flex-col flex-1 h-screen overflow-y-auto z-10">
+      <div className="flex flex-col flex-1 h-screen overflow-y-auto z-10 bg-[#222831]">
         {/* Barra de Navegação Superior / Header de Contexto */}
-        <header className="border-b border-white/10 bg-[#09090c]/80 backdrop-blur-xl px-6 py-4 sticky top-0 z-30">
+        <header className="border-b border-[#31363f] bg-[#222831]/90 backdrop-blur-xl px-6 py-4 sticky top-0 z-30">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#9be5ff] flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#9be5ff]" /> PAINEL ADMINISTRATIVO ·
-                  ACETERNITY SIDEBAR
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#76abae] flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#76abae]" /> PAINEL ADMINISTRATIVO
                 </span>
               </div>
-              <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-[0.18em] text-white mt-0.5">
+              <h1 className="text-base sm:text-lg font-extrabold uppercase tracking-[0.18em] text-[#eeeeee] mt-0.5">
                 {activeTab === "bento" && "Visão Analítica & Métricas"}
                 {activeTab === "leads" && "Triagem & Gestão de Leads (Orçamentos)"}
-                {activeTab === "agenda" && "Agenda & Gestão de Sessões do Ateliê"}
+                {activeTab === "agenda" && "Agenda & Gestão de Sessões"}
               </h1>
             </div>
 
@@ -405,11 +404,11 @@ function AdminPage() {
                 size="sm"
                 onClick={() => verifyAndFetch(authKey)}
                 disabled={isLoading}
-                className="bg-black/60 hover:bg-black border-white/15 text-neutral-300 hover:text-white text-xs uppercase tracking-[0.15em] transition-all cursor-pointer rounded-none h-8 gap-1.5"
+                className="bg-[#31363f] hover:bg-[#31363f]/80 border-white/10 text-[#eeeeee] hover:text-[#76abae] text-xs uppercase tracking-[0.15em] transition-all cursor-pointer rounded-none h-8 gap-1.5"
                 title="Atualizar dados"
               >
                 <RefreshCw
-                  className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#9be5ff]" : ""}`}
+                  className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#76abae]" : ""}`}
                 />
                 <span className="hidden sm:inline">Atualizar</span>
               </Button>
@@ -435,14 +434,14 @@ function AdminPage() {
               variant={panelAlert.variant}
               className={`mb-6 rounded-none ${
                 panelAlert.variant === "default"
-                  ? "border-[#9be5ff]/40 bg-[#9be5ff]/5 text-neutral-200"
+                  ? "border-[#76abae]/40 bg-[#76abae]/10 text-[#eeeeee]"
                   : ""
               }`}
             >
               {panelAlert.variant === "destructive" ? (
                 <AlertCircle className="h-4 w-4" />
               ) : (
-                <Info className="h-4 w-4 text-[#9be5ff]" />
+                <Info className="h-4 w-4 text-[#76abae]" />
               )}
               <AlertTitle>
                 {panelAlert.title ||

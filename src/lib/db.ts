@@ -251,6 +251,39 @@ export function applyPragmasAndSchema(db: DatabaseSync) {
     );
     CREATE INDEX IF NOT EXISTS idx_booking_events_booking ON booking_events (booking_id, created_at DESC);
   `);
+
+  // Migração defensiva: se booking_events foi criada antes de 'lead_linked', recria a tabela com a constraint correta
+  try {
+    const tableSql = db
+      .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'booking_events'")
+      .get() as { sql: string } | undefined;
+    if (tableSql && !tableSql.sql.includes("'lead_linked'")) {
+      db.exec(`
+        PRAGMA foreign_keys = OFF;
+        BEGIN TRANSACTION;
+        ALTER TABLE booking_events RENAME TO booking_events_old;
+        CREATE TABLE booking_events (
+          id          TEXT    PRIMARY KEY,
+          booking_id  TEXT    NOT NULL REFERENCES bookings(id),
+          event_type  TEXT    NOT NULL CHECK(event_type IN (
+            'created','confirmed','rescheduled','cancelled','no_show','completed',
+            'deposit_paid','deposit_waived','deposit_retained','deposit_refunded','note_updated','lead_linked'
+          )),
+          old_value   TEXT,
+          new_value   TEXT,
+          note        TEXT,
+          created_at  TEXT    NOT NULL
+        );
+        INSERT INTO booking_events SELECT * FROM booking_events_old;
+        DROP TABLE booking_events_old;
+        CREATE INDEX IF NOT EXISTS idx_booking_events_booking ON booking_events (booking_id, created_at DESC);
+        COMMIT;
+        PRAGMA foreign_keys = ON;
+      `);
+    }
+  } catch (migErr) {
+    console.error("[Database Migration] Erro ao migrar constraint de booking_events:", migErr);
+  }
 }
 
 /**
