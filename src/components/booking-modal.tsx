@@ -9,10 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-export type BookingServiceType =
-  | "studio"
-  | "home"
-  | "flash";
+export type BookingServiceType = "studio" | "home" | "flash";
 
 interface BookingModalProps {
   open: boolean;
@@ -44,11 +41,7 @@ const locationLabels: Record<BookingServiceType, string> = {
   flash: "Outra Cidade / Eventos",
 };
 
-export function BookingModal({
-  open,
-  onOpenChange,
-  defaultService = "studio",
-}: BookingModalProps) {
+export function BookingModal({ open, onOpenChange, defaultService = "studio" }: BookingModalProps) {
   const [name, setName] = React.useState("");
   const [phone, setPhone] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -123,7 +116,9 @@ export function BookingModal({
         if (data && data.error) {
           setError(data.error);
         } else {
-          setError("Ocorreu um erro ao processar seu pedido. Tente novamente ou contate pelo Instagram.");
+          setError(
+            "Ocorreu um erro ao processar seu pedido. Tente novamente ou contate pelo Instagram.",
+          );
         }
       }
     } catch {
@@ -144,7 +139,8 @@ export function BookingModal({
             SOLICITAR AGENDAMENTO
           </DialogTitle>
           <DialogDescription className="text-xs text-neutral-400 tracking-wider mt-1 mb-4">
-            Preencha os dados abaixo para receber nossa proposta autoral e disponibilidade com Karlos.
+            Preencha os dados abaixo para receber nossa proposta autoral e disponibilidade com
+            Karlos.
           </DialogDescription>
         </DialogHeader>
 
@@ -157,7 +153,8 @@ export function BookingModal({
               SOLICITAÇÃO ENVIADA
             </h4>
             <p className="text-xs text-neutral-400 leading-relaxed max-w-sm mx-auto">
-              Obrigado! Recebemos sua ideia. O Karlos analisará a proposta e entrará em contato via WhatsApp/E-mail para alinhar disponibilidade e orçamento.
+              Obrigado! Recebemos sua ideia. O Karlos analisará a proposta e entrará em contato via
+              WhatsApp/E-mail para alinhar disponibilidade e orçamento.
             </p>
             <Button
               type="button"
@@ -171,7 +168,10 @@ export function BookingModal({
           <form onSubmit={handleSubmit} className="space-y-4 pt-1">
             {/* Nome Completo */}
             <div>
-              <Label htmlFor="booking-name" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+              <Label
+                htmlFor="booking-name"
+                className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+              >
                 Nome Completo
               </Label>
               <input
@@ -189,7 +189,10 @@ export function BookingModal({
             {/* WhatsApp e E-mail */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="booking-phone" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+                <Label
+                  htmlFor="booking-phone"
+                  className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+                >
                   WhatsApp / Celular
                 </Label>
                 <input
@@ -204,7 +207,10 @@ export function BookingModal({
                 />
               </div>
               <div>
-                <Label htmlFor="booking-email" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+                <Label
+                  htmlFor="booking-email"
+                  className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+                >
                   E-mail
                 </Label>
                 <input
@@ -244,7 +250,9 @@ export function BookingModal({
                       <span className="text-xs tracking-wider uppercase font-semibold">
                         {opt.label}
                       </span>
-                      <span className={`text-[10px] tracking-wide mt-0.5 ${isSelected ? "text-[#9be5ff]/80" : "text-neutral-500"}`}>
+                      <span
+                        className={`text-[10px] tracking-wide mt-0.5 ${isSelected ? "text-[#9be5ff]/80" : "text-neutral-500"}`}
+                      >
                         {opt.sub}
                       </span>
                     </Button>
@@ -255,7 +263,10 @@ export function BookingModal({
 
             {/* Ideia / Referência */}
             <div>
-              <Label htmlFor="booking-notes" className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block">
+              <Label
+                htmlFor="booking-notes"
+                className="text-[11px] font-medium tracking-[0.2em] text-neutral-300 uppercase mb-1.5 block"
+              >
                 Ideia / Local do Corpo / Referência
               </Label>
               <textarea

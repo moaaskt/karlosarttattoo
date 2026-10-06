@@ -1,9 +1,22 @@
 import * as React from "react";
 import { DateTime } from "luxon";
-import { X, Calendar, Clock, DollarSign, User, Phone, Mail, MapPin, Tag, Sparkles, AlertCircle } from "lucide-react";
+import {
+  X,
+  Calendar,
+  Clock,
+  DollarSign,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Tag,
+  Sparkles,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch, displayToCents, getErrorMessage } from "../../../lib/api-client";
 import { localToUTC, utcToLocal } from "../../../lib/agenda-utils";
+import { Button } from "@/components/ui/button";
 import type { Booking, Lead } from "../../../lib/db";
 
 export interface BookingModalProps {
@@ -108,7 +121,17 @@ export function BookingModal({
       setDepositDisplay("0,00");
       setDepositStatus("pendente");
     }
-  }, [open, mode, bookingToReschedule, leadData, defaultDate, defaultTime, defaultEndTime, timezone, settings]);
+  }, [
+    open,
+    mode,
+    bookingToReschedule,
+    leadData,
+    defaultDate,
+    defaultTime,
+    defaultEndTime,
+    timezone,
+    settings,
+  ]);
 
   // Regra 9: Resetar forceConfirmed ao alterar data ou horário
   const handleDateOrTimeChange = (updater: () => void) => {
@@ -120,7 +143,9 @@ export function BookingModal({
   React.useEffect(() => {
     if (startTime && endTime && startDate) {
       if (endTime <= startTime) {
-        const nextDay = DateTime.fromISO(startDate, { zone: timezone }).plus({ days: 1 }).toFormat("yyyy-MM-dd");
+        const nextDay = DateTime.fromISO(startDate, { zone: timezone })
+          .plus({ days: 1 })
+          .toFormat("yyyy-MM-dd");
         setEndDate(nextDay);
         setIsNextDay(true);
       } else {
@@ -134,7 +159,9 @@ export function BookingModal({
   const addHoursDuration = (hours: number) => {
     if (!startDate || !startTime) return;
     handleDateOrTimeChange(() => {
-      const dt = DateTime.fromISO(`${startDate}T${startTime}:00`, { zone: timezone }).plus({ hours });
+      const dt = DateTime.fromISO(`${startDate}T${startTime}:00`, { zone: timezone }).plus({
+        hours,
+      });
       setEndTime(dt.toFormat("HH:mm"));
       setEndDate(dt.toFormat("yyyy-MM-dd"));
     });
@@ -146,7 +173,9 @@ export function BookingModal({
     if (timeVal) {
       handleDateOrTimeChange(() => {
         setStartTime(timeVal);
-        const dt = DateTime.fromISO(`${startDate}T${timeVal}:00`, { zone: timezone }).plus({ hours: 2 });
+        const dt = DateTime.fromISO(`${startDate}T${timeVal}:00`, { zone: timezone }).plus({
+          hours: 2,
+        });
         setEndTime(dt.toFormat("HH:mm"));
       });
     }
@@ -188,15 +217,24 @@ export function BookingModal({
         });
 
         if (!res.ok) {
-          if (res.data?.requires_force && res.data?.warnings && res.data.warnings.length > 0 && !forceConfirmed) {
-            const warningMsgs = res.data.warnings.map((w) => w.message || getErrorMessage(w.code)).join(" • ");
+          if (
+            res.data?.requires_force &&
+            res.data?.warnings &&
+            res.data.warnings.length > 0 &&
+            !forceConfirmed
+          ) {
+            const warningMsgs = res.data.warnings
+              .map((w) => w.message || getErrorMessage(w.code))
+              .join(" • ");
             toast.warning(`${warningMsgs}. Clique em 'Remarcar mesmo assim' para confirmar.`);
             setForceConfirmed(true);
             return;
           }
           const conflicts = res.data?.conflicts;
           if (conflicts && conflicts.length > 0) {
-            toast.error(`${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`);
+            toast.error(
+              `${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`,
+            );
           } else {
             toast.error(res.data?.message || getErrorMessage(res.data?.error));
           }
@@ -247,15 +285,24 @@ export function BookingModal({
         });
 
         if (!res.ok) {
-          if (res.data?.requires_force && res.data?.warnings && res.data.warnings.length > 0 && !forceConfirmed) {
-            const warningMsgs = res.data.warnings.map((w) => w.message || getErrorMessage(w.code)).join(" • ");
+          if (
+            res.data?.requires_force &&
+            res.data?.warnings &&
+            res.data.warnings.length > 0 &&
+            !forceConfirmed
+          ) {
+            const warningMsgs = res.data.warnings
+              .map((w) => w.message || getErrorMessage(w.code))
+              .join(" • ");
             toast.warning(`${warningMsgs}. Clique em 'Criar mesmo assim' para confirmar.`);
             setForceConfirmed(true);
             return;
           }
           const conflicts = res.data?.conflicts;
           if (conflicts && conflicts.length > 0) {
-            toast.error(`${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`);
+            toast.error(
+              `${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`,
+            );
           } else {
             toast.error(res.data?.message || getErrorMessage(res.data?.error));
           }
@@ -291,12 +338,14 @@ export function BookingModal({
               </span>
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
+            className="text-neutral-500 hover:text-white transition-colors cursor-pointer rounded-none"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Lead Vinculado (se houver) */}
@@ -305,7 +354,9 @@ export function BookingModal({
             <div className="flex items-center gap-2 text-[#9be5ff]">
               <Sparkles className="w-4 h-4" />
               <span className="font-bold uppercase tracking-wider">Lead Vinculado:</span>
-              <span className="text-white font-medium">{leadData.name} ({leadData.phone})</span>
+              <span className="text-white font-medium">
+                {leadData.name} ({leadData.phone})
+              </span>
             </div>
             <span className="text-[10px] font-mono uppercase bg-black/40 px-2 py-0.5 text-neutral-400">
               {leadData.service}
@@ -323,33 +374,41 @@ export function BookingModal({
               {/* Presets de início */}
               <div className="flex items-center gap-1.5 text-[10px]">
                 <span className="text-neutral-500">Presets:</span>
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="xs"
                   onClick={() => applyPresetTime("preset_manha")}
-                  className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 uppercase font-bold tracking-wider cursor-pointer"
+                  className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 uppercase font-bold tracking-wider cursor-pointer rounded-none"
                 >
                   Manhã ({settings["preset_manha"] || "09:00"})
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="outline"
+                  size="xs"
                   onClick={() => applyPresetTime("preset_tarde")}
-                  className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 uppercase font-bold tracking-wider cursor-pointer"
+                  className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 uppercase font-bold tracking-wider cursor-pointer rounded-none"
                 >
                   Tarde ({settings["preset_tarde"] || "14:00"})
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="outline"
+                  size="xs"
                   onClick={() => applyPresetTime("preset_noite")}
-                  className="px-2 py-0.5 bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 uppercase font-bold tracking-wider cursor-pointer"
+                  className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 uppercase font-bold tracking-wider cursor-pointer rounded-none"
                 >
                   Noite ({settings["preset_noite"] || "18:30"})
-                </button>
+                </Button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Início (Data & Hora)</label>
+                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                  Início (Data & Hora)
+                </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="date"
@@ -370,7 +429,9 @@ export function BookingModal({
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] uppercase font-bold text-neutral-400">Término (Hora)</label>
+                  <label className="text-[10px] uppercase font-bold text-neutral-400">
+                    Término (Hora)
+                  </label>
                   {isNextDay && (
                     <span className="text-[9px] uppercase font-bold tracking-wider text-amber-400 bg-amber-500/10 px-1.5 py-0.2 border border-amber-500/20">
                       Termina no dia seguinte ({endDate})
@@ -387,27 +448,33 @@ export function BookingModal({
                   />
                   {/* Atalhos de Duração */}
                   <div className="flex items-center gap-1 text-[10px]">
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="xs"
                       onClick={() => addHoursDuration(2)}
-                      className="px-2 py-1.5 bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 font-bold font-mono cursor-pointer"
+                      className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 font-bold font-mono cursor-pointer rounded-none"
                     >
                       +2h
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="xs"
                       onClick={() => addHoursDuration(4)}
-                      className="px-2 py-1.5 bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 font-bold font-mono cursor-pointer"
+                      className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 font-bold font-mono cursor-pointer rounded-none"
                     >
                       +4h
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="xs"
                       onClick={() => addHoursDuration(6)}
-                      className="px-2 py-1.5 bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 font-bold font-mono cursor-pointer"
+                      className="bg-white/5 hover:bg-white/10 text-neutral-300 border-white/10 font-bold font-mono cursor-pointer rounded-none"
                     >
                       +6h
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -417,7 +484,9 @@ export function BookingModal({
           {/* Dados Cadastrais (somente no create ou edição) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">Nome do Cliente</label>
+              <label className="text-[10px] uppercase font-bold text-neutral-400">
+                Nome do Cliente
+              </label>
               <input
                 type="text"
                 value={clientName}
@@ -428,7 +497,9 @@ export function BookingModal({
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">WhatsApp / Telefone</label>
+              <label className="text-[10px] uppercase font-bold text-neutral-400">
+                WhatsApp / Telefone
+              </label>
               <input
                 type="text"
                 value={clientPhone}
@@ -464,7 +535,9 @@ export function BookingModal({
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">Tipo de Sessão</label>
+              <label className="text-[10px] uppercase font-bold text-neutral-400">
+                Tipo de Sessão
+              </label>
               <select
                 value={sessionType}
                 onChange={(e) => setSessionType(e.target.value as Booking["session_type"])}
@@ -483,7 +556,9 @@ export function BookingModal({
           {mode === "create" && (
             <div className="grid grid-cols-3 gap-3 text-xs border-t border-white/10 pt-3">
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Valor Total (R$)</label>
+                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                  Valor Total (R$)
+                </label>
                 <input
                   type="text"
                   value={priceDisplay}
@@ -494,7 +569,9 @@ export function BookingModal({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Sinal (R$)</label>
+                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                  Sinal (R$)
+                </label>
                 <input
                   type="text"
                   value={depositDisplay}
@@ -505,7 +582,9 @@ export function BookingModal({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Status do Sinal</label>
+                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                  Status do Sinal
+                </label>
                 <select
                   value={depositStatus}
                   onChange={(e) => setDepositStatus(e.target.value as Booking["deposit_status"])}
@@ -521,7 +600,9 @@ export function BookingModal({
 
           {/* Observações */}
           <div className="space-y-1 text-xs">
-            <label className="text-[10px] uppercase font-bold text-neutral-400">Observações / Ideia</label>
+            <label className="text-[10px] uppercase font-bold text-neutral-400">
+              Observações / Ideia
+            </label>
             <textarea
               value={notes}
               rows={2}
@@ -533,18 +614,19 @@ export function BookingModal({
 
           {/* Botões de Ação */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border border-white/10 transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border-white/10 transition-colors cursor-pointer rounded-none h-auto"
             >
               Cancelar
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="submit"
               disabled={isSubmitting}
-              className={`px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${
+              className={`px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-none h-auto ${
                 forceConfirmed
                   ? "bg-amber-400 hover:bg-amber-300 text-black border-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.4)]"
                   : "bg-[#9be5ff] hover:bg-[#b0ecff] text-[#070707] border-[#9be5ff] shadow-[0_0_15px_rgba(155,229,255,0.2)]"
@@ -553,13 +635,13 @@ export function BookingModal({
               {isSubmitting
                 ? "Processando..."
                 : forceConfirmed
-                ? mode === "reschedule"
-                  ? "Remarcar mesmo assim"
-                  : "Criar mesmo assim"
-                : mode === "reschedule"
-                ? "Confirmar Remarcação"
-                : "Criar Agendamento"}
-            </button>
+                  ? mode === "reschedule"
+                    ? "Remarcar mesmo assim"
+                    : "Criar mesmo assim"
+                  : mode === "reschedule"
+                    ? "Confirmar Remarcação"
+                    : "Criar Agendamento"}
+            </Button>
           </div>
         </form>
       </div>

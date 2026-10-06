@@ -1,9 +1,21 @@
 import * as React from "react";
 import type { ApexOptions } from "apexcharts";
 import { DateTime } from "luxon";
-import { Users, Target, Activity, TrendingUp, Sparkles, MapPin, Calendar, ArrowUpRight, DollarSign, Wallet } from "lucide-react";
+import {
+  Users,
+  Target,
+  Activity,
+  TrendingUp,
+  Sparkles,
+  MapPin,
+  Calendar,
+  ArrowUpRight,
+  DollarSign,
+  Wallet,
+} from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/aceternity/bento-grid";
 import { GlowingCard } from "@/components/ui/aceternity/glowing-card";
+import { Button } from "@/components/ui/button";
 import { ApexChartClient } from "@/components/admin/apex-chart-client";
 import { centsToDisplay } from "@/lib/api-client";
 import type { Lead, Booking } from "@/lib/db";
@@ -74,7 +86,17 @@ export function BentoOverview({
     }
     if (period === "30d") {
       return {
-        categories: ["01/09", "04/09", "08/09", "12/09", "16/09", "20/09", "24/09", "28/09", "01/10"],
+        categories: [
+          "01/09",
+          "04/09",
+          "08/09",
+          "12/09",
+          "16/09",
+          "20/09",
+          "24/09",
+          "28/09",
+          "01/10",
+        ],
         sessoes: [340, 420, 510, 480, 620, 590, 710, 680, 840],
         leads: [8, 12, 14, 11, 18, 15, 22, 19, Math.max(stats.total, 24)],
       };
@@ -219,12 +241,16 @@ export function BentoOverview({
   };
 
   // Contagem de modalidades de serviço
-  const studioCount = leads.filter(
-    (l) => l.service.toLowerCase().includes("estúdio") || l.service.toLowerCase().includes("palhoça")
-  ).length || 2;
-  const vipCount = leads.filter(
-    (l) => l.service.toLowerCase().includes("domicílio") || l.service.toLowerCase().includes("vip")
-  ).length || 1;
+  const studioCount =
+    leads.filter(
+      (l) =>
+        l.service.toLowerCase().includes("estúdio") || l.service.toLowerCase().includes("palhoça"),
+    ).length || 2;
+  const vipCount =
+    leads.filter(
+      (l) =>
+        l.service.toLowerCase().includes("domicílio") || l.service.toLowerCase().includes("vip"),
+    ).length || 1;
   const totalServices = Math.max(studioCount + vipCount, 1);
   const studioPercent = Math.round((studioCount / totalServices) * 100);
   const vipPercent = 100 - studioPercent;
@@ -242,7 +268,8 @@ export function BentoOverview({
           <div className="my-3">
             <div className="text-3xl font-extrabold text-white tracking-tight">{stats.total}</div>
             <p className="text-[11px] text-neutral-400 mt-1">
-              <span className="text-[#9be5ff] font-semibold">{stats.novos} novos</span> aguardando contato
+              <span className="text-[#9be5ff] font-semibold">{stats.novos} novos</span> aguardando
+              contato
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
@@ -256,7 +283,9 @@ export function BentoOverview({
         {/* Taxa de Conversão */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Taxa de Conversão</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Taxa de Conversão
+            </span>
             <Target className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="my-3">
@@ -264,7 +293,8 @@ export function BentoOverview({
               {stats.conversionRate}
             </div>
             <p className="text-[11px] text-neutral-400 mt-1">
-              <span className="text-emerald-400 font-semibold">{stats.agendados} confirmados</span> na agenda
+              <span className="text-emerald-400 font-semibold">{stats.agendados} confirmados</span>{" "}
+              na agenda
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
@@ -278,7 +308,9 @@ export function BentoOverview({
         {/* Sinais em Caixa (Pagos ou Retidos) */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Sinais em Caixa ({period.toUpperCase()})</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Sinais em Caixa ({period.toUpperCase()})
+            </span>
             <Wallet className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="my-3">
@@ -286,7 +318,15 @@ export function BentoOverview({
               {centsToDisplay(sinaisRecebidosCents)}
             </div>
             <p className="text-[11px] text-neutral-400 mt-1 flex items-center gap-1">
-              <span className="text-emerald-400 font-semibold">{filteredBookings.filter(b => b.deposit_status === "pago" || b.deposit_status === "retido").length} depósitos</span> pagos ou retidos
+              <span className="text-emerald-400 font-semibold">
+                {
+                  filteredBookings.filter(
+                    (b) => b.deposit_status === "pago" || b.deposit_status === "retido",
+                  ).length
+                }{" "}
+                depósitos
+              </span>{" "}
+              pagos ou retidos
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
@@ -297,7 +337,9 @@ export function BentoOverview({
         {/* Receita Prevista (Sessões Ativas) */}
         <GlowingCard className="p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-neutral-400">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Receita Prevista ({period.toUpperCase()})</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em]">
+              Receita Prevista ({period.toUpperCase()})
+            </span>
             <DollarSign className="w-4 h-4 text-[#9be5ff]" />
           </div>
           <div className="my-3">
@@ -305,7 +347,11 @@ export function BentoOverview({
               {centsToDisplay(receitaPrevistaCents)}
             </div>
             <p className="text-[11px] text-neutral-400 mt-1">
-              {filteredBookings.filter(b => b.status !== "cancelado" && b.status !== "no_show").length} sessões ativas no período
+              {
+                filteredBookings.filter((b) => b.status !== "cancelado" && b.status !== "no_show")
+                  .length
+              }{" "}
+              sessões ativas no período
             </p>
           </div>
           <div className="h-1 w-full bg-white/10 overflow-hidden">
@@ -323,7 +369,8 @@ export function BentoOverview({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3 mb-2">
               <div>
                 <h3 className="text-xs uppercase font-extrabold tracking-[0.2em] text-white flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#9be5ff]" /> Tráfego Orgânico vs Conversão de Leads
+                  <Sparkles className="w-3.5 h-3.5 text-[#9be5ff]" /> Tráfego Orgânico vs Conversão
+                  de Leads
                 </h3>
                 <p className="text-[11px] text-neutral-400 mt-0.5">
                   Correlação dinâmica entre sessões do site e agendamentos solicitados
@@ -333,17 +380,19 @@ export function BentoOverview({
               {/* Seletor de Período 7D / 30D / 90D */}
               <div className="flex items-center gap-1 bg-black/60 p-1 border border-white/10 self-start sm:self-auto">
                 {(["7d", "30d", "90d"] as const).map((p) => (
-                  <button
+                  <Button
                     key={p}
+                    variant={period === p ? "default" : "ghost"}
+                    size="xs"
                     onClick={() => setPeriod(p)}
-                    className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer rounded-none h-auto ${
                       period === p
-                        ? "bg-[#9be5ff] text-black"
+                        ? "bg-[#9be5ff] text-black hover:bg-[#82d9f7]"
                         : "text-neutral-400 hover:text-white"
                     }`}
                   >
                     {p.toUpperCase()}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -434,12 +483,14 @@ export function BentoOverview({
                 </p>
               </div>
               {onNavigateToLeads && (
-                <button
+                <Button
+                  variant="link"
+                  size="sm"
                   onClick={onNavigateToLeads}
-                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-[#9be5ff] hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-[#9be5ff] hover:underline cursor-pointer p-0 h-auto"
                 >
                   Ver Todos <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               )}
             </div>
           }
@@ -460,8 +511,8 @@ export function BentoOverview({
                       lead.status === "novo"
                         ? "bg-[#9be5ff]/10 text-[#9be5ff] border border-[#9be5ff]/30"
                         : lead.status === "agendado"
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                        : "bg-white/5 text-neutral-400"
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                          : "bg-white/5 text-neutral-400"
                     }`}
                   >
                     {lead.status}

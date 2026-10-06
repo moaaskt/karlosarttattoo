@@ -11,9 +11,8 @@ export interface FullCalendarClientProps extends CalendarOptions {
 
 export const FullCalendarClient = React.memo(
   React.forwardRef<any, FullCalendarClientProps>((props, ref) => {
-    const [FullCalendarComponent, setFullCalendarComponent] = React.useState<React.ComponentType<any> | null>(
-      () => cachedFullCalendarComponent
-    );
+    const [FullCalendarComponent, setFullCalendarComponent] =
+      React.useState<React.ComponentType<any> | null>(() => cachedFullCalendarComponent);
     const [isMounted, setIsMounted] = React.useState(Boolean(cachedFullCalendarComponent));
 
     React.useEffect(() => {
@@ -33,12 +32,7 @@ export const FullCalendarClient = React.memo(
       ]).then(([reactMod, dayGrid, timeGrid, interaction, luxon3]) => {
         if (cancelled) return;
         if (!cachedPlugins) {
-          cachedPlugins = [
-            dayGrid.default,
-            timeGrid.default,
-            interaction.default,
-            luxon3.default,
-          ];
+          cachedPlugins = [dayGrid.default, timeGrid.default, interaction.default, luxon3.default];
         }
         cachedFullCalendarComponent = reactMod.default;
         setFullCalendarComponent(() => reactMod.default);
@@ -65,7 +59,7 @@ export const FullCalendarClient = React.memo(
         <FullCalendarComponent ref={ref} {...props} plugins={cachedPlugins!} />
       </div>
     );
-  })
+  }),
 );
 
 FullCalendarClient.displayName = "FullCalendarClient";

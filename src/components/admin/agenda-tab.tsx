@@ -1,5 +1,10 @@
 import * as React from "react";
-import type { DatesSetArg, EventContentArg, EventClickArg, DateSelectArg } from "@fullcalendar/core";
+import type {
+  DatesSetArg,
+  EventContentArg,
+  EventClickArg,
+  DateSelectArg,
+} from "@fullcalendar/core";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 import { FullCalendarClient } from "./calendar/FullCalendarClient";
 import { BookingDrawer } from "./calendar/BookingDrawer";
@@ -16,14 +21,9 @@ import {
   utcToLocal,
 } from "../../lib/agenda-utils";
 import type { Booking, TimeBlock, AvailabilityRule, Lead } from "../../lib/db";
-import {
-  Calendar as CalendarIcon,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  Plus,
-} from "lucide-react";
+import { Calendar as CalendarIcon, RefreshCw, Eye, EyeOff, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 // Constantes estáticas fora do componente para preservar identidade referencial estrita
 const HEADER_TOOLBAR = {
@@ -153,10 +153,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     try {
       const [bookingsRes, timeBlocksRes] = await Promise.all([
         apiFetch<{ success?: boolean; bookings?: Booking[] }>(
-          `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+          `/api/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
         ),
         apiFetch<{ success?: boolean; timeBlocks?: TimeBlock[] }>(
-          `/api/time-blocks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+          `/api/time-blocks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
         ),
       ]);
 
@@ -212,7 +212,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       setCurrentView(info.view.type);
       fetchEventsForRange(from, to);
     },
-    [fetchEventsForRange]
+    [fetchEventsForRange],
   );
 
   // 5. Cálculos memorizados (useMemo)
@@ -230,9 +230,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
   const timezone = settings["timezone"] || "America/Sao_Paulo";
 
   const events = React.useMemo(() => {
-    const bEvents = bookings
-      .map((b) => bookingToEvent(b, showCancelled, true))
-      .filter(Boolean);
+    const bEvents = bookings.map((b) => bookingToEvent(b, showCancelled, true)).filter(Boolean);
     const tbEvents = timeBlocks.map((tb) => timeBlockToEvent(tb));
     return [...bEvents, ...tbEvents];
   }, [bookings, timeBlocks, showCancelled]);
@@ -314,7 +312,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         });
       }
     },
-    [isReady, timezone]
+    [isReady, timezone],
   );
 
   const handleRescheduleDropOrResize = React.useCallback(
@@ -354,7 +352,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         const conflicts = res.data?.conflicts;
         if (conflicts && conflicts.length > 0) {
           toast.error(
-            `${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`
+            `${getErrorMessage(res.data?.error)} (Conflito com: ${conflicts.map((c) => c.client_name).join(", ")})`,
           );
         } else {
           toast.error(res.data?.message || getErrorMessage(res.data?.error));
@@ -365,7 +363,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
       toast.success("Agendamento remarcado com sucesso!");
       handleRefresh();
     },
-    [handleRefresh]
+    [handleRefresh],
   );
 
   const handleConfirmRescheduleForce = React.useCallback(async () => {
@@ -430,105 +428,133 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         {/* Lado Direito: Ações e Filtros */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Botão Novo Agendamento */}
-          <button
+          <Button
+            size="sm"
             onClick={() => setModalState({ open: true, mode: "create" })}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-all cursor-pointer shadow-[0_0_12px_rgba(155,229,255,0.2)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-all cursor-pointer shadow-[0_0_12px_rgba(155,229,255,0.2)] rounded-none h-8"
           >
             <Plus className="w-3.5 h-3.5" />
             Novo Agendamento
-          </button>
+          </Button>
 
           {/* Seletor de visualizações rápidas */}
           <div className="flex items-center border border-white/10 bg-black/40 text-xs font-bold">
-            <button
+            <Button
+              variant={currentView === "timeGridDay" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 const api = calendarRef.current?.getApi?.() || calendarRef.current;
                 api?.changeView?.("timeGridDay");
               }}
-              className={`px-3 py-1.5 uppercase tracking-wider transition-colors ${
+              className={`px-3 py-1.5 uppercase tracking-wider transition-colors rounded-none h-8 ${
                 currentView === "timeGridDay"
-                  ? "bg-[#9be5ff] text-[#070707]"
+                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
               Dia
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={currentView === "timeGridWeek" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 const api = calendarRef.current?.getApi?.() || calendarRef.current;
                 api?.changeView?.("timeGridWeek");
               }}
-              className={`px-3 py-1.5 uppercase tracking-wider transition-colors border-x border-white/10 ${
+              className={`px-3 py-1.5 uppercase tracking-wider transition-colors border-x border-white/10 rounded-none h-8 ${
                 currentView === "timeGridWeek"
-                  ? "bg-[#9be5ff] text-[#070707]"
+                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
               Semana
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={currentView === "dayGridMonth" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 const api = calendarRef.current?.getApi?.() || calendarRef.current;
                 api?.changeView?.("dayGridMonth");
               }}
-              className={`px-3 py-1.5 uppercase tracking-wider transition-colors ${
+              className={`px-3 py-1.5 uppercase tracking-wider transition-colors rounded-none h-8 ${
                 currentView === "dayGridMonth"
-                  ? "bg-[#9be5ff] text-[#070707]"
+                  ? "bg-[#9be5ff] text-[#070707] hover:bg-[#9be5ff]"
                   : "text-neutral-400 hover:text-white"
               }`}
             >
               Mês
-            </button>
+            </Button>
           </div>
 
           {/* Toggle de Cancelados */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setShowCancelled((prev) => !prev)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border transition-colors rounded-none h-8 ${
               showCancelled
-                ? "bg-neutral-800 text-white border-white/30"
-                : "bg-black/40 text-neutral-400 border-white/10 hover:text-white"
+                ? "bg-neutral-800 text-white border-white/30 hover:bg-neutral-700"
+                : "bg-black/40 text-neutral-400 border-white/10 hover:text-white hover:border-white/30"
             }`}
             title="Exibir agendamentos cancelados e faltas"
           >
             {showCancelled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
             {showCancelled ? "Cancelados ON" : "Cancelados OFF"}
-          </button>
+          </Button>
 
           {/* Botão de Atualizar */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 bg-black/40 text-neutral-300 hover:text-[#9be5ff] hover:border-[#9be5ff]/40 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-8"
             title="Recarregar agendamentos"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
             Atualizar
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Legenda de Status e Categorias */}
       <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-black/30 border border-white/5 text-[11px] text-neutral-400">
-        <span className="font-extrabold uppercase tracking-wider text-neutral-500 mr-1">Legenda:</span>
+        <span className="font-extrabold uppercase tracking-wider text-neutral-500 mr-1">
+          Legenda:
+        </span>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.pendente }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.pendente }}
+          />
           <span>Pendente</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.confirmado }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.confirmado }}
+          />
           <span>Confirmado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.concluido }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.concluido }}
+          />
           <span>Concluído</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.cancelado }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.cancelado }}
+          />
           <span>Cancelado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLOR.no_show }} />
+          <span
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: STATUS_COLOR.no_show }}
+          />
           <span>Falta (No-Show)</span>
         </div>
         <div className="flex items-center gap-1.5">

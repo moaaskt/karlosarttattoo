@@ -1,6 +1,17 @@
 import * as React from "react";
-import { MessageSquare, Phone, Mail, Calendar, CheckCircle2, Clock, Archive, Sparkles, Filter } from "lucide-react";
+import {
+  MessageSquare,
+  Phone,
+  Mail,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Archive,
+  Sparkles,
+  Filter,
+} from "lucide-react";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
+import { Button } from "@/components/ui/button";
 import type { Lead } from "@/lib/db";
 
 interface LeadTableProps {
@@ -93,21 +104,35 @@ export function LeadTable({ leads, onStatusChange, onScheduleLead, isLoading }: 
           {[
             { id: "todos", label: "TODOS", count: leads.length },
             { id: "novo", label: "NOVOS", count: leads.filter((l) => l.status === "novo").length },
-            { id: "contatado", label: "CONTATADOS", count: leads.filter((l) => l.status === "contatado").length },
-            { id: "agendado", label: "AGENDADOS", count: leads.filter((l) => l.status === "agendado").length },
-            { id: "arquivado", label: "ARQUIVADOS", count: leads.filter((l) => l.status === "arquivado").length },
+            {
+              id: "contatado",
+              label: "CONTATADOS",
+              count: leads.filter((l) => l.status === "contatado").length,
+            },
+            {
+              id: "agendado",
+              label: "AGENDADOS",
+              count: leads.filter((l) => l.status === "agendado").length,
+            },
+            {
+              id: "arquivado",
+              label: "ARQUIVADOS",
+              count: leads.filter((l) => l.status === "arquivado").length,
+            },
           ].map((tab) => (
-            <button
+            <Button
               key={tab.id}
+              variant={filter === tab.id ? "default" : "outline"}
+              size="sm"
               onClick={() => setFilter(tab.id)}
-              className={`px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] transition-all cursor-pointer border ${
+              className={`text-[11px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-none h-7 px-3 border ${
                 filter === tab.id
-                  ? "bg-[#9be5ff] text-[#070707] font-bold border-[#9be5ff] shadow-[0_0_12px_rgba(155,229,255,0.3)]"
-                  : "bg-black/40 text-neutral-400 border-white/10 hover:border-white/30"
+                  ? "bg-[#9be5ff] text-[#070707] font-bold border-[#9be5ff] shadow-[0_0_12px_rgba(155,229,255,0.3)] hover:bg-[#82d9f7]"
+                  : "bg-black/40 text-neutral-400 border-white/10 hover:border-white/30 hover:text-white"
               }`}
             >
               {tab.label} ({tab.count})
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -178,9 +203,7 @@ export function LeadTable({ leads, onStatusChange, onScheduleLead, isLoading }: 
                   <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 block">
                     Local / Modalidade
                   </span>
-                  <div className="text-white font-medium">
-                    {lead.service}
-                  </div>
+                  <div className="text-white font-medium">{lead.service}</div>
                 </div>
               </div>
 
@@ -215,13 +238,14 @@ export function LeadTable({ leads, onStatusChange, onScheduleLead, isLoading }: 
                   </a>
 
                   {onScheduleLead && (
-                    <button
+                    <Button
+                      variant="outline"
                       onClick={() => onScheduleLead(lead)}
-                      className="flex items-center gap-1.5 px-4 py-2.5 text-xs uppercase font-extrabold tracking-[0.18em] bg-[#9be5ff]/10 hover:bg-[#9be5ff]/20 text-[#9be5ff] border border-[#9be5ff]/30 transition-all cursor-pointer"
+                      className="flex items-center gap-1.5 px-4 py-2.5 text-xs uppercase font-extrabold tracking-[0.18em] bg-[#9be5ff]/10 hover:bg-[#9be5ff]/20 text-[#9be5ff] border-[#9be5ff]/30 transition-all cursor-pointer rounded-none h-auto"
                     >
                       <Calendar className="w-4 h-4" />
                       AGENDAR SESSÃO ↗
-                    </button>
+                    </Button>
                   )}
                 </div>
 

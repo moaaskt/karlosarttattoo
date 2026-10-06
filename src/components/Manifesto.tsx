@@ -32,10 +32,7 @@ export function Manifesto() {
         {/* 3 Pilares — D-04 */}
         <div className="grid gap-px bg-white/10 md:grid-cols-3">
           {/* Pilar 01 */}
-          <article
-            data-anim="manifesto-pillar"
-            className="bg-[#070707] px-6 py-10 md:px-8"
-          >
+          <article data-anim="manifesto-pillar" className="bg-[#070707] px-6 py-10 md:px-8">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.4em] text-[#9be5ff]">
               01 // Conexão &amp; Essência
             </p>
@@ -48,10 +45,7 @@ export function Manifesto() {
           </article>
 
           {/* Pilar 02 */}
-          <article
-            data-anim="manifesto-pillar"
-            className="bg-[#070707] px-6 py-10 md:px-8"
-          >
+          <article data-anim="manifesto-pillar" className="bg-[#070707] px-6 py-10 md:px-8">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.4em] text-[#9be5ff]">
               02 // Futurismo &amp; Anatomia
             </p>
@@ -64,10 +58,7 @@ export function Manifesto() {
           </article>
 
           {/* Pilar 03 */}
-          <article
-            data-anim="manifesto-pillar"
-            className="bg-[#070707] px-6 py-10 md:px-8"
-          >
+          <article data-anim="manifesto-pillar" className="bg-[#070707] px-6 py-10 md:px-8">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.4em] text-[#9be5ff]">
               03 // Ateliê &amp; Privacidade
             </p>
