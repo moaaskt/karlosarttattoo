@@ -24,6 +24,7 @@ import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/aceternity/sidebar";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { InfoBadge } from "@/components/ui/status-badge";
 import type { Lead, Booking } from "@/lib/db";
 
 export const Route = createFileRoute("/admin")({
@@ -458,9 +459,7 @@ function AdminPage() {
                   <Sparkles className="w-4 h-4 text-[#9be5ff]" /> Visão Analítica do Estúdio &
                   Métricas
                 </h2>
-                <span className="text-[10px] uppercase tracking-wider text-neutral-500">
-                  Palhoça & Florianópolis
-                </span>
+                <InfoBadge type="location">Palhoça & Florianópolis</InfoBadge>
               </div>
 
               <BentoOverview
