@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export type BookingServiceType = "studio" | "home" | "flash";
 
@@ -285,9 +287,11 @@ export function BookingModal({ open, onOpenChange, defaultService = "studio" }: 
             </p>
 
             {error && (
-              <div className="text-center text-xs text-red-400 tracking-wide font-medium bg-red-950/30 border border-red-800/40 p-2.5 rounded-none">
-                {error}
-              </div>
+              <Alert variant="destructive" className="rounded-none">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Erro no envio</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             <div className="pt-2 pb-1">
