@@ -8,6 +8,8 @@ import {
   Clock,
   MessageSquare,
   AlertCircle,
+  AlertTriangle,
+  Check,
   CheckCircle2,
   XCircle,
   HelpCircle,
@@ -19,6 +21,23 @@ import {
 import { toast } from "sonner";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   apiFetch,
   centsToDisplay,
@@ -248,153 +267,223 @@ export function BookingDrawer({
     booking.status === "cancelado" ||
     booking.status === "no_show" ||
     booking.status === "concluido";
-  const whatsappUrl = `https://wa.me/${formatWhatsAppPhone(booking.client_phone)}?text=${encodeURIComponent(
+
+  const whatsappPhone = formatWhatsAppPhone(booking.client_phone);
+  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(
     `Olá ${booking.client_name}, aqui é o Karlos do ateliê Karlos Art Tattoo sobre sua sessão no dia ${localStart.date}!`,
   )}`;
 
+  // Labels e status formatados
+  const LOCATION_LABELS: Record<Booking["location"], string> = {
+    estudio: "Estúdio",
+    domicilio: "Domicílio",
+    evento: "Evento",
+  };
+
+  const STATUS_LABELS: Record<Booking["status"], { label: string; className: string }> = {
+    pendente: {
+      label: "Pendente",
+      className: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    },
+    confirmado: {
+      label: "Confirmado",
+      className: "bg-[#76ABAE]/20 text-[#76ABAE] border-[#76ABAE]/30",
+    },
+    concluido: {
+      label: "Concluído",
+      className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    },
+    cancelado: {
+      label: "Cancelado",
+      className: "bg-red-500/20 text-red-400 border-red-500/30",
+    },
+    no_show: {
+      label: "Falta (No-Show)",
+      className: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+    },
+  };
+
+  const currentStatusInfo = STATUS_LABELS[booking.status] ?? {
+    label: booking.status,
+    className: "bg-[#222831] text-[#9DA5B4] border-[#31363F]",
+  };
+
+  const DEPOSIT_STATUS_LABELS: Record<Booking["deposit_status"], { label: string; className: string }> = {
+    pendente: {
+      label: "Sinal: Pendente",
+      className: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    },
+    pago: {
+      label: "Sinal: Pago",
+      className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    },
+    dispensado: {
+      label: "Sinal: Dispensado",
+      className: "bg-[#76ABAE]/15 text-[#76ABAE] border-[#76ABAE]/30",
+    },
+    retido: {
+      label: "Sinal: Retido",
+      className: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+    },
+    devolvido: {
+      label: "Sinal: Devolvido",
+      className: "bg-neutral-500/15 text-neutral-300 border-neutral-500/30",
+    },
+  };
+
+  const currentDepositInfo = DEPOSIT_STATUS_LABELS[booking.deposit_status] ?? {
+    label: `Sinal: ${booking.deposit_status}`,
+    className: "bg-[#222831] text-[#9DA5B4] border-[#31363F]",
+  };
+
   return (
     <>
-      {/* Overlay escuro em telas menores */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 sm:bg-black/30"
-      />
-
-      {/* Drawer Lateral */}
-      <aside className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-[#31363f] border-l border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto">
-        {/* Cabeçalho */}
-        <div className="p-6 border-b border-white/10 bg-[#222831]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: STATUS_COLOR[booking.status] }}
-              />
-              <span className="text-xs font-bold uppercase tracking-widest text-[#76abae]">
-                Agendamento #{booking.id.slice(-6)}
+      <Dialog open={Boolean(bookingId)} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent
+          className="w-full max-w-2xl mx-auto p-6 bg-[#31363F] text-[#EEEEEE] border border-[#31363F] shadow-2xl rounded-xl max-h-[90vh] overflow-y-auto custom-scrollbar"
+        >
+          {/* Cabeçalho do Modal */}
+          <DialogHeader className="space-y-1 text-left">
+            <div className="flex items-center justify-between gap-3">
+              <DialogTitle className="text-xl font-bold text-[#EEEEEE] tracking-wide">
+                {booking.client_name}
+              </DialogTitle>
+              <span className="bg-[#222831] text-[#9DA5B4] border border-[#31363F] text-xs px-2.5 py-0.5 rounded-full font-mono">
+                #{booking.id.slice(-6).toUpperCase()}
               </span>
             </div>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={onClose}
-              className="text-[#9da5b4] hover:text-[#eeeeee] transition-colors cursor-pointer rounded-none"
+
+            {/* Badges de Status e Contexto */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <Badge
+                variant="outline"
+                className="bg-[#222831] text-[#EEEEEE] border-[#31363F] text-xs font-normal"
+              >
+                {LOCATION_LABELS[booking.location] || booking.location}
+              </Badge>
+              <Badge
+                variant="outline"
+                className="bg-[#222831] text-[#EEEEEE] border-[#31363F] text-xs font-normal"
+              >
+                {SESSION_TYPE_LABEL[booking.session_type] || booking.session_type}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={`text-xs font-semibold ${currentStatusInfo.className}`}
+              >
+                {currentStatusInfo.label}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={`text-xs font-semibold ${currentDepositInfo.className}`}
+              >
+                {currentDepositInfo.label}
+              </Badge>
+            </div>
+          </DialogHeader>
+
+          {/* Card Informativo de Contato e Horário (Acesso Rápido) */}
+          <div className="bg-[#222831] border border-[#31363F] rounded-lg p-3.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 my-4">
+            <div className="space-y-1 text-xs text-[#EEEEEE]">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#76ABAE]" />
+                <span className="font-semibold">{localStart.date}</span>
+                <span className="text-[#9DA5B4]">•</span>
+                <Clock className="w-4 h-4 text-[#76ABAE]" />
+                <span className="font-mono">
+                  {localStart.time} – {localEnd.time}
+                </span>
+                <span className="text-[10px] text-[#9DA5B4] font-mono">
+                  ({timezone.split("/")[1] ?? timezone})
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-[#9DA5B4] text-[11px] font-mono">
+                <Phone className="w-3.5 h-3.5 text-[#76ABAE]" />
+                <span>{booking.client_phone}</span>
+                {booking.client_email && (
+                  <>
+                    <span>•</span>
+                    <Mail className="w-3.5 h-3.5 text-[#76ABAE]" />
+                    <span className="font-sans">{booking.client_email}</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block"
             >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-
-          <div className="mt-4">
-            <h2 className="text-xl font-extrabold uppercase tracking-wide text-[#eeeeee]">
-              {booking.client_name}
-            </h2>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-white/10 text-white rounded">
-                {SESSION_TYPE_LABEL[booking.session_type]}
-              </span>
-              <span
-                className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded border"
-                style={{
-                  backgroundColor: `${STATUS_COLOR[booking.status]}20`,
-                  color: STATUS_COLOR[booking.status],
-                  borderColor: STATUS_COLOR[booking.status],
-                }}
-              >
-                {booking.status}
-              </span>
-              <span
-                className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded border"
-                style={{
-                  borderColor: DEPOSIT_BORDER[booking.deposit_status],
-                  color: DEPOSIT_BORDER[booking.deposit_status],
-                }}
-              >
-                Sinal: {booking.deposit_status}
-              </span>
-            </div>
-          </div>
-
-          {/* Dados rápidos de contato e horário */}
-          <div className="grid grid-cols-1 gap-2 mt-4 text-xs text-neutral-300 bg-white/5 p-3 rounded border border-white/5">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-neutral-400">
-                <Calendar className="w-3.5 h-3.5 text-[#9be5ff]" />
-                {localStart.date}
-              </span>
-              <span className="flex items-center gap-1.5 font-mono text-white">
-                <Clock className="w-3.5 h-3.5 text-[#9be5ff]" />
-                {localStart.time} – {localEnd.time} ({timezone.split("/")[1] ?? timezone})
-              </span>
-            </div>
-            <div className="flex items-center justify-between border-t border-white/5 pt-2">
-              <span className="flex items-center gap-1.5 font-mono">
-                <Phone className="w-3.5 h-3.5 text-[#9be5ff]" />
-                {booking.client_phone}
-              </span>
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-bold uppercase text-[#25D366] hover:underline"
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 text-xs gap-1.5 h-8 bg-transparent"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
-                WhatsApp ↗
-              </a>
-            </div>
+                Conversar no WhatsApp
+              </Button>
+            </a>
           </div>
-        </div>
 
-        {/* Corpo com Ações e Edição */}
-        <div className="p-6 space-y-6 flex-1">
-          {/* 1. MÁQUINA DE STATUS */}
+          {/* Transição de Status (Ações Rápidas da Sessão) */}
           <div className="space-y-2">
-            <label className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-neutral-400 block">
-              Transição de Status
-            </label>
+            <Label className="text-xs font-medium text-[#9DA5B4] block">
+              Ações da Sessão
+            </Label>
             {isTerminal ? (
-              <p className="text-xs text-neutral-500 italic">
-                Status terminal alcançado ({booking.status}). Nenhuma outra transição de status é
-                permitida.
+              <p className="text-xs text-[#9DA5B4] italic bg-[#222831]/60 border border-[#31363F] p-2.5 rounded-md">
+                Status terminal alcançado ({booking.status}). Nenhuma outra transição de status é permitida.
               </p>
             ) : allowedTransitions.length === 0 ? (
-              <p className="text-xs text-neutral-500">Sem transições disponíveis.</p>
+              <p className="text-xs text-[#9DA5B4]">Sem transições disponíveis para este status.</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {allowedTransitions.includes("confirmado") && (
                   <Button
+                    size="sm"
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("confirmado")}
-                    className="flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-[#9be5ff] text-[#070707] hover:bg-[#b0ecff] transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
+                    className="bg-[#76ABAE] hover:bg-[#76ABAE]/90 text-[#222831] font-semibold text-xs h-8"
                   >
+                    <Check className="w-3.5 h-3.5 mr-1" />
                     Confirmar Sessão
                   </Button>
                 )}
                 {allowedTransitions.includes("concluido") && (
                   <Button
+                    size="sm"
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("concluido")}
-                    className="flex-1 px-3 py-2 text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-8"
                   >
+                    <Check className="w-3.5 h-3.5 mr-1" />
                     Concluir Sessão
                   </Button>
                 )}
                 {allowedTransitions.includes("cancelado") && (
                   <Button
+                    size="sm"
                     variant="outline"
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("cancelado")}
-                    className="px-3 py-2 text-xs font-bold uppercase tracking-wider bg-neutral-800 text-neutral-300 hover:bg-red-950/60 hover:text-red-400 border-white/10 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
+                    className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs h-8 bg-transparent"
                   >
+                    <X className="w-3.5 h-3.5 mr-1" />
                     Cancelar
                   </Button>
                 )}
                 {allowedTransitions.includes("no_show") && (
                   <Button
-                    variant="destructive"
+                    size="sm"
+                    variant="outline"
                     disabled={isSubmitting}
                     onClick={() => handleStatusChange("no_show")}
-                    className="px-3 py-2 text-xs font-bold uppercase tracking-wider bg-red-950/40 text-red-400 border border-red-800/40 hover:bg-red-900/60 transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
+                    className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-xs h-8 bg-transparent"
                   >
+                    <AlertTriangle className="w-3.5 h-3.5 mr-1" />
                     Falta (No-Show)
                   </Button>
                 )}
@@ -402,148 +491,136 @@ export function BookingDrawer({
             )}
           </div>
 
-          {/* 2. SINAL FINANCEIRO */}
-          <div className="space-y-2 border-t border-white/10 pt-4">
+          {/* Formulário de Edição dos Dados (Grid Responsivo) */}
+          <form id="booking-detail-form" onSubmit={handleSaveData} className="space-y-4 pt-4 border-t border-[#31363F]">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-neutral-400 block">
-                Status do Sinal
-              </label>
-              <span className="text-xs font-mono text-[#9be5ff]">
-                {centsToDisplay(booking.deposit_cents)} /{" "}
-                {centsToDisplay(booking.price_total_cents)}
-              </span>
-            </div>
-            <select
-              value={booking.deposit_status}
-              disabled={isSubmitting}
-              onChange={(e) =>
-                handleDepositStatusChange(e.target.value as Booking["deposit_status"])
-              }
-              className="w-full bg-[#141416] border border-white/20 text-white text-xs px-3 py-2 rounded-none outline-none focus:border-[#9be5ff] cursor-pointer"
-            >
-              <option value="pendente">Pendente</option>
-              <option value="pago">Pago</option>
-              <option value="dispensado">Dispensado</option>
-              <option
-                value="retido"
-                disabled={booking.status !== "cancelado" && booking.status !== "no_show"}
-              >
-                Retido{" "}
-                {booking.status !== "cancelado" && booking.status !== "no_show"
-                  ? "(só após cancelamento)"
-                  : ""}
-              </option>
-              <option
-                value="devolvido"
-                disabled={booking.status !== "cancelado" && booking.status !== "no_show"}
-              >
-                Devolvido{" "}
-                {booking.status !== "cancelado" && booking.status !== "no_show"
-                  ? "(só após cancelamento)"
-                  : ""}
-              </option>
-            </select>
-          </div>
-
-          {/* 3. EDIÇÃO DE DADOS (TASK-05b) */}
-          <form onSubmit={handleSaveData} className="space-y-4 border-t border-white/10 pt-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-neutral-400">
-                Editar Dados da Sessão
-              </span>
-              <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
-                PATCH /api/bookings/:id
+              <Label className="text-xs font-semibold text-[#EEEEEE] uppercase tracking-wider">
+                Dados do Agendamento
+              </Label>
+              <span className="text-xs font-mono text-[#76ABAE]">
+                Sinal: {centsToDisplay(booking.deposit_cents)} / Total: {centsToDisplay(booking.price_total_cents)}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {/* Nome */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Nome</label>
-                <input
+                <Label htmlFor="booking-edit-name" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
+                  Nome do Cliente
+                </Label>
+                <Input
+                  id="booking-edit-name"
                   type="text"
                   value={editName}
                   disabled={isTerminal && booking.status !== "concluido"}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] disabled:opacity-50"
+                  className="bg-[#222831] border-[#31363F] text-[#EEEEEE] placeholder:text-[#9DA5B4] focus:border-[#76ABAE] rounded-md text-xs h-9"
                   required
                 />
               </div>
 
+              {/* Telefone */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Telefone</label>
-                <input
+                <Label htmlFor="booking-edit-phone" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
+                  Telefone / WhatsApp
+                </Label>
+                <Input
+                  id="booking-edit-phone"
                   type="text"
                   value={editPhone}
                   disabled={isTerminal && booking.status !== "concluido"}
                   onChange={(e) => setEditPhone(e.target.value)}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] disabled:opacity-50 font-mono"
+                  className="bg-[#222831] border-[#31363F] text-[#EEEEEE] placeholder:text-[#9DA5B4] focus:border-[#76ABAE] rounded-md text-xs font-mono h-9"
                   required
                 />
               </div>
-            </div>
 
-            <div className="space-y-1 text-xs">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">E-mail</label>
-              <input
-                type="email"
-                value={editEmail}
-                disabled={isTerminal && booking.status !== "concluido"}
-                onChange={(e) => setEditEmail(e.target.value)}
-                className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] disabled:opacity-50"
-              />
-            </div>
+              {/* E-mail (2 colunas) */}
+              <div className="space-y-1 col-span-1 sm:col-span-2">
+                <Label htmlFor="booking-edit-email" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
+                  E-mail
+                </Label>
+                <Input
+                  id="booking-edit-email"
+                  type="email"
+                  value={editEmail}
+                  disabled={isTerminal && booking.status !== "concluido"}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="bg-[#222831] border-[#31363F] text-[#EEEEEE] placeholder:text-[#9DA5B4] focus:border-[#76ABAE] rounded-md text-xs h-9"
+                  placeholder="cliente@email.com"
+                />
+              </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
+              {/* Local */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">Local</label>
-                <select
+                <Label htmlFor="booking-edit-location" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
+                  Local / Modalidade
+                </Label>
+                <Select
                   value={editLocation}
-                  onChange={(e) => setEditLocation(e.target.value as Booking["location"])}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
+                  onValueChange={(val) => setEditLocation(val as Booking["location"])}
                 >
-                  <option value="estudio">Estúdio</option>
-                  <option value="domicilio">Domicílio</option>
-                  <option value="evento">Evento</option>
-                </select>
+                  <SelectTrigger
+                    id="booking-edit-location"
+                    className="w-full bg-[#222831] border-[#31363F] text-[#EEEEEE] focus:border-[#76ABAE] rounded-md text-xs h-9"
+                  >
+                    <SelectValue placeholder="Selecione o local" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#222831] border-[#31363F] text-[#EEEEEE]">
+                    <SelectItem value="estudio">Estúdio</SelectItem>
+                    <SelectItem value="domicilio">Domicílio</SelectItem>
+                    <SelectItem value="evento">Evento</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
+              {/* Tipo de Sessão */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                <Label htmlFor="booking-edit-session-type" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
                   Tipo de Sessão
-                </label>
-                <select
+                </Label>
+                <Select
                   value={editSessionType}
-                  onChange={(e) => setEditSessionType(e.target.value as Booking["session_type"])}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff]"
+                  onValueChange={(val) => setEditSessionType(val as Booking["session_type"])}
                 >
-                  <option value="tatuagem">Tatuagem</option>
-                  <option value="flash">Flash</option>
-                  <option value="retoque">Retoque</option>
-                  <option value="projeto">Projeto</option>
-                  <option value="outro">Outro</option>
-                </select>
+                  <SelectTrigger
+                    id="booking-edit-session-type"
+                    className="w-full bg-[#222831] border-[#31363F] text-[#EEEEEE] focus:border-[#76ABAE] rounded-md text-xs h-9"
+                  >
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#222831] border-[#31363F] text-[#EEEEEE]">
+                    <SelectItem value="tatuagem">Tatuagem</SelectItem>
+                    <SelectItem value="flash">Flash</SelectItem>
+                    <SelectItem value="retoque">Retoque</SelectItem>
+                    <SelectItem value="projeto">Projeto</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
+              {/* Preço Total */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">
+                <Label htmlFor="booking-edit-price" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
                   Preço Total (R$)
-                </label>
-                <input
+                </Label>
+                <Input
+                  id="booking-edit-price"
                   type="text"
                   value={editPriceDisplay}
                   onChange={(e) => setEditPriceDisplay(e.target.value)}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] font-mono"
+                  className="bg-[#222831] border-[#31363F] text-[#EEEEEE] placeholder:text-[#9DA5B4] focus:border-[#76ABAE] rounded-md text-xs font-mono h-9"
                   placeholder="0,00"
                 />
               </div>
 
+              {/* Valor do Sinal */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-neutral-400">
-                  Sinal (R$)
-                </label>
-                <input
+                <Label htmlFor="booking-edit-deposit" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
+                  Valor do Sinal (R$)
+                </Label>
+                <Input
+                  id="booking-edit-deposit"
                   type="text"
                   value={editDepositDisplay}
                   disabled={
@@ -552,92 +629,139 @@ export function BookingDrawer({
                     booking.deposit_status === "devolvido"
                   }
                   onChange={(e) => setEditDepositDisplay(e.target.value)}
-                  className="w-full bg-[#141416] border border-white/20 px-3 py-1.5 text-white outline-none focus:border-[#9be5ff] disabled:opacity-50 font-mono"
+                  className="bg-[#222831] border-[#31363F] text-[#EEEEEE] placeholder:text-[#9DA5B4] focus:border-[#76ABAE] rounded-md text-xs font-mono h-9 disabled:opacity-50"
                   placeholder="0,00"
                 />
               </div>
-            </div>
 
-            <div className="space-y-1 text-xs">
-              <label className="text-[10px] uppercase font-bold text-neutral-400">
-                Notas / Ideia
-              </label>
-              <textarea
-                value={editNotes}
-                rows={2}
-                onChange={(e) => setEditNotes(e.target.value)}
-                className="w-full bg-[#141416] border border-white/20 px-3 py-2 text-white outline-none focus:border-[#9be5ff]"
-                placeholder="Observações da sessão..."
-              />
-            </div>
+              {/* Status do Sinal (Select) */}
+              <div className="space-y-1 col-span-1 sm:col-span-2">
+                <Label htmlFor="booking-edit-deposit-status" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
+                  Status do Sinal
+                </Label>
+                <Select
+                  value={booking.deposit_status}
+                  disabled={isSubmitting}
+                  onValueChange={(val) =>
+                    handleDepositStatusChange(val as Booking["deposit_status"])
+                  }
+                >
+                  <SelectTrigger
+                    id="booking-edit-deposit-status"
+                    className="w-full bg-[#222831] border-[#31363F] text-[#EEEEEE] focus:border-[#76ABAE] rounded-md text-xs h-9"
+                  >
+                    <SelectValue placeholder="Status do Sinal" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#222831] border-[#31363F] text-[#EEEEEE]">
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="pago">Pago</SelectItem>
+                    <SelectItem value="dispensado">Dispensado</SelectItem>
+                    <SelectItem
+                      value="retido"
+                      disabled={booking.status !== "cancelado" && booking.status !== "no_show"}
+                    >
+                      Retido {booking.status !== "cancelado" && booking.status !== "no_show" ? "(só após cancelamento)" : ""}
+                    </SelectItem>
+                    <SelectItem
+                      value="devolvido"
+                      disabled={booking.status !== "cancelado" && booking.status !== "no_show"}
+                    >
+                      Devolvido {booking.status !== "cancelado" && booking.status !== "no_show" ? "(só após cancelamento)" : ""}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer rounded-none h-auto"
-            >
-              <Save className="w-3.5 h-3.5" />
-              {isSubmitting ? "Salvando..." : "Salvar Dados da Sessão"}
-            </Button>
+              {/* Observações / Ideia (2 colunas) */}
+              <div className="space-y-1 col-span-1 sm:col-span-2">
+                <Label htmlFor="booking-edit-notes" className="text-xs font-medium text-[#9DA5B4] mb-1 block">
+                  Notas / Ideia
+                </Label>
+                <Textarea
+                  id="booking-edit-notes"
+                  value={editNotes}
+                  rows={3}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  className="bg-[#222831] border-[#31363F] text-[#EEEEEE] placeholder:text-[#9DA5B4] focus:border-[#76ABAE] rounded-md text-xs resize-none"
+                  placeholder="Observações da sessão..."
+                />
+              </div>
+            </div>
           </form>
 
-          {/* 4. HISTÓRICO DE AUDITORIA */}
-          <div className="space-y-2 border-t border-white/10 pt-4">
-            <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.15em] text-neutral-400">
-              <History className="w-3.5 h-3.5 text-[#9be5ff]" />
+          {/* Histórico & Auditoria */}
+          <div className="space-y-2 mt-4">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#EEEEEE]">
+              <History className="w-3.5 h-3.5 text-[#76ABAE]" />
               Histórico & Auditoria
             </div>
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <div className="bg-[#222831]/60 border border-[#31363F] rounded-md p-3 text-xs text-[#9DA5B4] max-h-40 overflow-y-auto space-y-2">
               {(booking.events || []).length === 0 ? (
-                <p className="text-xs text-neutral-500">Nenhum evento registrado.</p>
+                <p className="italic text-[#9DA5B4]">Nenhum evento registrado.</p>
               ) : (
                 booking.events.map((ev) => (
                   <div
                     key={ev.id}
-                    className="text-[11px] bg-black/40 border border-white/5 p-2 rounded"
+                    className="border-b border-[#31363F]/50 pb-1.5 last:border-b-0 last:pb-0"
                   >
-                    <div className="flex items-center justify-between text-neutral-400">
-                      <span className="font-bold uppercase text-[#9be5ff]">{ev.event_type}</span>
-                      <span className="font-mono text-[9px]">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-[#76ABAE] uppercase tracking-wider text-[11px]">
+                        {ev.event_type}
+                      </span>
+                      <span className="font-mono text-[10px] text-[#9DA5B4]">
                         {utcToLocal(ev.created_at, timezone).date}{" "}
                         {utcToLocal(ev.created_at, timezone).time}
                       </span>
                     </div>
-                    {ev.note && <p className="text-neutral-300 mt-0.5">{ev.note}</p>}
+                    {ev.note && <p className="text-[#EEEEEE] mt-0.5 text-xs">{ev.note}</p>}
                   </div>
                 ))
               )}
             </div>
           </div>
-        </div>
 
-        {/* Rodapé com Remarcar e Fechar */}
-        <div className="p-4 border-t border-white/10 bg-[#070707] flex items-center justify-between gap-3">
-          <Button
-            variant="outline"
-            onClick={() => {
-              onReschedule(booking);
-              onClose();
-            }}
-            disabled={
-              booking.status === "cancelado" ||
-              booking.status === "concluido" ||
-              booking.status === "no_show"
-            }
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#9be5ff]/10 hover:bg-[#9be5ff]/20 text-[#9be5ff] border-[#9be5ff]/30 text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-40 cursor-pointer rounded-none h-auto"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Remarcar Horário ↗
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border-white/10 transition-colors cursor-pointer rounded-none h-auto"
-          >
-            Fechar
-          </Button>
-        </div>
-      </aside>
+          {/* Rodapé do Modal */}
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-[#31363F] mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onReschedule(booking);
+                onClose();
+              }}
+              disabled={
+                booking.status === "cancelado" ||
+                booking.status === "concluido" ||
+                booking.status === "no_show"
+              }
+              className="text-xs border-[#31363F] text-[#9DA5B4] hover:text-[#EEEEEE] hover:bg-[#222831] h-8 bg-transparent"
+            >
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+              Remarcar Horário
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onClose}
+                className="text-xs text-[#9DA5B4] hover:text-[#EEEEEE] hover:bg-[#222831] h-8"
+              >
+                Fechar
+              </Button>
+              <Button
+                type="submit"
+                form="booking-detail-form"
+                disabled={isSubmitting}
+                className="bg-[#76ABAE] hover:bg-[#76ABAE]/90 text-[#222831] font-semibold text-xs h-8"
+              >
+                <Save className="w-3.5 h-3.5 mr-1.5" />
+                {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Diálogo de confirmação de cancelamento com sinal pago */}
       <ConfirmDialog
