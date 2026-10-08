@@ -86,6 +86,31 @@ export const AVAILABLE_VARIABLES: TemplateVariableDefinition[] = [
 ];
 
 /**
+ * Sanitiza e padroniza números de telefone para envio no WhatsApp (DDI 55 + DDD + Número).
+ */
+export function sanitizeWhatsAppNumber(phone: string): string {
+  if (!phone) return "";
+  let digits = phone.replace(/\D/g, "");
+
+  // Remove zero à esquerda do DDD caso exista (ex: 048991234567 -> 48991234567)
+  if (digits.startsWith("0")) {
+    digits = digits.slice(1);
+  }
+
+  // Se já começar com 55 e tiver 12 ou 13 dígitos, preserva
+  if (digits.startsWith("55") && (digits.length === 12 || digits.length === 13)) {
+    return digits;
+  }
+
+  // Se tiver 10 ou 11 dígitos (DDD + celular ou fixo do Brasil), adiciona 55
+  if (digits.length === 10 || digits.length === 11) {
+    return `55${digits}`;
+  }
+
+  return digits;
+}
+
+/**
  * Extrai todas as variáveis no formato {{variavel}} encontradas no texto.
  */
 export function extractVariablesFromTemplate(content: string): string[] {

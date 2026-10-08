@@ -62,10 +62,13 @@ const sendMessageSchema = z.object({
   channel: z.enum(["whatsapp", "email"]),
   recipient: z.string().min(1, "Destinatário é obrigatório"),
   body: z.string().optional(),
+  message: z.string().optional(),
   template_id: z.string().optional(),
   subject: z.string().optional(),
   lead_id: z.string().optional(),
+  leadId: z.string().optional(),
   lead_name: z.string().optional(),
+  leadName: z.string().optional(),
   variables_data: z.record(z.any()).optional(),
 });
 
@@ -210,12 +213,12 @@ export async function handleMessagesRequest(request: Request): Promise<Response>
         channel,
         recipient,
         template_id,
-        lead_id,
-        lead_name,
         variables_data = {},
       } = parsed.data;
 
-      let finalBody = parsed.data.body || "";
+      const lead_id = parsed.data.lead_id || parsed.data.leadId;
+      const lead_name = parsed.data.lead_name || parsed.data.leadName;
+      let finalBody = parsed.data.body || parsed.data.message || "";
       let finalSubject = parsed.data.subject || "";
 
       // Se template_id foi informado, busca o modelo

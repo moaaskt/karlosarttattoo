@@ -20,6 +20,7 @@ import { LeadTable } from "@/components/admin/lead-table";
 import { BentoOverview } from "@/components/admin/bento-overview";
 import { AgendaTab } from "@/components/admin/agenda-tab";
 import { AnalyticsTab } from "@/components/admin/analytics-tab";
+import { QuickMessageModal } from "@/components/admin/quick-message-modal";
 import { Toaster } from "@/components/ui/sonner";
 import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
@@ -45,6 +46,7 @@ function AdminPage() {
   const [loginError, setLoginError] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState<"bento" | "leads" | "agenda" | "analytics">("bento");
   const [leadToSchedule, setLeadToSchedule] = React.useState<Lead | null>(null);
+  const [leadToMessage, setLeadToMessage] = React.useState<Lead | null>(null);
 
   const [leads, setLeads] = React.useState<Lead[]>([]);
   const [bookings, setBookings] = React.useState<Booking[]>([]);
@@ -475,6 +477,7 @@ function AdminPage() {
                 leads={leads}
                 bookings={bookings}
                 onNavigateToLeads={() => setActiveTab("leads")}
+                onOpenMessageModal={setLeadToMessage}
               />
             </section>
           ) : activeTab === "leads" ? (
@@ -500,6 +503,7 @@ function AdminPage() {
                   setLeadToSchedule(lead);
                   setActiveTab("agenda");
                 }}
+                onOpenMessageModal={setLeadToMessage}
                 isLoading={isLoading}
               />
             </section>
@@ -517,6 +521,15 @@ function AdminPage() {
           )}
         </main>
       </div>
+
+      {/* Modal de Mensagem Rápida e Disparos Personalizados */}
+      <QuickMessageModal
+        lead={leadToMessage}
+        isOpen={!!leadToMessage}
+        onClose={() => setLeadToMessage(null)}
+        authKey={authKey}
+        onMessageSent={() => verifyAndFetch(authKey)}
+      />
 
       {/* Toaster do Sonner montado para notificações de feedback */}
       <Toaster position="top-right" richColors theme="dark" />

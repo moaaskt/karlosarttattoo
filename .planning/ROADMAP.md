@@ -18,12 +18,12 @@
 - [x] Endpoints de API REST seguros `/api/messages/*` protegidos por autorização administrativa (`isAuthorized`).
 - [x] Suporte a persistência de templates, configurações e logs no SQLite (`src/lib/db.ts`).
 
-### Phase 07: Quick Message Modal & Leads Action Integration (Planned)
-- [ ] Componente `src/components/admin/quick-message-modal.tsx` com `Dialog` e `Tabs` shadcn (`[ WhatsApp ]` e `[ E-mail ]`).
-- [ ] Dropdown de seleção de templates com interpolação dinâmica dos dados do lead selecionado no textarea.
-- [ ] Campo condicional de Assunto para o canal E-mail.
-- [ ] Ação de envio via API com loading/toasts e botão secundário "Abrir Web WhatsApp" como fallback manual.
-- [ ] Conexão e abertura do modal nos cards e linhas de leads em `src/components/admin/lead-table.tsx` e `src/components/admin/bento-overview.tsx`.
+### Phase 07: Quick Message Modal & Leads Action Integration (Completed)
+- [x] Componente `src/components/admin/quick-message-modal.tsx` com `Dialog` e `Tabs` shadcn (`[ WhatsApp ]` e `[ E-mail ]`).
+- [x] Dropdown de seleção de templates com interpolação dinâmica dos dados do lead selecionado no textarea.
+- [x] Campo condicional de Assunto para o canal E-mail.
+- [x] Ação de envio via API com loading/toasts e botão secundário "Abrir Web WhatsApp" como fallback manual.
+- [x] Conexão e abertura do modal nos cards e linhas de leads em `src/components/admin/lead-table.tsx` e `src/components/admin/bento-overview.tsx`.
 
 ### Phase 08: Messaging Administration Hub & Quality Assurance (Planned)
 - [ ] Componente `src/components/admin/messaging-tab.tsx` integrado à Sidebar de `src/routes/admin.tsx` com ícone `MessageSquare`.

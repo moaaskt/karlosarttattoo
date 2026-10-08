@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   DollarSign,
   Wallet,
+  MessageSquare,
 } from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/aceternity/bento-grid";
 import { GlowingCard } from "@/components/ui/aceternity/glowing-card";
@@ -34,6 +35,7 @@ interface BentoOverviewProps {
   bookings?: Booking[];
   timezone?: string;
   onNavigateToLeads?: () => void;
+  onOpenMessageModal?: (lead: Lead) => void;
 }
 
 export function BentoOverview({
@@ -42,6 +44,7 @@ export function BentoOverview({
   bookings = [],
   timezone = "America/Sao_Paulo",
   onNavigateToLeads,
+  onOpenMessageModal,
 }: BentoOverviewProps) {
   const [period, setPeriod] = React.useState<"7d" | "30d" | "90d">("7d");
 
@@ -506,11 +509,25 @@ export function BentoOverview({
                   <div className="font-bold text-[#eeeeee] uppercase tracking-wider">{lead.name}</div>
                   <div className="text-[11px] text-[#9da5b4]">{lead.service}</div>
                 </div>
-                <div className="text-right">
-                  <StatusBadge status={lead.status} />
-                  <div className="text-[10px] text-[#9da5b4] mt-1 flex items-center gap-1 justify-end">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(lead.createdAt).toLocaleDateString("pt-BR")}
+                <div className="flex items-center gap-3">
+                  {onOpenMessageModal && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onOpenMessageModal(lead)}
+                      className="h-7 px-2.5 bg-emerald-600/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white cursor-pointer text-[10px] uppercase font-bold tracking-wider transition-all"
+                      title="Enviar Mensagem Rápida"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 mr-1" />
+                      Mensagem
+                    </Button>
+                  )}
+                  <div className="text-right">
+                    <StatusBadge status={lead.status} />
+                    <div className="text-[10px] text-[#9da5b4] mt-1 flex items-center gap-1 justify-end">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(lead.createdAt).toLocaleDateString("pt-BR")}
+                    </div>
                   </div>
                 </div>
               </div>
