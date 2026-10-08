@@ -7,6 +7,7 @@ import { handleBookingsRequest } from "./server/api/bookings";
 import { handleTimeBlocksRequest } from "./server/api/time-blocks";
 import { handleSettingsRequest } from "./server/api/settings";
 import { handleAvailabilityRulesRequest } from "./server/api/availability-rules";
+import { handleAnalyticsRequest } from "./server/api/analytics";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -72,6 +73,9 @@ export default {
         url.pathname.startsWith("/api/availability-rules/")
       ) {
         return await handleAvailabilityRulesRequest(request);
+      }
+      if (url.pathname === "/api/analytics" || url.pathname.startsWith("/api/analytics/")) {
+        return await handleAnalyticsRequest(request);
       }
 
       const handler = await getServerEntry();
