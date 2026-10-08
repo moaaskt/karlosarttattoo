@@ -99,7 +99,9 @@ export async function handleTimeBlocksRequest(request: Request): Promise<Respons
       if (result.error === "booking_conflict") {
         return jsonResponse(
           {
-            error: result.error,
+            success: false,
+            error: "Conflito de horário detectado",
+            conflict_type: "time_block_conflict",
             conflicts: result.conflicts || [],
             message: result.message,
           },

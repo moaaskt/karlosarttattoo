@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   listAvailabilityRules,
   upsertAvailabilityRule,
+  replaceAvailabilityRules,
   deleteAvailabilityRule,
 } from "../../lib/db";
 import { isAuthorized, unauthorizedResponse, jsonResponse, corsHeaders } from "./auth";
@@ -20,6 +21,10 @@ const ruleSchema = z
     message: "window_end deve ser posterior a window_start",
     path: ["window_end"],
   });
+
+const batchRulesSchema = z.object({
+  rules: z.array(ruleSchema),
+});
 
 export async function handleAvailabilityRulesRequest(request: Request): Promise<Response> {
   const method = request.method.toUpperCase();
@@ -46,6 +51,42 @@ export async function handleAvailabilityRulesRequest(request: Request): Promise<
     } catch (err) {
       console.error("[AvailabilityRules API] Erro ao listar regras:", err);
       return jsonResponse({ error: "Erro interno ao listar regras de disponibilidade." }, 500);
+    }
+  }
+
+  // 2. PUT /api/availability-rules (substituição em lote com anti-sobreposição atômica)
+  if (method === "PUT" && pathParts.length === 0) {
+    try {
+      const body = await request.json().catch(() => null);
+      if (!body) {
+        return jsonResponse({ error: "Corpo da requisição inválido ou vazio." }, 400);
+      }
+
+      const parsed = batchRulesSchema.safeParse(body);
+      if (!parsed.success) {
+        return jsonResponse(
+          {
+            error: "Formato inválido de regras de disponibilidade.",
+            details: parsed.error.format(),
+          },
+          422,
+        );
+      }
+
+      const rules = replaceAvailabilityRules(parsed.data.rules);
+      return jsonResponse({
+        success: true,
+        message: "Regras de disponibilidade atualizadas com sucesso.",
+        rules,
+      });
+    } catch (err: any) {
+      console.error("[AvailabilityRules API] Erro ao atualizar regras em lote:", err);
+      return jsonResponse(
+        {
+          error: err.message || "Erro ao atualizar regras de disponibilidade.",
+        },
+        422,
+      );
     }
   }
 
