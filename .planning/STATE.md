@@ -1,34 +1,39 @@
 ---
 gsd_state_version: "1.0"
-status: milestone_completed
-milestone: "v2.0"
-stopped_at: "Milestone v2.0 Completed and Archived"
-last_updated: "2026-10-08T11:45:00.000Z"
+status: in_progress
+milestone: "v2.1"
+phase: "06"
+stopped_at: "Milestone v2.1 Initialized (Pronto para Planejamento da Fase 06)"
+last_updated: "2026-10-08T13:12:00.000Z"
 progress:
   total_phases: 3
-  completed_phases: 3
-  percent: 100
+  completed_phases: 0
+  current_phase_plans: 0
+  completed_phase_plans: 0
+  percent: 0
 ---
 
-# Project State: Milestone v2.0 Completed & Archived
+# Project State: Milestone v2.1
 
 ## Current Status
 
-- **Shipped Milestone**: v2.0 — _Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration_ (Arquivado com 100% de sucesso).
-- **Archived Artifacts**:
-  - Roadmap: [.planning/milestones/v2.0-ROADMAP.md](file:///home/moa-dev/projetos/ink-sharp-editorial/.planning/milestones/v2.0-ROADMAP.md)
-  - Requisitos: [.planning/milestones/v2.0-REQUIREMENTS.md](file:///home/moa-dev/projetos/ink-sharp-editorial/.planning/milestones/v2.0-REQUIREMENTS.md)
-  - Auditoria: [.planning/v2.0-MILESTONE-AUDIT.md](file:///home/moa-dev/projetos/ink-sharp-editorial/.planning/v2.0-MILESTONE-AUDIT.md)
-- **Suíte de Testes**: 91/91 testes passando (0 falhas).
-- **Build de Produção**: 100% aprovado via Vite e Nitro.
-- **Next Milestone**: v2.1 — _Content Expansion & Authority_ (Execute `/gsd-new-milestone`).
+- **Active Milestone**: v2.1 — _Módulo Completo de Mensageria Automatizada (WhatsApp via Evolution API v2 + E-mail via SMTP + Gestor de Templates e Disparos)_.
+- **Active Phase**: Phase 06 — _Messaging Engine, Multi-Channel Providers & Persistence_ — 🔄 **READY TO PLAN**.
+- **Scope Overview**:
+  - TASK-01: Tipos, motor de interpolação e conectores WhatsApp (Evolution API v2) e E-mail (SMTP) em `src/lib/messaging/`.
+  - TASK-02: Modal de disparo rápido `QuickMessageModal.tsx` integrado aos cards de leads.
+  - TASK-03: Nova aba "Mensageria & Disparos" (`MessagingTab.tsx`) com Gestor de Templates, Disparo em Massa e Configurações/Logs.
+  - TASK-04: Conexão nos componentes existentes (`lead-table.tsx`, `bento-overview.tsx`) e suíte de testes.
+- **Next Immediate Action**: Executar `/gsd-plan-phase 06` para detalhar a Fase 06 e iniciar a implementação.
 
-## Shipped Phases (Milestone v2.0)
+## Milestone v2.1 Phases Progress
 
-1. **Phase 03**: Aceternity UI Foundation & ApexCharts Migration — ✅ SHIPPED
-2. **Phase 04**: Agenda & Calendar Booking Engine — ✅ SHIPPED
-3. **Phase 05**: Real GA4 Data API & Google Search Console Integration — ✅ SHIPPED
+1. **Phase 06**: Messaging Engine, Multi-Channel Providers & Persistence — ⏳ PLANNED
+2. **Phase 07**: Quick Message Modal & Leads Action Integration — ⏳ PLANNED
+3. **Phase 08**: Messaging Administration Hub & Quality Assurance — ⏳ PLANNED
 
-## Next Milestone Preview (v2.1)
+## Session
 
-- **Phase 06**: Content Expansion & Authority (FAQ interativo, Aftercare Guide, autoridade editorial)
+**Last session:** 2026-10-08T13:12:00.000Z  
+**Active Phase:** Phase 06 (Messaging Engine, Multi-Channel Providers & Persistence)  
+**Next Step:** Planejamento da Fase 06 (`/gsd-plan-phase 06`)  
