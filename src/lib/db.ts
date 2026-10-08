@@ -484,6 +484,25 @@ export function updateSetting(key: string, value: string): void {
   stmt.run(key, value);
 }
 
+export function updateSettingsBatch(settings: Record<string, string>): SettingsMap {
+  const db = getDatabase();
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO settings (key, value) VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `);
+    for (const [k, v] of Object.entries(settings)) {
+      stmt.run(k, String(v));
+    }
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
+  return getSettings();
+}
+
 // ==========================================
 // Módulo de Availability Rules (D-03)
 // ==========================================
@@ -534,6 +553,69 @@ export function upsertAvailabilityRule(rule: {
   };
 }
 
+export function replaceAvailabilityRules(
+  newRules: Array<{
+    id?: string;
+    day_of_week: number;
+    window_start: string;
+    window_end: string;
+    is_active?: number;
+  }>,
+): AvailabilityRule[] {
+  const db = getDatabase();
+
+  // 1. Validação estrita por dia da semana contra sobreposição
+  const byDay = new Map<number, typeof newRules>();
+  for (const r of newRules) {
+    if (r.window_end <= r.window_start) {
+      throw new Error(`window_end (${r.window_end}) deve ser posterior a window_start (${r.window_start})`);
+    }
+    if (r.day_of_week < 0 || r.day_of_week > 6) {
+      throw new Error("day_of_week deve estar entre 0 (Dom) e 6 (Sáb)");
+    }
+    const isActive = r.is_active ?? 1;
+    if (isActive === 1) {
+      const list = byDay.get(r.day_of_week) || [];
+      list.push(r);
+      byDay.set(r.day_of_week, list);
+    }
+  }
+
+  // Ordena por window_start e checa se window[i].window_end > window[i+1].window_start
+  for (const [day, list] of byDay.entries()) {
+    list.sort((a, b) => a.window_start.localeCompare(b.window_start));
+    for (let i = 0; i < list.length - 1; i++) {
+      if (list[i].window_end > list[i + 1].window_start) {
+        throw new Error(
+          `Sobreposição de horários detectada no dia ${day}: ${list[i].window_start}-${list[i].window_end} sobrepõe ${list[i + 1].window_start}-${list[i + 1].window_end}`,
+        );
+      }
+    }
+  }
+
+  // 2. Transação atômica BEGIN IMMEDIATE
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    db.prepare("DELETE FROM availability_rules").run();
+    const insertStmt = db.prepare(`
+      INSERT INTO availability_rules (id, day_of_week, window_start, window_end, is_active)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+
+    for (const r of newRules) {
+      const id = r.id || generateId("ar");
+      insertStmt.run(id, r.day_of_week, r.window_start, r.window_end, r.is_active ?? 1);
+    }
+
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
+
+  return listAvailabilityRules();
+}
+
 export function deleteAvailabilityRule(id: string): boolean {
   const db = getDatabase();
   const stmt = db.prepare("DELETE FROM availability_rules WHERE id = ?");
@@ -551,7 +633,14 @@ export function createTimeBlock(
 ): {
   timeBlock?: TimeBlock;
   error?: "validation_error" | "booking_conflict";
-  conflicts?: Array<{ id: string; client_name: string; start_at: string; end_at: string }>;
+  conflicts?: Array<{
+    id: string;
+    client_name?: string;
+    reason?: string;
+    start_at: string;
+    end_at: string;
+    type: "booking" | "time_block";
+  }>;
   message?: string;
 } {
   const db = getDatabase();
@@ -582,26 +671,44 @@ export function createTimeBlock(
     }
   }
 
-  // D-13: Verificar conflito com agendamentos ativos se force não for true
+  // D-13 / D-08: Verificar conflito com agendamentos ativos e outros bloqueios se force não for true
   if (!force) {
     const bookingConflictStmt = db.prepare(`
       SELECT id, client_name, start_at, end_at FROM bookings
       WHERE status NOT IN ('cancelado', 'no_show')
         AND ? < end_at AND start_at < ?
     `);
-    const activeConflicts = bookingConflictStmt.all(startAt, endAt) as Array<{
+    const activeConflicts = (bookingConflictStmt.all(startAt, endAt) as Array<{
       id: string;
       client_name: string;
       start_at: string;
       end_at: string;
-    }>;
+    }>).map((b) => ({ ...b, type: "booking" as const }));
 
-    if (activeConflicts.length > 0) {
+    const tbConflictStmt = db.prepare(`
+      SELECT id, reason_tag, note, start_at, end_at FROM time_blocks
+      WHERE ? < end_at AND start_at < ?
+    `);
+    const tbConflicts = (tbConflictStmt.all(startAt, endAt) as Array<{
+      id: string;
+      reason_tag: string;
+      note: string | null;
+      start_at: string;
+      end_at: string;
+    }>).map((tb) => ({
+      id: tb.id,
+      start_at: tb.start_at,
+      end_at: tb.end_at,
+      reason: tb.note || tb.reason_tag,
+      type: "time_block" as const,
+    }));
+
+    if (activeConflicts.length > 0 || tbConflicts.length > 0) {
       return {
         error: "booking_conflict",
-        conflicts: activeConflicts,
+        conflicts: [...activeConflicts, ...tbConflicts],
         message:
-          "Existem agendamentos ativos no período selecionado. Confirme com force para prosseguir.",
+          "Existem agendamentos ativos ou bloqueios no período selecionado. Confirme com force para prosseguir.",
       };
     }
   }
