@@ -11,6 +11,10 @@ import {
   type AvailabilityRuleShape,
 } from "./booking-utils";
 import { utcToLocal, isPastDateTime, isFutureWindowExceeded } from "./agenda-utils";
+import type { MessageTemplate, MessagingConfig, MessageLog } from "./messaging/types";
+import { DEFAULT_TEMPLATES } from "./messaging/engine";
+
+export type { MessageTemplate, MessagingConfig, MessageLog };
 
 export interface BookingWarning {
   code: "outside_hours" | "past_date" | "future_window";
@@ -283,6 +287,74 @@ export function applyPragmasAndSchema(db: DatabaseSync) {
     }
   } catch (migErr) {
     console.error("[Database Migration] Erro ao migrar constraint de booking_events:", migErr);
+  }
+
+  // 7. Tabelas do Módulo de Mensageria (Milestone v2.1)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS message_templates (
+      id         TEXT    PRIMARY KEY,
+      name       TEXT    NOT NULL,
+      category   TEXT    NOT NULL,
+      channel    TEXT    NOT NULL,
+      subject    TEXT,
+      body       TEXT    NOT NULL,
+      variables  TEXT    NOT NULL,
+      active     INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT    NOT NULL,
+      updated_at TEXT    NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_msg_templates_cat ON message_templates (category);
+    CREATE INDEX IF NOT EXISTS idx_msg_templates_channel ON message_templates (channel);
+
+    CREATE TABLE IF NOT EXISTS message_logs (
+      id         TEXT PRIMARY KEY,
+      lead_id    TEXT,
+      lead_name  TEXT,
+      channel    TEXT NOT NULL,
+      recipient  TEXT NOT NULL,
+      status     TEXT NOT NULL CHECK(status IN ('sent', 'failed')),
+      error      TEXT,
+      payload    TEXT,
+      sent_at    TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_msg_logs_sent ON message_logs (sent_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_msg_logs_lead ON message_logs (lead_id);
+
+    CREATE TABLE IF NOT EXISTS messaging_settings (
+      key        TEXT PRIMARY KEY,
+      value      TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `);
+
+  // Seed automático de templates padrão caso a tabela esteja vazia
+  try {
+    const templateCount = db
+      .prepare("SELECT COUNT(*) as count FROM message_templates")
+      .get() as { count: number } | undefined;
+    if (templateCount && templateCount.count === 0) {
+      const insertStmt = db.prepare(`
+        INSERT INTO message_templates (id, name, category, channel, subject, body, variables, active, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      let idx = 1;
+      for (const t of DEFAULT_TEMPLATES) {
+        insertStmt.run(
+          `tpl_default_${idx++}`,
+          t.name,
+          t.category,
+          t.channel,
+          t.subject || null,
+          t.body,
+          JSON.stringify(t.variables),
+          now,
+          now,
+        );
+      }
+    }
+  } catch (seedErr) {
+    console.error("[Database Seed] Erro ao popular templates padrão:", seedErr);
   }
 }
 
@@ -1755,3 +1827,213 @@ export function updateBookingData(
     throw err;
   }
 }
+
+// ==========================================
+// Funções de Mensageria (Milestone v2.1)
+// ==========================================
+
+function mapTemplateRow(row: any): MessageTemplate {
+  let parsedVariables: string[] = [];
+  try {
+    parsedVariables = JSON.parse(row.variables);
+  } catch {
+    parsedVariables = [];
+  }
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    channel: row.channel,
+    subject: row.subject || undefined,
+    body: row.body,
+    variables: parsedVariables,
+    active: Boolean(row.active),
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+export function listMessageTemplates(): MessageTemplate[] {
+  const db = getDatabase();
+  const rows = db.prepare("SELECT * FROM message_templates ORDER BY created_at ASC").all();
+  return rows.map(mapTemplateRow);
+}
+
+export function getMessageTemplateById(id: string): MessageTemplate | null {
+  const db = getDatabase();
+  const row = db.prepare("SELECT * FROM message_templates WHERE id = ?").get(id);
+  return row ? mapTemplateRow(row) : null;
+}
+
+export function createMessageTemplate(
+  data: Omit<MessageTemplate, "id" | "created_at" | "updated_at">,
+): MessageTemplate {
+  const db = getDatabase();
+  const id = generateId("tpl");
+  const now = new Date().toISOString();
+  const variablesJson = JSON.stringify(data.variables || []);
+
+  db.prepare(`
+    INSERT INTO message_templates (id, name, category, channel, subject, body, variables, active, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    data.name,
+    data.category,
+    data.channel,
+    data.subject || null,
+    data.body,
+    variablesJson,
+    data.active ? 1 : 0,
+    now,
+    now,
+  );
+
+  return {
+    id,
+    ...data,
+    created_at: now,
+    updated_at: now,
+  };
+}
+
+export function updateMessageTemplate(
+  id: string,
+  data: Partial<Omit<MessageTemplate, "id" | "created_at">>,
+): MessageTemplate | null {
+  const db = getDatabase();
+  const current = getMessageTemplateById(id);
+  if (!current) return null;
+
+  const now = new Date().toISOString();
+  const updated: MessageTemplate = {
+    ...current,
+    ...data,
+    updated_at: now,
+  };
+
+  db.prepare(`
+    UPDATE message_templates
+    SET name = ?, category = ?, channel = ?, subject = ?, body = ?, variables = ?, active = ?, updated_at = ?
+    WHERE id = ?
+  `).run(
+    updated.name,
+    updated.category,
+    updated.channel,
+    updated.subject || null,
+    updated.body,
+    JSON.stringify(updated.variables),
+    updated.active ? 1 : 0,
+    now,
+    id,
+  );
+
+  return updated;
+}
+
+export function deleteMessageTemplate(id: string): boolean {
+  const db = getDatabase();
+  const res = db.prepare("DELETE FROM message_templates WHERE id = ?").run(id);
+  return Number((res as any)?.changes || 0) > 0;
+}
+
+export function createMessageLog(
+  log: Omit<MessageLog, "id" | "sent_at">,
+): MessageLog {
+  const db = getDatabase();
+  const id = generateId("log");
+  const now = new Date().toISOString();
+
+  db.prepare(`
+    INSERT INTO message_logs (id, lead_id, lead_name, channel, recipient, status, error, payload, sent_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    log.lead_id || null,
+    log.lead_name || null,
+    log.channel,
+    log.recipient,
+    log.status,
+    log.error || null,
+    log.payload || null,
+    now,
+  );
+
+  return {
+    id,
+    ...log,
+    sent_at: now,
+  };
+}
+
+export function listMessageLogs(limit: number = 50): MessageLog[] {
+  const db = getDatabase();
+  const rows = db.prepare("SELECT * FROM message_logs ORDER BY sent_at DESC LIMIT ?").all(limit);
+  return rows.map((r: any) => ({
+    id: r.id,
+    lead_id: r.lead_id || undefined,
+    lead_name: r.lead_name || undefined,
+    channel: r.channel,
+    recipient: r.recipient,
+    status: r.status,
+    error: r.error || undefined,
+    payload: r.payload || undefined,
+    sent_at: r.sent_at,
+  }));
+}
+
+export function getMessagingSettings(): MessagingConfig {
+  const db = getDatabase();
+  const rows = db.prepare("SELECT key, value FROM messaging_settings").all() as Array<{
+    key: string;
+    value: string;
+  }>;
+
+  const map = new Map<string, string>();
+  for (const r of rows) {
+    map.set(r.key, r.value);
+  }
+
+  // Precedência: configurações salvas no banco sobrescrevem variáveis de ambiente
+  return {
+    evolutionUrl: map.get("evolutionUrl") || process.env.EVOLUTION_API_URL?.trim() || "",
+    evolutionApiKey: map.get("evolutionApiKey") || process.env.EVOLUTION_API_KEY?.trim() || "",
+    instanceName: map.get("instanceName") || process.env.EVOLUTION_INSTANCE_NAME?.trim() || "",
+    smtpHost: map.get("smtpHost") || process.env.SMTP_HOST?.trim() || "",
+    smtpPort: map.has("smtpPort")
+      ? Number(map.get("smtpPort"))
+      : process.env.SMTP_PORT
+      ? Number(process.env.SMTP_PORT)
+      : 587,
+    smtpUser: map.get("smtpUser") || process.env.SMTP_USER?.trim() || "",
+    smtpPass: map.get("smtpPass") || process.env.SMTP_PASS?.trim() || "",
+    smtpFrom:
+      map.get("smtpFrom") ||
+      process.env.SMTP_FROM?.trim() ||
+      "Karlos Art Tattoo <contato@karlosarttattoo.com.br>",
+  };
+}
+
+export function saveMessagingSettings(config: Partial<MessagingConfig>): void {
+  const db = getDatabase();
+  const now = new Date().toISOString();
+  const upsertStmt = db.prepare(`
+    INSERT INTO messaging_settings (key, value, updated_at)
+    VALUES (?, ?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+  `);
+
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    for (const [key, value] of Object.entries(config)) {
+      if (value !== undefined) {
+        upsertStmt.run(key, String(value), now);
+      }
+    }
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
+}
+

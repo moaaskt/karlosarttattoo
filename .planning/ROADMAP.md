@@ -9,14 +9,14 @@
 
 ## Active Milestone: v2.1 — Módulo Completo de Mensageria Automatizada (In Progress)
 
-### Phase 06: Messaging Engine, Multi-Channel Providers & Persistence (Planned)
-- [ ] Módulo de tipagem `src/lib/messaging/types.ts` (`Channel`, `TemplateCategory`, `MessageTemplate`, `MessagingConfig`, `MessageLog`).
-- [ ] Motor de interpolação e templates padrão em `src/lib/messaging/engine.ts` (`interpolateTemplate` com suporte a `{{nome}}`, `{{ideia}}`, `{{local}}`, `{{data_agendamento}}`, `{{valor_sinal}}`).
-- [ ] Conectores de envio em `src/server/lib/messaging-service.ts`:
+### Phase 06: Messaging Engine, Multi-Channel Providers & Persistence (Completed)
+- [x] Módulo de tipagem `src/lib/messaging/types.ts` (`Channel`, `TemplateCategory`, `MessageTemplate`, `MessagingConfig`, `MessageLog`).
+- [x] Motor de interpolação e templates padrão em `src/lib/messaging/engine.ts` (`interpolateTemplate` com suporte a `{{nome}}`, `{{ideia}}`, `{{local}}`, `{{data_agendamento}}`, `{{valor_sinal}}`).
+- [x] Conectores de envio em `src/server/lib/messaging-service.ts`:
   - WhatsApp: Evolution API v2 (`POST /message/sendText/{instanceName}`) com headers `{ apikey, Content-Type }` e telefone sanitizado (`55489...`).
-  - E-mail: Conector SMTP configurável.
-- [ ] Endpoints de API REST seguros `/api/messages/*` protegidos por autorização administrativa (`isAuthorized`).
-- [ ] Suporte a persistência de templates, configurações e logs no SQLite (`src/lib/db.ts`).
+  - E-mail: Conector SMTP configurável via `nodemailer`.
+- [x] Endpoints de API REST seguros `/api/messages/*` protegidos por autorização administrativa (`isAuthorized`).
+- [x] Suporte a persistência de templates, configurações e logs no SQLite (`src/lib/db.ts`).
 
 ### Phase 07: Quick Message Modal & Leads Action Integration (Planned)
 - [ ] Componente `src/components/admin/quick-message-modal.tsx` com `Dialog` e `Tabs` shadcn (`[ WhatsApp ]` e `[ E-mail ]`).
