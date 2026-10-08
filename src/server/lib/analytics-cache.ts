@@ -8,7 +8,7 @@ interface CacheEntry {
 const memoryCache = new Map<string, CacheEntry>();
 const inFlightPromises = new Map<string, Promise<AnalyticsDataPayload>>();
 
-const DEFAULT_TTL_MS = 30 * 60 * 1000; // 30 minutos em milissegundos
+const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 minutos em milissegundos para manter dados recentes
 
 /**
  * Obtém do cache em memória ou executa a função fetcher se expirado/ausente.

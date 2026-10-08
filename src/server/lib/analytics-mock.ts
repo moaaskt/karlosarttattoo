@@ -10,6 +10,7 @@ export interface AnalyticsSummary {
   gsc_impressions: number;
   gsc_ctr: string;
   gsc_avg_position: string;
+  realtime_active_users?: number;
 }
 
 export interface AnalyticsTimelineItem {
@@ -217,6 +218,7 @@ export function generateMockAnalyticsData(
       gsc_impressions: totalImpressions,
       gsc_ctr: `${ctrVal}%`,
       gsc_avg_position: "3.2",
+      realtime_active_users: 3,
     },
     timeline,
     geo_cities,
