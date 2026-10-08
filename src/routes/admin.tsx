@@ -13,11 +13,13 @@ import {
   ExternalLink,
   AlertCircle,
   Info,
+  TrendingUp,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { BentoOverview } from "@/components/admin/bento-overview";
 import { AgendaTab } from "@/components/admin/agenda-tab";
+import { AnalyticsTab } from "@/components/admin/analytics-tab";
 import { Toaster } from "@/components/ui/sonner";
 import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
 import { ShimmerButton } from "@/components/ui/aceternity/shimmer-button";
@@ -41,7 +43,7 @@ function AdminPage() {
   const [authKey, setAuthKey] = React.useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [loginError, setLoginError] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"bento" | "leads" | "agenda">("bento");
+  const [activeTab, setActiveTab] = React.useState<"bento" | "leads" | "agenda" | "analytics">("bento");
   const [leadToSchedule, setLeadToSchedule] = React.useState<Lead | null>(null);
 
   const [leads, setLeads] = React.useState<Lead[]>([]);
@@ -262,6 +264,12 @@ function AdminPage() {
       active: activeTab === "agenda",
       onClick: () => setActiveTab("agenda"),
     },
+    {
+      label: "Tráfego & SEO",
+      icon: <TrendingUp className="w-4 h-4 shrink-0" />,
+      active: activeTab === "analytics",
+      onClick: () => setActiveTab("analytics"),
+    },
   ];
 
   const sidebarActionLinks: SidebarLinkItem[] = [
@@ -395,6 +403,7 @@ function AdminPage() {
                 {activeTab === "bento" && "Visão Analítica & Métricas"}
                 {activeTab === "leads" && "Triagem & Gestão de Leads (Orçamentos)"}
                 {activeTab === "agenda" && "Agenda & Gestão de Sessões"}
+                {activeTab === "analytics" && "Tráfego Web & Desempenho SEO"}
               </h1>
             </div>
 
@@ -494,12 +503,16 @@ function AdminPage() {
                 isLoading={isLoading}
               />
             </section>
-          ) : (
+          ) : activeTab === "agenda" ? (
             <section className="space-y-6">
               <AgendaTab
                 leadToSchedule={leadToSchedule}
                 onLeadScheduled={() => setLeadToSchedule(null)}
               />
+            </section>
+          ) : (
+            <section className="space-y-6">
+              <AnalyticsTab authKey={authKey} />
             </section>
           )}
         </main>
