@@ -6,6 +6,14 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+if (typeof (process as any).loadEnvFile === "function") {
+  try {
+    (process as any).loadEnvFile();
+  } catch {
+    // Silencia caso .env já tenha sido carregado
+  }
+}
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
@@ -94,6 +102,14 @@ export default defineConfig({
                   "/src/server/api/availability-rules.ts",
                 );
                 webResponse = await handleAvailabilityRulesRequest(webRequest);
+              } else if (
+                parsedUrl.pathname === "/api/analytics" ||
+                parsedUrl.pathname.startsWith("/api/analytics/")
+              ) {
+                const { handleAnalyticsRequest } = await server.ssrLoadModule(
+                  "/src/server/api/analytics.ts",
+                );
+                webResponse = await handleAnalyticsRequest(webRequest);
               } else {
                 return next();
               }
