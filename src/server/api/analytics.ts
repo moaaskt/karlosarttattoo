@@ -2,7 +2,7 @@ import { isAuthorized, unauthorizedResponse, jsonResponse, corsHeaders } from ".
 import { hasGoogleCredentials } from "../lib/google-auth";
 import { getOrSetAnalyticsCache, invalidateAnalyticsCache } from "../lib/analytics-cache";
 import { generateMockAnalyticsData, type AnalyticsDataPayload } from "../lib/analytics-mock";
-import { fetchGa4Analytics } from "../lib/google-analytics";
+import { fetchGa4Analytics, fetchGa4RealtimeUsers } from "../lib/google-analytics";
 import { fetchGscAnalytics } from "../lib/google-search-console";
 import { DateTime } from "luxon";
 
@@ -33,21 +33,22 @@ export async function handleAnalyticsRequest(request: Request): Promise<Response
     }
 
     const payload = await getOrSetAnalyticsCache(period, async (): Promise<AnalyticsDataPayload> => {
-      // 1. Se não houver credenciais configuradas, usa o gerador de simulação ultra-realista
+      // 1. Se não houver credenciais configuradas, usa o gerador de simulação
       if (!hasGoogleCredentials()) {
         return generateMockAnalyticsData(period);
       }
 
       // 2. Com credenciais configuradas, busca os dados das APIs reais
       try {
-        const [ga4Result, gscResult] = await Promise.all([
+        const [ga4Result, gscResult, realtimeUsers] = await Promise.all([
           fetchGa4Analytics(period),
           fetchGscAnalytics(period),
+          fetchGa4RealtimeUsers(),
         ]);
 
         // Se ambas as consultas falharem totalmente, fallback seguro para o mock com aviso
         if (!ga4Result && !gscResult) {
-          console.warn("[Analytics API] Consultas do Google falharam. Retornando dados de contingência simulados.");
+          console.warn("[Analytics API] Consultas do Google falharam. Retornando contingência.");
           return generateMockAnalyticsData(period);
         }
 
@@ -74,6 +75,7 @@ export async function handleAnalyticsRequest(request: Request): Promise<Response
             gsc_impressions: gscResult?.summary?.gsc_impressions ?? 0,
             gsc_ctr: gscResult?.summary?.gsc_ctr ?? "0.0%",
             gsc_avg_position: gscResult?.summary?.gsc_avg_position ?? "0.0",
+            realtime_active_users: realtimeUsers,
           },
           timeline,
           geo_cities: ga4Result?.geo_cities || [],

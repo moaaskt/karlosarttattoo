@@ -233,3 +233,45 @@ export async function fetchGa4Analytics(
     return null;
   }
 }
+
+/**
+ * Consulta o número de usuários ativos em tempo real (últimos 30 minutos) no GA4.
+ */
+export async function fetchGa4RealtimeUsers(): Promise<number> {
+  const config = getGoogleCredentialsConfig();
+  if (!config || !config.ga4PropertyId) {
+    return 0;
+  }
+
+  const accessToken = await getGoogleAccessToken([GA4_SCOPE]);
+  if (!accessToken) {
+    return 0;
+  }
+
+  try {
+    const url = `https://analyticsdata.googleapis.com/v1beta/properties/${config.ga4PropertyId}:runRealtimeReport`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        metrics: [{ name: "activeUsers" }],
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`[GA4 Realtime] Status ${response.status} ao consultar realtime`);
+      return 0;
+    }
+
+    const data = await response.json();
+    const activeUsers = Number(data?.rows?.[0]?.metricValues?.[0]?.value || 0);
+    return activeUsers;
+  } catch (err) {
+    console.error("[GA4 Realtime] Erro ao buscar usuários em tempo real:", err);
+    return 0;
+  }
+}
+

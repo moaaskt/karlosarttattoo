@@ -3,38 +3,40 @@
 ## Milestones Archived
 
 - **[Milestone v1.0: Karlos Art Tattoo Editorial Engine](file:///home/moa-dev/projetos/ink-sharp-editorial/.planning/milestones/v1.0-ROADMAP.md)** — Shipped 2026-10-01 (Phase 1: MVP Landing Page + Phase 2: Brand Manifesto, Local SEO & Native Lead Engine).
+- **[Milestone v2.0: Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration](file:///home/moa-dev/projetos/ink-sharp-editorial/.planning/milestones/v2.0-ROADMAP.md)** — Shipped 2026-10-08 (Phase 03: Aceternity UI & ApexCharts + Phase 04: Agenda Engine & FullCalendar + Phase 05: Real GA4/GSC REST Integration).
 
 ---
 
-## Milestone v2.0: Aceternity Admin Redesign, ApexCharts, Agenda System & Real GA4/GSC Integration (In Progress)
+## Active Milestone: v2.1 — Módulo Completo de Mensageria Automatizada (In Progress)
 
-### Phase 03: Aceternity UI Foundation & ApexCharts Migration (Completed)
+### Phase 06: Messaging Engine, Multi-Channel Providers & Persistence (Completed)
+- [x] Módulo de tipagem `src/lib/messaging/types.ts` (`Channel`, `TemplateCategory`, `MessageTemplate`, `MessagingConfig`, `MessageLog`).
+- [x] Motor de interpolação e templates padrão em `src/lib/messaging/engine.ts` (`interpolateTemplate` com suporte a `{{nome}}`, `{{ideia}}`, `{{local}}`, `{{data_agendamento}}`, `{{valor_sinal}}`).
+- [x] Conectores de envio em `src/server/lib/messaging-service.ts`:
+  - WhatsApp: Evolution API v2 (`POST /message/sendText/{instanceName}`) com headers `{ apikey, Content-Type }` e telefone sanitizado (`55489...`).
+  - E-mail: Conector SMTP configurável via `nodemailer`.
+- [x] Endpoints de API REST seguros `/api/messages/*` protegidos por autorização administrativa (`isAuthorized`).
+- [x] Suporte a persistência de templates, configurações e logs no SQLite (`src/lib/db.ts`).
 
-- [x] Primitivos Aceternity UI adaptados para Tailwind v4 (Bento Grid, Glowing Cards, Shimmer Buttons, Background Beams).
-- [x] Instalação e configuração de ApexCharts com tema dark editorial (#070707, #9be5ff, neon accents).
-- [x] Redesign completo da interface do `/admin` em layout Bento Grid com gráficos interativos em ApexCharts.
+### Phase 07: Quick Message Modal & Leads Action Integration (Completed)
+- [x] Componente `src/components/admin/quick-message-modal.tsx` com `Dialog` e `Tabs` shadcn (`[ WhatsApp ]` e `[ E-mail ]`).
+- [x] Dropdown de seleção de templates com interpolação dinâmica dos dados do lead selecionado no textarea.
+- [x] Campo condicional de Assunto para o canal E-mail.
+- [x] Ação de envio via API com loading/toasts e botão secundário "Abrir Web WhatsApp" como fallback manual.
+- [x] Conexão e abertura do modal nos cards e linhas de leads em `src/components/admin/lead-table.tsx` e `src/components/admin/bento-overview.tsx`.
 
-### Phase 04: Agenda & Calendar Booking Engine (Completed)
-
-- [x] Modelagem e migração da tabela `bookings`, `time_blocks`, `availability_rules`, `booking_events` e `settings` no SQLite WAL (`src/lib/db.ts`) com anti-conflito, buffers e auditoria.
-- [x] Rotas de API `/api/bookings`, `/api/time-blocks`, `/api/availability-rules` e `/api/settings` com bloqueio 405, transações imediatas e contratos tipados de erro.
-- [x] Componente de Calendário Interativo no `/admin` (FullCalendar v6.1.21 com `@fullcalendar/luxon3`, visualização dia/semana/mês, drag & drop, resize e badges de alerta ⚠️).
-- [x] BookingDrawer com máquina de estados e histórico, BookingModal com presets e conversão direta de lead em agendamento via `LeadTable`.
-- [x] Painel de Configurações (`AgendaSettings.tsx`), Gestão de Bloqueios (`TimeBlocksModal.tsx`), Backup VACUUM INTO com rotação 6h e 81 testes automatizados aprovados.
-
-### Phase 05: Real GA4 Data API & Google Search Console Integration (Planned)
-
-- [ ] Rota de API servidora `/api/analytics` com suporte a Service Account do Google Cloud.
-- [ ] Integração com GA4 Data API v1 para buscar sessões reais, usuários ativos e cidades de Santa Catarina.
-- [ ] Integração com Search Console API para palavras-chave ("karlitostattoo", "tatuador em palhoça", etc.), cliques e impressões.
-- [ ] Cards dedicados de SEO orgânico e tráfego real no dashboard com fallback de desenvolvimento.
+### Phase 08: Messaging Administration Hub & Quality Assurance (Completed)
+- [x] Componente `src/components/admin/messaging-tab.tsx` integrado à Sidebar de `src/routes/admin.tsx` com ícone `MessageSquare`.
+- [x] Sub-aba 1: Gestor de Templates com CRUD, tabela/cards e chips interativos de variáveis (`+ {{nome}}`, etc.).
+- [x] Sub-aba 2: Disparo em Massa / Campanhas com filtros de leads e barra de progresso visual (`Progress` do shadcn).
+- [x] Sub-aba 3: Configurações de Conexão com formulários de credenciais, botões de teste de conexão (WhatsApp e E-mail) e tabela de histórico de logs.
+- [x] Suíte de testes automatizados (`src/test/messaging-admin.test.ts`), validação integral com `npm test` (119/119) e compilação de produção com `npm run build`.
 
 ---
 
-## Future Milestone (v2.1 / Expansion)
+## Future Milestone (v2.2 / Content Expansion)
 
-### Phase 06: Content Expansion & Authority
-
-- [ ] Seção de Perguntas Frequentes (FAQ) interativa com Schema `FAQPage`.
+### Phase 09: Content Expansion & Authority
+- [ ] Seção de Perguntas Frequentes (FAQ) interativa com Accordion e Schema `FAQPage`.
 - [ ] Guia e seção de Cuidados Pós-Tatuagem ("Aftercare Guide").
-- [ ] Módulo dinâmico de artigos e publicações editoriais para fortalecimento de SEO orgânico.
+- [ ] Módulo editorial de artigos e publicações para fortalecimento de SEO orgânico.
