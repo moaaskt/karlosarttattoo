@@ -16,6 +16,7 @@ import {
   localToUTC,
   utcToLocal,
   VALID_TRANSITIONS,
+  checkBookingTimeBlockOverlap,
 } from "../lib/agenda-utils";
 import type { Booking, TimeBlock, AvailabilityRule } from "../lib/db";
 
@@ -147,3 +148,30 @@ test("deriveSlotMinTime e deriveSlotMaxTime", () => {
   assert.equal(deriveSlotMinTime([]), "07:00:00"); // fallback sem regras ativas
   assert.equal(deriveSlotMaxTime([]), "23:00:00");
 });
+
+test("checkBookingTimeBlockOverlap — detecção de sobreposição", () => {
+  const timeBlocks = [
+    {
+      id: "tb-1",
+      start_at: "2026-10-15T13:00:00.000Z",
+      end_at: "2026-10-15T15:00:00.000Z",
+      all_day: 0,
+      reason_tag: "evento",
+    } as TimeBlock,
+  ];
+
+  // Sobrepõe
+  const overlappingBooking = {
+    start_at: "2026-10-15T14:00:00.000Z",
+    end_at: "2026-10-15T16:00:00.000Z",
+  };
+  assert.ok(checkBookingTimeBlockOverlap(overlappingBooking, timeBlocks) !== null);
+
+  // Não sobrepõe (após)
+  const afterBooking = {
+    start_at: "2026-10-15T15:00:00.000Z",
+    end_at: "2026-10-15T17:00:00.000Z",
+  };
+  assert.equal(checkBookingTimeBlockOverlap(afterBooking, timeBlocks), null);
+});
+
