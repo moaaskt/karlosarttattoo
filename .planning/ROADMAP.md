@@ -25,12 +25,12 @@
 - [x] Ação de envio via API com loading/toasts e botão secundário "Abrir Web WhatsApp" como fallback manual.
 - [x] Conexão e abertura do modal nos cards e linhas de leads em `src/components/admin/lead-table.tsx` e `src/components/admin/bento-overview.tsx`.
 
-### Phase 08: Messaging Administration Hub & Quality Assurance (Planned)
-- [ ] Componente `src/components/admin/messaging-tab.tsx` integrado à Sidebar de `src/routes/admin.tsx` com ícone `MessageSquare`.
-- [ ] Sub-aba 1: Gestor de Templates com CRUD, tabela/cards e chips interativos de variáveis (`+ {{nome}}`, etc.).
-- [ ] Sub-aba 2: Disparo em Massa / Campanhas com filtros de leads e barra de progresso visual (`Progress` do shadcn).
-- [ ] Sub-aba 3: Configurações de Conexão com formulários de credenciais, botões de teste de conexão (WhatsApp e E-mail) e tabela de histórico de logs.
-- [ ] Suíte de testes automatizados (`src/test/messaging.test.ts`), validação integral com `npm test` e compilação de produção com `npm run build`.
+### Phase 08: Messaging Administration Hub & Quality Assurance (Completed)
+- [x] Componente `src/components/admin/messaging-tab.tsx` integrado à Sidebar de `src/routes/admin.tsx` com ícone `MessageSquare`.
+- [x] Sub-aba 1: Gestor de Templates com CRUD, tabela/cards e chips interativos de variáveis (`+ {{nome}}`, etc.).
+- [x] Sub-aba 2: Disparo em Massa / Campanhas com filtros de leads e barra de progresso visual (`Progress` do shadcn).
+- [x] Sub-aba 3: Configurações de Conexão com formulários de credenciais, botões de teste de conexão (WhatsApp e E-mail) e tabela de histórico de logs.
+- [x] Suíte de testes automatizados (`src/test/messaging-admin.test.ts`), validação integral com `npm test` (119/119) e compilação de produção com `npm run build`.
 
 ---
 

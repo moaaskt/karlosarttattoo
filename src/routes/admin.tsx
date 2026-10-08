@@ -14,12 +14,14 @@ import {
   AlertCircle,
   Info,
   TrendingUp,
+  MessageSquare,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { LeadTable } from "@/components/admin/lead-table";
 import { BentoOverview } from "@/components/admin/bento-overview";
 import { AgendaTab } from "@/components/admin/agenda-tab";
 import { AnalyticsTab } from "@/components/admin/analytics-tab";
+import { MessagingTab } from "@/components/admin/messaging-tab";
 import { QuickMessageModal } from "@/components/admin/quick-message-modal";
 import { Toaster } from "@/components/ui/sonner";
 import { BackgroundBeams } from "@/components/ui/aceternity/background-beams";
@@ -44,7 +46,7 @@ function AdminPage() {
   const [authKey, setAuthKey] = React.useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [loginError, setLoginError] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"bento" | "leads" | "agenda" | "analytics">("bento");
+  const [activeTab, setActiveTab] = React.useState<"bento" | "leads" | "agenda" | "analytics" | "messaging">("bento");
   const [leadToSchedule, setLeadToSchedule] = React.useState<Lead | null>(null);
   const [leadToMessage, setLeadToMessage] = React.useState<Lead | null>(null);
 
@@ -265,6 +267,12 @@ function AdminPage() {
       icon: <CalendarIcon className="w-4 h-4 shrink-0" />,
       active: activeTab === "agenda",
       onClick: () => setActiveTab("agenda"),
+    },
+    {
+      label: "Mensageria & Disparos",
+      icon: <MessageSquare className="w-4 h-4 shrink-0" />,
+      active: activeTab === "messaging",
+      onClick: () => setActiveTab("messaging"),
     },
     {
       label: "Tráfego & SEO",
@@ -513,6 +521,10 @@ function AdminPage() {
                 leadToSchedule={leadToSchedule}
                 onLeadScheduled={() => setLeadToSchedule(null)}
               />
+            </section>
+          ) : activeTab === "messaging" ? (
+            <section className="space-y-6">
+              <MessagingTab leads={leads} authKey={authKey} />
             </section>
           ) : (
             <section className="space-y-6">
