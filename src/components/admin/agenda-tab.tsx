@@ -6,9 +6,12 @@ import type {
   DateSelectArg,
 } from "@fullcalendar/core";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
+import { DateTime } from "luxon";
 import { FullCalendarClient } from "./calendar/FullCalendarClient";
 import { BookingDrawer } from "./calendar/BookingDrawer";
 import { BookingModal } from "./calendar/BookingModal";
+import { AgendaSettings } from "./calendar/AgendaSettings";
+import { TimeBlocksModal } from "./calendar/TimeBlocksModal";
 import { ConfirmDialog } from "./calendar/ConfirmDialog";
 import { apiFetch, toUTCString, getErrorMessage } from "../../lib/api-client";
 import {
@@ -19,9 +22,20 @@ import {
   STATUS_COLOR,
   SESSION_TYPE_LABEL,
   utcToLocal,
+  checkBookingTimeBlockOverlap,
 } from "../../lib/agenda-utils";
 import type { Booking, TimeBlock, AvailabilityRule, Lead } from "../../lib/db";
-import { Calendar as CalendarIcon, RefreshCw, Eye, EyeOff, Plus } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Plus,
+  Sliders,
+  CalendarOff,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -103,6 +117,9 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     defaultEndTime?: string;
   }>({ open: false, mode: "create" });
 
+  const [showSettings, setShowSettings] = React.useState<boolean>(false);
+  const [showTimeBlocks, setShowTimeBlocks] = React.useState<boolean>(false);
+
   const [rescheduleConfirmState, setRescheduleConfirmState] = React.useState<{
     id: string;
     newStart: string;
@@ -111,6 +128,43 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
     revertFn?: () => void;
   } | null>(null);
   const [showRescheduleConfirm, setShowRescheduleConfirm] = React.useState<boolean>(false);
+
+  // Fuso referencial das settings
+  const timezone = settings["timezone"] || "America/Sao_Paulo";
+
+  // KPIs de Resumo Analítico (TASK-19)
+  const summaryKpis = React.useMemo(() => {
+    const todayLocal = utcToLocal(new Date().toISOString(), timezone).date;
+    const nowDt = DateTime.fromISO(new Date().toISOString()).setZone(timezone);
+    const startOfWeek = nowDt.startOf("week");
+    const endOfWeek = nowDt.endOf("week");
+
+    let countToday = 0;
+    let countWeek = 0;
+    let countPendingDeposits = 0;
+
+    for (const b of bookings) {
+      if (b.status === "cancelado" || b.status === "no_show") continue;
+      const bLocal = utcToLocal(b.start_at, timezone);
+      if (bLocal.date === todayLocal) {
+        countToday++;
+      }
+      const bDt = DateTime.fromISO(b.start_at).setZone(timezone);
+      if (bDt >= startOfWeek && bDt <= endOfWeek) {
+        countWeek++;
+      }
+      if (b.deposit_status === "pendente") {
+        countPendingDeposits++;
+      }
+    }
+
+    return {
+      today: countToday,
+      week: countWeek,
+      pendingDeposits: countPendingDeposits,
+      timeBlocks: timeBlocks.length,
+    };
+  }, [bookings, timeBlocks, timezone]);
 
   // Refs para controle de faixa estável e prevenção absoluta de loops
   const calendarRef = React.useRef<any>(null);
@@ -227,7 +281,6 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
 
   const slotMinTime = React.useMemo(() => deriveSlotMinTime(rules), [rules]);
   const slotMaxTime = React.useMemo(() => deriveSlotMaxTime(rules), [rules]);
-  const timezone = settings["timezone"] || "America/Sao_Paulo";
 
   const events = React.useMemo(() => {
     const bEvents = bookings.map((b) => bookingToEvent(b, showCancelled, true)).filter(Boolean);
@@ -263,14 +316,23 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
 
     const timeText = arg.timeText;
     const sessionLabel = SESSION_TYPE_LABEL[b.session_type] ?? b.session_type;
+    const overlappingTb = checkBookingTimeBlockOverlap(b, timeBlocks);
 
     return (
       <div className="flex flex-col h-full w-full justify-between p-1.5 overflow-hidden leading-tight">
         <div className="flex items-center justify-between gap-1">
-          <span className="font-extrabold text-[11px] truncate tracking-tight text-[#070707]">
-            {b.client_name}
+          <span className="font-extrabold text-[11px] truncate tracking-tight text-[#070707] flex items-center gap-1">
+            {overlappingTb && (
+              <span
+                title={`Atenção: Horário sobreposto por bloqueio (${overlappingTb.note || overlappingTb.reason_tag})`}
+                className="text-amber-900 font-bold shrink-0"
+              >
+                ⚠️
+              </span>
+            )}
+            <span className="truncate">{b.client_name}</span>
           </span>
-          <span className="text-[9px] uppercase font-bold tracking-wider px-1 bg-black/20 text-[#070707] rounded">
+          <span className="text-[9px] uppercase font-bold tracking-wider px-1 bg-black/20 text-[#070707] rounded shrink-0">
             {sessionLabel}
           </span>
         </div>
@@ -280,7 +342,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         </div>
       </div>
     );
-  }, []);
+  }, [timeBlocks]);
 
   // 7. Handlers de Interação memorizados
   const handleEventClick = React.useCallback((info: EventClickArg) => {
@@ -405,6 +467,49 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* 4 Cards de Resumo Analítico da Agenda (TASK-19) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="p-3.5 bg-[#222831] border border-[#31363F] hover:border-[#76ABAE]/50 transition-all shadow-[0_0_15px_rgba(118,171,174,0.05)]">
+          <div className="flex items-center justify-between text-[#9DA5B4] mb-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider">Sessões Hoje</span>
+            <CalendarIcon className="w-4 h-4 text-[#76ABAE]" />
+          </div>
+          <div className="text-xl font-mono font-extrabold text-[#EEEEEE]">
+            {summaryKpis.today}
+          </div>
+        </div>
+
+        <div className="p-3.5 bg-[#222831] border border-[#31363F] hover:border-[#76ABAE]/50 transition-all shadow-[0_0_15px_rgba(118,171,174,0.05)]">
+          <div className="flex items-center justify-between text-[#9DA5B4] mb-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider">Na Semana</span>
+            <Clock className="w-4 h-4 text-[#9be5ff]" />
+          </div>
+          <div className="text-xl font-mono font-extrabold text-[#EEEEEE]">
+            {summaryKpis.week}
+          </div>
+        </div>
+
+        <div className="p-3.5 bg-[#222831] border border-[#31363F] hover:border-amber-500/50 transition-all shadow-[0_0_15px_rgba(245,158,11,0.05)]">
+          <div className="flex items-center justify-between text-[#9DA5B4] mb-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider">Sinais Pendentes</span>
+            <AlertCircle className="w-4 h-4 text-amber-400" />
+          </div>
+          <div className="text-xl font-mono font-extrabold text-amber-300">
+            {summaryKpis.pendingDeposits}
+          </div>
+        </div>
+
+        <div className="p-3.5 bg-[#222831] border border-[#31363F] hover:border-red-500/50 transition-all shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+          <div className="flex items-center justify-between text-[#9DA5B4] mb-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider">Bloqueios Ativos</span>
+            <CalendarOff className="w-4 h-4 text-red-400" />
+          </div>
+          <div className="text-xl font-mono font-extrabold text-red-300">
+            {summaryKpis.timeBlocks}
+          </div>
+        </div>
+      </div>
+
       {/* Barra Superior de Controles e Legenda */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#31363F] border border-[#31363F] p-4">
         {/* Lado Esquerdo: Identificação e Fuso */}
@@ -414,10 +519,10 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           </div>
           <div>
             <h2 className="text-sm font-extrabold uppercase tracking-[0.2em] text-[#EEEEEE] flex items-center gap-2">
-              Agenda
-              {/* <span className="text-[9px] font-mono px-2 py-0.5 bg-white/5 border border-white/10 text-[#9DA5B4]">
-                {timezone}
-              </span> */}
+              Agenda do Ateliê
+              <span className="text-[9px] font-mono px-2 py-0.5 bg-white/5 border border-white/10 text-[#9DA5B4]">
+                {timezone.split("/")[1] ?? timezone}
+              </span>
             </h2>
             <p className="text-xs text-[#9DA5B4] mt-0.5">
               Grade horária com detecção de expediente, intervalos e proteção de sobreposição
@@ -435,6 +540,30 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           >
             <Plus className="w-3.5 h-3.5" />
             Novo Agendamento
+          </Button>
+
+          {/* Botão Gestão de Bloqueios (TASK-18) */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTimeBlocks(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border border-[#31363F] bg-[#222831] text-red-300 hover:text-red-200 hover:border-red-500/50 transition-colors rounded-none h-8"
+            title="Gerenciar períodos de folga, convenções e viagens"
+          >
+            <CalendarOff className="w-3.5 h-3.5 text-red-400" />
+            Bloqueios
+          </Button>
+
+          {/* Botão Configurações da Agenda (TASK-16) */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSettings(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border border-[#31363F] bg-[#222831] text-[#EEEEEE] hover:text-[#76ABAE] hover:border-[#76ABAE]/40 transition-colors rounded-none h-8"
+            title="Configurar horários de expediente, buffer e presets"
+          >
+            <Sliders className="w-3.5 h-3.5 text-[#76ABAE]" />
+            Configurações
           </Button>
 
           {/* Seletor de visualizações rápidas */}
@@ -603,6 +732,7 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
         onRefresh={handleRefresh}
         onReschedule={(b) => setModalState({ open: true, mode: "reschedule", booking: b })}
         timezone={timezone}
+        timeBlocks={timeBlocks}
       />
 
       {/* Modal de Criação e Remarcação */}
@@ -621,6 +751,24 @@ export function AgendaTab({ leadToSchedule, onLeadScheduled }: AgendaTabProps) {
           onLeadScheduled?.();
         }}
         onSuccess={handleRefresh}
+      />
+
+      {/* Modal de Configurações da Agenda (TASK-16) */}
+      <AgendaSettings
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        onSaved={loadInitialConfig}
+        settings={settings}
+        rules={rules}
+      />
+
+      {/* Modal de Gestão de Bloqueios de Tempo (TASK-18) */}
+      <TimeBlocksModal
+        open={showTimeBlocks}
+        onClose={() => setShowTimeBlocks(false)}
+        onSaved={handleRefresh}
+        timeBlocks={timeBlocks}
+        timezone={timezone}
       />
 
       {/* Confirmação de avisos (fora de expediente, passado, etc.) ao arrastar ou redimensionar */}

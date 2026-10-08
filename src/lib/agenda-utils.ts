@@ -215,3 +215,20 @@ export function isFutureWindowExceeded(
   const diffDays = Math.round(dt.diff(ref, "days").days);
   return diffDays > maxDays;
 }
+
+/**
+ * Verifica se um agendamento sobrepõe algum bloqueio ativo da lista.
+ * Retorna o primeiro TimeBlock sobreposto ou null.
+ */
+export function checkBookingTimeBlockOverlap(
+  booking: { start_at: string; end_at: string },
+  timeBlocks: TimeBlock[],
+): TimeBlock | null {
+  for (const tb of timeBlocks) {
+    if (booking.start_at < tb.end_at && tb.start_at < booking.end_at) {
+      return tb;
+    }
+  }
+  return null;
+}
+

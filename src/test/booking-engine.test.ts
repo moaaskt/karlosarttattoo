@@ -22,6 +22,9 @@ import {
 } from "../lib/booking-utils";
 import { isAuthorized } from "../server/api/auth";
 import { handleBookingsRequest } from "../server/api/bookings";
+import { handleSettingsRequest } from "../server/api/settings";
+import { handleAvailabilityRulesRequest } from "../server/api/availability-rules";
+import { handleTimeBlocksRequest } from "../server/api/time-blocks";
 
 // Assegura que todos os testes executam estritamente em memória
 process.env.DB_PATH = ":memory:";
@@ -1155,4 +1158,138 @@ describe("Sistema de Agendamento Karlos Art Tattoo — Suite Integral", () => {
       );
     });
   });
+
+  // =========================================================================
+  // 13. TASK-16 e TASK-18 — Settings Transacionais, Anti-Sobreposição e Conflitos D-08
+  // =========================================================================
+  describe("13. TASK-16 e TASK-18 — Settings Transacionais, Anti-Sobreposição e Conflitos D-08", () => {
+    const authHeaders = {
+      Authorization: "Bearer test-admin-token",
+      "Content-Type": "application/json",
+    };
+
+    beforeEach(() => {
+      process.env.ADMIN_PASSWORD = "test-admin-token";
+    });
+
+    test("PATCH /api/settings: timezone IANA inválido retorna 422", async () => {
+      const req = new Request("http://localhost:3000/api/settings", {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          key: "timezone",
+          value: "Fuso/Inexistente_123",
+        }),
+      });
+
+      const res = await handleSettingsRequest(req);
+      assert.equal(res.status, 422);
+      const json = (await res.json()) as any;
+      assert.ok(json.error.includes("Fuso horário IANA inválido"));
+    });
+
+    test("PATCH /api/settings: buffer_minutes fora do intervalo 0-240 retorna 422", async () => {
+      const req = new Request("http://localhost:3000/api/settings", {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          key: "buffer_minutes",
+          value: "300",
+        }),
+      });
+
+      const res = await handleSettingsRequest(req);
+      assert.equal(res.status, 422);
+      const json = (await res.json()) as any;
+      assert.ok(json.error.includes("buffer_minutes"));
+    });
+
+    test("PATCH /api/settings: presets válidos como JSON são salvos com sucesso", async () => {
+      const req = new Request("http://localhost:3000/api/settings", {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({
+          key: "presets",
+          value: JSON.stringify(["09:00", "14:00", "19:00"]),
+        }),
+      });
+
+      const res = await handleSettingsRequest(req);
+      assert.equal(res.status, 200);
+      const s = getSettings();
+      assert.equal(s["presets"], JSON.stringify(["09:00", "14:00", "19:00"]));
+    });
+
+    test("PUT /api/availability-rules: detecta sobreposição no mesmo dia e retorna 422", async () => {
+      const req = new Request("http://localhost:3000/api/availability-rules", {
+        method: "PUT",
+        headers: authHeaders,
+        body: JSON.stringify({
+          rules: [
+            { day_of_week: 2, window_start: "09:00", window_end: "14:00", is_active: 1 },
+            { day_of_week: 2, window_start: "13:00", window_end: "18:00", is_active: 1 }, // Sobrepõe 13:00 < 14:00
+          ],
+        }),
+      });
+
+      const res = await handleAvailabilityRulesRequest(req);
+      assert.equal(res.status, 422);
+      const json = (await res.json()) as any;
+      assert.ok(json.error.includes("Sobreposição de horários detectada"));
+    });
+
+    test("PUT /api/availability-rules: substitui em lote regras sem sobreposição com sucesso", async () => {
+      const req = new Request("http://localhost:3000/api/availability-rules", {
+        method: "PUT",
+        headers: authHeaders,
+        body: JSON.stringify({
+          rules: [
+            { day_of_week: 2, window_start: "09:00", window_end: "12:00", is_active: 1 },
+            { day_of_week: 2, window_start: "13:00", window_end: "18:00", is_active: 1 },
+          ],
+        }),
+      });
+
+      const res = await handleAvailabilityRulesRequest(req);
+      assert.equal(res.status, 200);
+      const json = (await res.json()) as any;
+      assert.equal(json.rules.length, 2);
+    });
+
+    test("POST /api/time-blocks: retorna conflito estruturado com type booking e time_block", async () => {
+      // 1. Cria booking ativo
+      createBooking(
+        {
+          client_name: "Cliente Conflitante",
+          client_phone: "48999991111",
+          location: "estudio",
+          session_type: "tatuagem",
+          start_at: "2026-10-15T13:00:00.000Z",
+          end_at: "2026-10-15T15:00:00.000Z",
+        },
+        true,
+      );
+
+      // 2. Tenta criar time block sem force
+      const req = new Request("http://localhost:3000/api/time-blocks", {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({
+          start_at: "2026-10-15T12:00:00.000Z",
+          end_at: "2026-10-15T16:00:00.000Z",
+          reason_tag: "evento",
+          force: false,
+        }),
+      });
+
+      const res = await handleTimeBlocksRequest(req);
+      assert.equal(res.status, 409);
+      const json = (await res.json()) as any;
+      assert.equal(json.conflict_type, "time_block_conflict");
+      assert.ok(Array.isArray(json.conflicts));
+      assert.equal(json.conflicts[0].type, "booking");
+      assert.equal(json.conflicts[0].client_name, "Cliente Conflitante");
+    });
+  });
 });
+

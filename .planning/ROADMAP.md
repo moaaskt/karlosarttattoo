@@ -14,12 +14,13 @@
 - [x] Instalação e configuração de ApexCharts com tema dark editorial (#070707, #9be5ff, neon accents).
 - [x] Redesign completo da interface do `/admin` em layout Bento Grid com gráficos interativos em ApexCharts.
 
-### Phase 04: Agenda & Calendar Booking Engine (Planned)
+### Phase 04: Agenda & Calendar Booking Engine (Completed)
 
-- [ ] Modelagem e migração da tabela `bookings` no SQLite (`src/lib/db.ts`) com status, slots de horários e vinculação de leads.
-- [ ] Rotas de API `/api/bookings` (GET, POST, PATCH, DELETE) para controle de agendamentos e bloqueio de horários.
-- [ ] Componente de Calendário Interativo no `/admin` (visualização semanal/mensal, filtro por local/ateliê).
-- [ ] Fluxo de conversão direta de lead em agendamento com confirmação e notificação.
+- [x] Modelagem e migração da tabela `bookings`, `time_blocks`, `availability_rules`, `booking_events` e `settings` no SQLite WAL (`src/lib/db.ts`) com anti-conflito, buffers e auditoria.
+- [x] Rotas de API `/api/bookings`, `/api/time-blocks`, `/api/availability-rules` e `/api/settings` com bloqueio 405, transações imediatas e contratos tipados de erro.
+- [x] Componente de Calendário Interativo no `/admin` (FullCalendar v6.1.21 com `@fullcalendar/luxon3`, visualização dia/semana/mês, drag & drop, resize e badges de alerta ⚠️).
+- [x] BookingDrawer com máquina de estados e histórico, BookingModal com presets e conversão direta de lead em agendamento via `LeadTable`.
+- [x] Painel de Configurações (`AgendaSettings.tsx`), Gestão de Bloqueios (`TimeBlocksModal.tsx`), Backup VACUUM INTO com rotação 6h e 81 testes automatizados aprovados.
 
 ### Phase 05: Real GA4 Data API & Google Search Console Integration (Planned)
 

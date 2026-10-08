@@ -51,8 +51,10 @@ import {
   SESSION_TYPE_LABEL,
   VALID_TRANSITIONS,
   utcToLocal,
+  checkBookingTimeBlockOverlap,
+  REASON_TAG_LABEL,
 } from "../../../lib/agenda-utils";
-import type { Booking, BookingEvent } from "../../../lib/db";
+import type { Booking, BookingEvent, TimeBlock } from "../../../lib/db";
 
 export interface BookingDrawerProps {
   bookingId: string | null;
@@ -60,6 +62,7 @@ export interface BookingDrawerProps {
   onRefresh: () => void;
   onReschedule: (booking: Booking) => void;
   timezone?: string;
+  timeBlocks?: TimeBlock[];
 }
 
 export function BookingDrawer({
@@ -68,6 +71,7 @@ export function BookingDrawer({
   onRefresh,
   onReschedule,
   timezone = "America/Sao_Paulo",
+  timeBlocks = [],
 }: BookingDrawerProps) {
   const [booking, setBooking] = React.useState<(Booking & { events: BookingEvent[] }) | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -336,6 +340,11 @@ export function BookingDrawer({
     className: "bg-[#222831] text-[#9DA5B4] border-[#31363F]",
   };
 
+  const overlappingBlock = React.useMemo(() => {
+    if (!booking || !timeBlocks || timeBlocks.length === 0) return null;
+    return checkBookingTimeBlockOverlap(booking, timeBlocks);
+  }, [booking, timeBlocks]);
+
   return (
     <>
       <Dialog open={Boolean(bookingId)} onOpenChange={(open) => !open && onClose()}>
@@ -381,6 +390,20 @@ export function BookingDrawer({
               </Badge>
             </div>
           </DialogHeader>
+
+          {/* Banner de Aviso de Sobreposição com Time Block (TASK-18) */}
+          {overlappingBlock && (
+            <div className="flex items-start gap-2.5 p-3.5 my-3 bg-amber-500/15 border border-amber-500/35 text-amber-200 text-xs rounded-lg">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+              <span>
+                <strong>Atenção:</strong> Horário sobreposto por bloqueio de agenda (
+                <span className="font-semibold text-amber-300">
+                  {REASON_TAG_LABEL[overlappingBlock.reason_tag] || overlappingBlock.reason_tag}
+                </span>
+                {overlappingBlock.note ? ` — "${overlappingBlock.note}"` : ""}).
+              </span>
+            </div>
+          )}
 
           {/* Card Informativo de Contato e Horário (Acesso Rápido) */}
           <div className="bg-[#222831] border border-[#31363F] rounded-lg p-3.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 my-4">
