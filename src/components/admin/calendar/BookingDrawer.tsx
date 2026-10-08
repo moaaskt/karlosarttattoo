@@ -51,8 +51,10 @@ import {
   SESSION_TYPE_LABEL,
   VALID_TRANSITIONS,
   utcToLocal,
+  checkBookingTimeBlockOverlap,
+  REASON_TAG_LABEL,
 } from "../../../lib/agenda-utils";
-import type { Booking, BookingEvent } from "../../../lib/db";
+import type { Booking, BookingEvent, TimeBlock } from "../../../lib/db";
 
 export interface BookingDrawerProps {
   bookingId: string | null;
@@ -60,6 +62,7 @@ export interface BookingDrawerProps {
   onRefresh: () => void;
   onReschedule: (booking: Booking) => void;
   timezone?: string;
+  timeBlocks?: TimeBlock[];
 }
 
 export function BookingDrawer({
@@ -68,6 +71,7 @@ export function BookingDrawer({
   onRefresh,
   onReschedule,
   timezone = "America/Sao_Paulo",
+  timeBlocks = [],
 }: BookingDrawerProps) {
   const [booking, setBooking] = React.useState<(Booking & { events: BookingEvent[] }) | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
