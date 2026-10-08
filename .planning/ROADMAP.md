@@ -22,12 +22,13 @@
 - [x] BookingDrawer com máquina de estados e histórico, BookingModal com presets e conversão direta de lead em agendamento via `LeadTable`.
 - [x] Painel de Configurações (`AgendaSettings.tsx`), Gestão de Bloqueios (`TimeBlocksModal.tsx`), Backup VACUUM INTO com rotação 6h e 81 testes automatizados aprovados.
 
-### Phase 05: Real GA4 Data API & Google Search Console Integration (Planned)
+### Phase 05: Real GA4 Data API & Google Search Console Integration (Completed)
 
-- [ ] Rota de API servidora `/api/analytics` com suporte a Service Account do Google Cloud.
-- [ ] Integração com GA4 Data API v1 para buscar sessões reais, usuários ativos e cidades de Santa Catarina.
-- [ ] Integração com Search Console API para palavras-chave ("karlitostattoo", "tatuador em palhoça", etc.), cliques e impressões.
-- [ ] Cards dedicados de SEO orgânico e tráfego real no dashboard com fallback de desenvolvimento.
+- [x] Rota de API servidora `/api/analytics` com suporte a Service Account do Google Cloud via `google-auth-library`.
+- [x] Integração com GA4 Data API v1beta para buscar sessões reais, usuários ativos, páginas e cidades de Santa Catarina.
+- [x] Integração com Google Search Console v3 API para palavras-chave ("karlitos tattoo", "tatuador palhoça", etc.), cliques, impressões, CTR e ranking médio.
+- [x] Nova aba dedicada "Tráfego & SEO" (`AnalyticsTab.tsx`) na Sidebar do `/admin` com Glowing Cards, ApexCharts e fallback ultra-realista em modo de demonstração.
+- [x] Cache em memória com TTL de 30 minutos, proteção contra concorrência (thundering herd) e suíte com 91 testes passando.
 
 ---
 
