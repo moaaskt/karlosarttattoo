@@ -179,25 +179,37 @@ export function AnalyticsTab({ authKey }: AnalyticsTabProps) {
             </h2>
 
             {data && (
-              <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
-                  data.is_mock
-                    ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-                    : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                }`}
-              >
-                {data.is_mock ? (
-                  <>
-                    <AlertTriangle className="w-3 h-3 text-amber-400" />
-                    Modo Demonstração (Sem credenciais no .env)
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    Conectado ao GA4 & Search Console
-                  </>
+              <>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                    data.is_mock
+                      ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                      : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                  }`}
+                >
+                  {data.is_mock ? (
+                    <>
+                      <AlertTriangle className="w-3 h-3 text-amber-400" />
+                      Modo Demonstração (Sem credenciais no .env)
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      Conectado ao GA4 & Search Console
+                    </>
+                  )}
+                </span>
+
+                {!data.is_mock && data.summary.realtime_active_users !== undefined && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    Tempo Real: {data.summary.realtime_active_users} {data.summary.realtime_active_users === 1 ? "ativo agora" : "ativos agora"}
+                  </span>
                 )}
-              </span>
+              </>
             )}
           </div>
           <p className="text-xs text-[#9da5b4]">
@@ -279,8 +291,14 @@ export function AnalyticsTab({ authKey }: AnalyticsTabProps) {
             </span>
             <Users className="w-4 h-4 text-[#9be5ff]" />
           </div>
-          <div className="text-2xl font-black text-[#eeeeee] font-mono tracking-tight">
-            {isLoading ? "---" : (data?.summary.active_users.toLocaleString("pt-BR") ?? "0")}
+          <div className="text-2xl font-black text-[#eeeeee] font-mono tracking-tight flex items-baseline justify-between">
+            <span>{isLoading ? "---" : (data?.summary.active_users.toLocaleString("pt-BR") ?? "0")}</span>
+            {!isLoading && data?.summary.realtime_active_users !== undefined && (
+              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 flex items-center gap-1.5 font-sans">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                {data.summary.realtime_active_users} online
+              </span>
+            )}
           </div>
           <div className="text-[11px] text-[#9da5b4] mt-1.5 flex items-center justify-between">
             <span>Engajamento:</span>
